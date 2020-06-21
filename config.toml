@@ -1,0 +1,71 @@
+baseurl = "https://www.example.org/"
+title = "The LLVM Project Blog"
+copyright = "llvm.org"
+canonifyurls = true
+theme = "hugo-kiera"
+
+paginate = 10 
+
+summaryLength = 30
+enableEmoji = true
+pygmentsCodeFences = true
+
+#disqusShortname = "myShortName"
+
+# Note: to disable a social network icon delete or comment out the corresponding line
+[author]
+    name = "LLVM Project"
+    github = "llvm"
+    #gitlab = "username"
+    #linkedin = "username"
+    facebook = "llvmorg"
+    twitter = "llvmorg"
+    #instagram = "username"
+    #stackoverflow = "username"
+    youtube = "c/LLVMPROJ" # or channel/channelname
+
+[params]
+    tagline = "LLVM Project News and Details from the Trenches"
+    description = "LLVM Project News and Details from the Trenches"
+    #images = [""] #This is used for opengraph/twitter cards.
+    customCSS = []  #Optional Customised CSS
+    #favicon = ""
+    #utterancesRepo = "username/repository"
+    #utterancesIssueTerm = "pathname"
+    homepageLength = 10
+    #commentAutoload = true  #This mean reader don't need click, disqus comment autoload
+
+  [[menu.main]]
+    identifier = "about"
+    name = "About"
+    url = "/about"
+    weight = 1
+
+
+  [[menu.main]]
+    identifier = "posts"
+    name = "Posts"
+    url = "/posts"
+    weight = 2
+
+
+# uncomment to enable the Tags link on the main toolbar
+  [[menu.main]]
+    identifier = "tags"
+    name = "Tags"
+    url = "/tags"
+    weight = 3
+
+  [[menu.main]]
+    identifier = "llvmorg"
+    name = "llvm.org"
+    url = "https://llvm.org/"
+    weight = 4
+
+
+# uncomment to enable the Categories link on the main toolbar
+#  [[menu.main]]
+#    identifier = "categories"
+#    name = "Categories"
+#    url = "/categories"
+#    weight = 1

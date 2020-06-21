@@ -1,0 +1,11 @@
+---
+author: Doug Gregor
+blogger_id: tag:blogger.com,1999:blog-6088150582281556517.post-28386686052799222
+blogger_orig_url: http://blog.llvm.org/2010/02/clang-successfully-self-hosts.html
+date: "2010-02-04T19:13:00Z"
+modified_time: "2010-02-04T20:12:23.047-08:00"
+tags: ["Clang"]
+title: Clang Successfully Self-Hosts!
+---
+
+Today, Clang completed its first complete self-host! We built all of LLVM and Clang with Clang (over 550k lines of C++ code). The resulting binaries passed all of Clang and LLVM's regression test suites, and the Clang-built Clang could then build all of LLVM and Clang again. The third-stage Clang was also fully-functional, completing the bootstrap.<div><br /></div><div>Congratulations to all of the Clang developers on this amazing achievement!</div>

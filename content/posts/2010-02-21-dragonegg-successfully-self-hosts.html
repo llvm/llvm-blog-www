@@ -1,0 +1,11 @@
+---
+author: Duncan Sands
+blogger_id: tag:blogger.com,1999:blog-6088150582281556517.post-4232132361751884624
+blogger_orig_url: http://blog.llvm.org/2010/02/dragonegg-successfully-self-hosts.html
+date: "2010-02-21T05:07:00Z"
+modified_time: "2010-02-22T12:16:14.268-08:00"
+tags: ["dragonegg"]
+title: Dragonegg Successfully Self-Hosts!
+---
+
+The <a href="http://dragonegg.llvm.org/">dragonegg GCC plugin</a> can host itself! Dragonegg lets you use the <a href="http://llvm.org/">LLVM</a> optimizers with <a href="http://gcc.gnu.org/">GCC-4.5</a>, much like <a href="http://llvm.org/cmds/llvmgcc.html">llvm-gcc</a>, but unlike llvm-gcc does not involve modifying GCC, thanks to the new GCC plugin infrastructure (currently one small patch is required).  We built all of GCC-4.5, LLVM and dragonegg with dragonegg, then used the resulting binaries to build them all again.  Why?  Because we love to build!  And because this was a great way of checking that nothing was miscompiled.  The final dragonegg plugin was fully functional, successfully passing the entire dragonegg test suite.

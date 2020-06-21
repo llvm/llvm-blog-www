@@ -1,0 +1,14 @@
+</main>
+    <footer>
+        <h6>{{ .Site.Copyright | markdownify }} |
+            {{ T "rendered" }} <a href="https://gohugo.io" title="Hugo">Hugo</a> |
+            <a href="{{.Site.BaseURL}}index.xml">{{ T "subscribe" }} </a></h6>
+    </footer>
+</div>
+<script src="{{ "js/scripts.js" | relURL }}"></script>
+{{ if .Site.GoogleAnalytics }}
+  {{ template "_internal/google_analytics_async.html" . }}
+{{ end }}
+</body>
+
+</html>

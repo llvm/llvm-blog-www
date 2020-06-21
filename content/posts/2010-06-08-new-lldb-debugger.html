@@ -1,0 +1,11 @@
+---
+author: Chris Lattner
+blogger_id: tag:blogger.com,1999:blog-6088150582281556517.post-589243175382746064
+blogger_orig_url: http://blog.llvm.org/2010/06/new-lldb-debugger.html
+date: "2010-06-08T21:00:00Z"
+modified_time: "2010-06-08T21:00:31.647-07:00"
+tags: ["LLDB","new-in-llvm-2.8"]
+title: New "lldb" Debugger
+---
+
+I'm happy to announce a great new subproject of LLVM: LLDB.  LLDB is a modern debugger infrastructure which is built (like the rest of LLVM) as a series of modular and reusable libraries.  LLDB builds on existing LLVM technologies like the <a href="http://blog.llvm.org/2010/01/x86-disassembler.html">enhanced disassembler</a> APIs, the Clang ASTs and expression parser, the LLVM code generator and JIT compiler.<br /><br />While still in early development, LLDB supports basic command line debugging scenarios on the Mac, is scriptable, and has great support for multithreaded debugging.  LLDB is already much faster than GDB when debugging large programs, and has the promise to provide a much better user experience (particularly for C++ programmers).  We are excited to see the new platforms, new features, and enhancements that the broader LLVM community is interested in.<br /><br />If you'd like to try out LLDB and participate in its development, please visit <a href="http://lldb.llvm.org/">http://lldb.llvm.org/</a> and consider signing up for the <a href="http://lists.cs.uiuc.edu/mailman/listinfo/lldb-dev">lldb-dev</a> and <a href="http://lists.cs.uiuc.edu/mailman/listinfo/lldb-commits">lldb-commits</a> mailing lists.<br /><br />-Chris and the LLDB Team
