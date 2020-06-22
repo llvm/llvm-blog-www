@@ -6,4 +6,4 @@ weight: "1" #Right-most nav item
 meta: "false" #Do not display tags or categories
 ---
 
-About information will go here.
+This is the new LLVM Blog.
