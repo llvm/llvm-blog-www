@@ -3,6 +3,7 @@ title = "Announcing the new LLVM Foundation Board"
 date = 2020-08-21T17:54:06-07:00
 tags = ["LLVM Foundation Board"]
 draft = false
+author = "Tanya Lattner"
 +++
 
 The LLVM Foundation is pleased to announce its new Board of Directors, which includes:
