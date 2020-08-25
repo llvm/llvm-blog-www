@@ -1,4 +1,97 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>new-in-llvm-3.3 on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/new-in-llvm-3.3/</link><description>Recent content in new-in-llvm-3.3 on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Fri, 28 Jun 2013 12:20:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/new-in-llvm-3.3/index.xml" rel="self" type="application/rss+xml"/><item><title>Announcing the new LLVM Foundation Board</title><link>https://blog.llvm.org/posts/2020-08-21-new-llvm-foundation-board/</link><pubDate>Fri, 21 Aug 2020 17:54:06 -0700</pubDate><guid>https://blog.llvm.org/posts/2020-08-21-new-llvm-foundation-board/</guid><description>&lt;p>The LLVM Foundation is pleased to announce its new Board of Directors, which includes:&lt;/p>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>new-in-llvm-3.3 on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/new-in-llvm-3.3/</link><description>Recent content in new-in-llvm-3.3 on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Fri, 28 Jun 2013 12:20:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/new-in-llvm-3.3/index.xml" rel="self" type="application/rss+xml"/><item><title>The 2020 Virtual LLVM Developers' Meeting Program</title><link>https://blog.llvm.org/posts/2020-08-23-llvmdevmtgprogram/</link><pubDate>Sun, 23 Aug 2020 17:00:06 -0700</pubDate><guid>https://blog.llvm.org/posts/2020-08-23-llvmdevmtgprogram/</guid><description>&lt;p>&lt;img src="https://blog.llvm.org/img/750x300-1.png" alt="2020 Virtual LLVM Developers&amp;rsquo; Meeting">&lt;/p>
+&lt;p>The LLVM Foundation is excited to announce the &lt;a href="https://llvm.org/devmtg/2020-09/">2020 Virtual LLVM Developers&amp;rsquo; Meeting&lt;/a> program! Registration will open this week.&lt;/p>
+&lt;p>&lt;strong>Keynote:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Undef and Poison: Present and Future - &lt;em>J. Lee&lt;/em>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Technical Talks:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Clang &amp;amp; Linux: Asm Goto with Outputs - &lt;em>B. Wendling; N. Desaulniers&lt;/em>&lt;/li>
+&lt;li>LLVM Libc: Current Status, Challenges and Future Plans - &lt;em>S. Reddy; G. Chatelet; P. Asker; D. Finkelstein&lt;/em>&lt;/li>
+&lt;li>Branch Coverage: Squeezing more out of LLVM Source-based Code Coverage - &lt;em>A. Phipps&lt;/em>&lt;/li>
+&lt;li>Memory tagging in LLVM and Android - &lt;em>E. Stepanov; K. Serebryany; P. Collingbourne; M. Phillips&lt;/em>&lt;/li>
+&lt;li>Towards a representation of arbitrary alias graph in LLVM IR for Fortran code - &lt;em>K. Li; T. Islam&lt;/em>&lt;/li>
+&lt;li>Control-flow sensitive escape analysis in Falcon JIT - &lt;em>A. Pilipenko&lt;/em>&lt;/li>
+&lt;li>Extending Clang for checking compliance with automotive coding standards - &lt;em>M. Vujosevic Janicic&lt;/em>&lt;/li>
+&lt;li>An Update on Optimizing Multiple Exit Loops - &lt;em>P. Reames&lt;/em>&lt;/li>
+&lt;li>Code Size Compiler Optimizations and Techniques - &lt;em>A. Kumar&lt;/em>&lt;/li>
+&lt;li>Accelerate Matrix Multiplication Using the New POWER Outer Product Instructions - &lt;em>B. Saleil; J. Carvalho&lt;/em>&lt;/li>
+&lt;li>CIL : Common MLIR Dialect for C/C++ and Fortran - &lt;em>P. NR; V. M; Ranjith; Srihari&lt;/em>&lt;/li>
+&lt;li>Building compiler extension for LLVM 10.0.1 - &lt;em>S. Guelton&lt;/em>&lt;/li>
+&lt;li>LLVM-based mutation testing for C and C++ - &lt;em>A. Denisov; S. Pankevich&lt;/em>&lt;/li>
+&lt;li>Matrix Support in Clang and LLVM- &lt;em>F. Hahn&lt;/em>&lt;/li>
+&lt;li>Adding CUDA® Support to Cling: JIT Compile to GPUs - &lt;em>S. Ehrig&lt;/em>&lt;/li>
+&lt;li>The Present and Future of Interprocedural Optimization in LLVM - &lt;em>J. Doerfert; B. Homerding; S. Baziotis; S. Stipanovic; H. Ueno; K. Dinel; S. Okumura; L. Chen&lt;/em>&lt;/li>
+&lt;li>Pushing Back Lit&amp;rsquo;s Boundaries to Test Libc++ - &lt;em>L. Dionne&lt;/em>&lt;/li>
+&lt;li>Evolving “convergent”: Lessons from Control Flow in AMDGPU - &lt;em>N. Hähnle&lt;/em>&lt;/li>
+&lt;li>How to update debug info in compiler transformations - &lt;em>A. Prantl; V. Kumar&lt;/em>&lt;/li>
+&lt;li>Proposal for A Framework for More Effective Loop Optimizations - &lt;em>M. Kruse; H. Finkel&lt;/em>&lt;/li>
+&lt;li>Changing Everything With Clang Plugins: A Story About Syntax Extensions, Clang&amp;rsquo;s AST, and Quantum Computing = &lt;em>H. Finkel; A. Mccaskey&lt;/em>&lt;/li>
+&lt;li>(OpenMP) Parallelism-Aware Optimizations - &lt;em>J. Doerfert; S. Stipanovic; H. Mosquera; J. Chesterfield; G. Georgakoudis; J. Huber&lt;/em>&lt;/li>
+&lt;li>Checked C: Adding memory safety support to LLVM - &lt;em>M. Grang; K. Kjeer&lt;/em>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Tutorials:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Everything I know about debugging LLVM - &lt;em>N. Desaulniers&lt;/em>&lt;/li>
+&lt;li>LLVM in a Bare Metal Environment - &lt;em>H. Qadeer&lt;/em>&lt;/li>
+&lt;li>PGO: Add per-callsite counters - &lt;em>P. Kosov; Y. Sergey&lt;/em>&lt;/li>
+&lt;li>Understanding Changes made by a Pass in the Opt Pipeline. - &lt;em>J. Schmeiser&lt;/em>&lt;/li>
+&lt;li>Using clang-tidy for customized checkers and large scale source tree refactoring - &lt;em>V. Bridgers&lt;/em>&lt;/li>
+&lt;li>Finding Your Way Around the LLVM Dependence Analysis Zoo - &lt;em>S. Baziotis; S. Moll&lt;/em>&lt;/li>
+&lt;li>Using the clang static analyzer to find bugs - &lt;em>V. Bridgers&lt;/em>&lt;/li>
+&lt;li>A Deep Dive into the Interprocedural Optimization Infrastructure - &lt;em>J. Doerfert; B. Homerding; S. Baziotis; S. Stipanovic; H. Ueno; K. Dinel; S. Okumura; L. Chen&lt;/em>&lt;/li>
+&lt;li>MLIR Tutorial - &lt;em>M. Amini&lt;/em>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Lightning Talks:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Finding and Outlining Similarities in LLVM IR - &lt;em>A. Litteken&lt;/em>&lt;/li>
+&lt;li>A fast algorithm for global code motion of congruent instructions - &lt;em>A. Kumar; S. Pop&lt;/em>&lt;/li>
+&lt;li>From Implicit Pass Dependencies to Effectiveness Prediction - &lt;em>H. Ueno; J. Doerfert; E. Park; G. Georgakoudis; T. Jayatilaka; S. Badruswamy&lt;/em>&lt;/li>
+&lt;li>Using Clang as An Alternative C/C++ Frontend of The ROSE Source-to-Source Compiler - &lt;em>A. Wang; P. Lin; C. Liao; Y. Yan&lt;/em>&lt;/li>
+&lt;li>OpenACC support in Flang with a MLIR dialect - &lt;em>V. Clement; J. Vetter&lt;/em>&lt;/li>
+&lt;li>Fragmenting the DWARF to Enable Dead Debug Data Elimination - &lt;em>J. Henderson&lt;/em>&lt;/li>
+&lt;li>Source-based Code Coverage for Embedded Use Cases - &lt;em>A. Phipps; C. Addison&lt;/em>&lt;/li>
+&lt;li>pre-merge checks for LLVM - &lt;em>M. Goncharov; C. Kühnel&lt;/em>&lt;/li>
+&lt;li>Getting stack size just right on XCore - &lt;em>J. McCrea&lt;/em>&lt;/li>
+&lt;li>Compile Faster with the Program Repository and ccache - &lt;em>Y. Yi; P. Bowen-Huggett&lt;/em>&lt;/li>
+&lt;li>GWP-TSan: Zero-Cost Detection of Data Races in Production - &lt;em>M. Morehouse; K. Serebryany&lt;/em>&lt;/li>
+&lt;li>CompilerInvocation to -cc1 command line - &lt;em>D. Grumberg&lt;/em>&lt;/li>
+&lt;li>Outer-Loop Vectorization Legality Analysis for RV: One Step Closer to a Powerful Vectorizer for LLVM - &lt;em>S. Baziotis&lt;/em>&lt;/li>
+&lt;li>Flang Update - &lt;em>S. Scalpone&lt;/em>&lt;/li>
+&lt;li>Code Feature Analysis, Tracking, and Future Usage - &lt;em>T. Jayatilaka; J. Doerfert; G. Georgakoudis; E. Park; H. Ueno; S. Badruswamy&lt;/em>&lt;/li>
+&lt;li>Lowering XLA HLO using RISE - A Functional Pattern-based MLIR Dialect - &lt;em>M. Lücke; A. Smith; M. Steuwer&lt;/em>&lt;/li>
+&lt;li>SYCL for CUDA: An overview of implementing PI for CUDA - &lt;em>A. Johnston&lt;/em>&lt;/li>
+&lt;li>Extending LLDB to More Scripting Languages - &lt;em>J. Devlieghere&lt;/em>&lt;/li>
+&lt;li>Adding a Subtarget Support to LLVM in Five Minutes - &lt;em>E. Yakubova&lt;/em>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Birds of a Feather:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>ClangBuiltLinux BoF - &lt;em>N. Desaulniers&lt;/em>&lt;/li>
+&lt;li>Loop Optimization BoF - &lt;em>M. Kruse; K. Barton&lt;/em>&lt;/li>
+&lt;li>LLVM Just-In-Time Compilers BoF - &lt;em>L. Hames&lt;/em>&lt;/li>
+&lt;li>Code Size Optimization - &lt;em>S. Bartell; V. Adve&lt;/em>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Student Research Competition&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Enzyme: High-Performance Automatic Differentiation of LLVM - &lt;em>W. Moses; V. Churavy&lt;/em>&lt;/li>
+&lt;li>SPAM: Stateless Permutation of Application Memory with LLVM - &lt;em>M. Ziad; M. Arroyo; S. Sethumadhavan&lt;/em>&lt;/li>
+&lt;li>HPVM-FPGFA: Leveraging Compiler Optimizations for Hardware-Agnostic FPGA Programming - &lt;em>A. Ejjeh; K. Kanwar; M. Kotsifakou; V. Adve; R. Rutenbar&lt;/em>&lt;/li>
+&lt;li>Guided Linking: shrinking and speeding up dynamically linked code - &lt;em>S. Bartell; V. Adve&lt;/em>&lt;/li>
+&lt;li>ApproxTuner: A Compiler and Runtime System for Adaptive Approximations - &lt;em>H. Sharif; M. Kotsifakou; Y. Zhao; A. Kothari; B. Schreiber; E. Wang; Y. Sarita; N. Zhao; K. Joshi; V. Adve; S. Misailovic; S. Adve&lt;/em>&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>Posters:&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>CIRCT: MLIR for Hardware Design - &lt;em>S. Neuendorffer; C. Lattner; A. Wilson&lt;/em>&lt;/li>
+&lt;li>An Approach to Generate Correctly Rounded Math Libraries for New Floating Point Variants - &lt;em>J. Lim; M. Aanjaneya; J. Gustafson; S. Nagarakatte&lt;/em>&lt;/li>
+&lt;li>Compiling a Higher-Order Smart Contract Language to LLVM - &lt;em>V. Nagaraj; J. Johannsen; A. Trunov; G. Pirlea; A. Kumar; I. Sergey&lt;/em>&lt;/li>
+&lt;li>To -jInfinity &amp;amp; Beyond - &lt;em>W. Moses; K. Kwok; L. Sha&lt;/em>&lt;/li>
+&lt;li>llvm-diva – Debug Information Visual Analyzer - &lt;em>C. Enciso&lt;/em>&lt;/li>
+&lt;li>Quickly Finding RISC-V Code Quality Issues with Differential Analysis - &lt;em>L. Marques&lt;/em>&lt;/li>
+&lt;li>Error estimates of floating-point numbers and Jacobian matrix computation in Clad - &lt;em>V. Vassilev; A. Penev; R. Shakhov&lt;/em>&lt;/li>
+&lt;li>Data Dependency using MSSA: Analysis and Contrast - &lt;em>R. Sharma&lt;/em>&lt;/li>
+&lt;li>Connecting Clang to The ROSE Source-to-Source Compiler - &lt;em>A. Wang; P. Lin; C. Liao; Y. Yan&lt;/em>&lt;/li>
+&lt;li>Incremental Compilation Support in Clang - &lt;em>V. Vassilevv; D. Lange&lt;/em>&lt;/li>
+&lt;/ul></description></item><item><title>Announcing the new LLVM Foundation Board</title><link>https://blog.llvm.org/posts/2020-08-21-new-llvm-foundation-board/</link><pubDate>Fri, 21 Aug 2020 17:54:06 -0700</pubDate><guid>https://blog.llvm.org/posts/2020-08-21-new-llvm-foundation-board/</guid><description>&lt;p>The LLVM Foundation is pleased to announce its new Board of Directors, which includes:&lt;/p>
 &lt;ul>
 &lt;li>Kit Barton&lt;/li>
 &lt;li>Kristof Beyls&lt;/li>
