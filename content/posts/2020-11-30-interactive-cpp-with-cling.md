@@ -31,7 +31,7 @@ discoveries such as gravitational waves, the great cavity in the Pyramid of
 Cheops, the discovery of the Higgs boson by the Large Hadron Collider. For the
 last 5 years, Cling has helped to analyze 1 EB physical data, serving as a basis
 for over 1000 scientific publications, and supports software run across a
-distributed million CPU core computing facility. 
+distributed million CPU core computing facility.
 
 Recently we started a project aiming to leverage our experience in interactive
 C++, just-in-time compilation technology (JIT), dynamic optimizations, and large
@@ -58,7 +58,7 @@ Cling. Want to follow along? You can get cling from conda
 ```
 conda config --add channels conda-forge
 conda install cling
-conda install llvmdev=5.0.0 
+conda install llvmdev=5.0.0
 ```
 or from docker-hub if you don't already use conda:
 ```
@@ -109,8 +109,8 @@ some qualitatively different approaches to program development and enhanced
 productivity.
 
 <div style="max-width:1095px; margin:0 auto;">
-  <img src="/img/cling-2020-11-17-figure1.gif" style="max-width:90%;"><br />
-  <!--- ![alt_text](/img/cling-2020-11-17-figure1.gif "image_tooltip") --->
+  <img src="/img/cling-2020-11-30-figure1.gif" style="max-width:90%;"><br />
+  <!--- ![alt_text](/img/cling-2020-11-30-figure1.gif "image_tooltip") --->
  <p align="center">
   Figure 1. Interactive OpenGL Demo, adapted from
   [here](https://www.youtube.com/watch?v=eoIuqLNvzFs).
@@ -123,13 +123,13 @@ Some of the design goals of cling include:
   * Do not pay for what you do not use -- prioritize performance of processing
   correct code.  For example, in order to provide error recovery do not penalize
   users typing syntactically and semantically correct C++; and interactive C++
-  transformations are only done when necessary and can be disabled. 
+  transformations are only done when necessary and can be disabled.
   * Reuse Clang & LLVM at (almost) any cost -- do not reinvent the wheel. If a
   feature is not available, then try finding a minimalistic way to implement it
   and propose it for a review to the LLVM community. Otherwise find the minimal
   patch, even at the cost of misusing API, which satisfies the requirements.
   * Continuous feature delivery -- focus on a minimal feature, its integration
-  in the main use-case (ROOT), deployment in production, repeat. 
+  in the main use-case (ROOT), deployment in production, repeat.
   * Library design -- allow Cling to be used as a library from third party
   frameworks.
   * Learn and evolve -- experiment with user experience. There is no formal
@@ -146,8 +146,8 @@ transformations to each chunk before execution. Cling orchestrates the existing
 LLVM and Clang infrastructure following a data flow described in Figure 2.
 
 <div style="max-width:600px; margin:0 auto;">
-  <img src="/img/cling-2020-11-17-figure2.png" style="max-width:90%;"><br />
-  <!--- ![alt_text](/img/cling-2020-11-17-figure2.png "image_tooltip") --->
+  <img src="/img/cling-2020-11-30-figure2.svg" style="max-width:90%;"><br />
+  <!--- ![alt_text](/img/cling-2020-11-30-figure2.svg "image_tooltip") --->
 <p align="center">
 Figure 2. Information flow in Cling
 </p>
@@ -155,11 +155,11 @@ Figure 2. Information flow in Cling
 In short:
 
   1. The tool controls the input infrastructure by interactive prompt or by an
-  interface allowing the incremental processing of input (➀). 
-  2. It sends the input to the underlying clang library for compilation (➁). 
-  3. Clang compiles the input, possibly wrapped into a function, into an AST (➂). 
+  interface allowing the incremental processing of input (➀).
+  2. It sends the input to the underlying clang library for compilation (➁).
+  3. Clang compiles the input, possibly wrapped into a function, into an AST (➂).
   4. When necessary the AST is further transformed in order to attach specific
-  behavior (➃). 
+  behavior (➃).
 
 For example, reporting execution results, or other interpreter-related features.
 Once the high-level AST representation is ready, it is sent for lowering to an
@@ -254,8 +254,7 @@ support redefinitions of entities.
 (std::string &) ""
 [cling] #include <vector>
 [cling] std::vector<int> v
-input_line_7:2:19: error: redefinition of 'v' with a different type: 'std::vector<int>' vs 'std::string' (aka 'basic_string<char, char_traits<char>,
-  	allocator<char> >')
+input_line_7:2:19: error: redefinition of 'v' with a different type: 'std::vector<int>' vs 'std::string' (aka 'basic_string<char, char_traits<char>, allocator<char> >')
  std::vector<int> v
                   ^
 input_line_4:2:14: note: previous definition is here
@@ -301,7 +300,7 @@ checkpointing is not a viable option as it introduces overhead for correct code.
 [cling] std::vector<int> v; v[0].error_here;
 input_line_4:2:26: error: member reference base type 'std::__1::__vector_base<int, std::__1::allocator<int> >::value_type' (aka 'int') is not a structure or union
  std::vector<int> v; v[0].error_here;
-                 	   ~~~~^~~~~~~~~~~
+                     ~~~~^~~~~~~~~~~
 ```
 
 
