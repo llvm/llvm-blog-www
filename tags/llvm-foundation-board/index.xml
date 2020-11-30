@@ -84,7 +84,14 @@ trivial to orient the shape, choose size and color or compare to previous
 settings. The invisible compile-link cycle aids interactive use which allows
 some qualitatively different approaches to program development and enhanced
 productivity.&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;div style="max-width:1095px; margin:0 auto;">
+&lt;img src="https://blog.llvm.org/img/cling-2020-11-17-figure1.gif" style="max-width:90%;">&lt;br />
+&lt;!--- ![alt_text](/img/cling-2020-11-17-figure1.gif "image_tooltip") --->
+&lt;p align="center">
+Figure 1. Interactive OpenGL Demo, adapted from
+[here](https://www.youtube.com/watch?v=eoIuqLNvzFs).
+&lt;/p>
+&lt;/div>
 &lt;h2 id="design-principles">Design principles&lt;/h2>
 &lt;p>Some of the design goals of cling include:&lt;/p>
 &lt;ul>
@@ -110,7 +117,14 @@ to act on code as it comes in. It includes an API providing access to the
 properties of recently compiled chunks of code. Cling can apply custom
 transformations to each chunk before execution. Cling orchestrates the existing
 LLVM and Clang infrastructure following a data flow described in Figure 2.&lt;/p>
-&lt;!-- raw HTML omitted -->
+&lt;div style="max-width:600px; margin:0 auto;">
+&lt;img src="https://blog.llvm.org/img/cling-2020-11-17-figure2.png" style="max-width:90%;">&lt;br />
+&lt;!--- ![alt_text](/img/cling-2020-11-17-figure2.png "image_tooltip") --->
+&lt;p align="center">
+Figure 2. Information flow in Cling
+&lt;/p>
+&lt;/div>
+In short:
 &lt;ol>
 &lt;li>The tool controls the input infrastructure by interactive prompt or by an
 interface allowing the incremental processing of input (➀).&lt;/li>
