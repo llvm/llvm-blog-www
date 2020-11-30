@@ -12,6 +12,11 @@ pygmentsCodeFences = true
 
 #disqusShortname = "myShortName"
 
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+
 # Note: to disable a social network icon delete or comment out the corresponding line
 [author]
     name = "LLVM Project"
