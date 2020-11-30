@@ -1,4 +1,267 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>numerics on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/numerics/</link><description>Recent content in numerics on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Fri, 15 Mar 2019 15:47:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/numerics/index.xml" rel="self" type="application/rss+xml"/><item><title>The 2020 Virtual LLVM Developers' Meeting Program</title><link>https://blog.llvm.org/posts/2020-08-23-llvmdevmtgprogram/</link><pubDate>Sun, 23 Aug 2020 17:00:06 -0700</pubDate><guid>https://blog.llvm.org/posts/2020-08-23-llvmdevmtgprogram/</guid><description>&lt;p>&lt;img src="https://blog.llvm.org/img/750x300-1.png" alt="2020 Virtual LLVM Developers&amp;rsquo; Meeting">&lt;/p>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>numerics on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/numerics/</link><description>Recent content in numerics on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Fri, 15 Mar 2019 15:47:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/numerics/index.xml" rel="self" type="application/rss+xml"/><item><title>Interactive C++ with Cling</title><link>https://blog.llvm.org/posts/2020-11-17-interactive-cpp-with-cling/</link><pubDate>Mon, 30 Nov 2020 10:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2020-11-17-interactive-cpp-with-cling/</guid><description>&lt;h1 id="interactive-c-with-cling">Interactive C++ with Cling&lt;/h1>
+&lt;p>The C++ programming language is used for many numerically intensive scientific
+applications. A combination of performance and solid backward compatibility has
+led to its use for many research software codes over the past 20 years. Despite
+its power, C++ is often seen as difficult to learn and inconsistent with rapid
+application development. Exploration and prototyping is slowed down by the long
+edit-compile-run cycles during development.&lt;/p>
+&lt;p>&lt;a href="https://github.com/root-project/cling/">Cling&lt;/a> has emerged as a recognized
+capability that enables interactivity, dynamic interoperability and rapid
+prototyping capabilities to C++ developers. Cling supports the full C++ feature
+set including the use of templates, lambdas, and virtual inheritance. Cling is
+an interactive C++ interpreter, built on top of the Clang and &lt;a href="llvm.org">LLVM&lt;/a>
+compiler infrastructure. The interpreter enables interactive exploration and
+makes the C++ language more welcoming for research.&lt;/p>
+&lt;p>The main tool for storage, research and visualization of scientific data in the
+field of high energy physics (HEP) is the specialized software package
+&lt;a href="root.cern/">ROOT&lt;/a>. ROOT is a set of interconnected components that assist
+scientists from data storage and research to their visualization when published
+in a scientific paper. ROOT has played a significant role in scientific
+discoveries such as gravitational waves, the great cavity in the Pyramid of
+Cheops, the discovery of the Higgs boson by the Large Hadron Collider. For the
+last 5 years, Cling has helped to analyze 1 EB physical data, serving as a basis
+for over 1000 scientific publications, and supports software run across a
+distributed million CPU core computing facility.&lt;/p>
+&lt;p>Recently we started a project aiming to leverage our experience in interactive
+C++, just-in-time compilation technology (JIT), dynamic optimizations, and large
+scale software development to greatly reduce the impedance mismatch between C++
+and Python. We will generalize Cling to offer a robust, sustainable and
+omnidisciplinary solution for C++ language interoperability.The scope of our
+objectives is to:&lt;/p>
+&lt;ul>
+&lt;li>advance the interpretative technology to provide a state-of-the-art C++
+execution environment,&lt;/li>
+&lt;li>enable functionality which can provide native-like, dynamic runtime
+interoperability between C++ and Python (and eventually other languages such
+as Julia and Swift)&lt;/li>
+&lt;li>allow seamless utilization of heterogeneous hardware (such as hardware
+accelerators)&lt;/li>
+&lt;/ul>
+&lt;p>Project results will be integrated into the widely used tools LLVM, Clang and
+Cling. The outcome of the proposed work is a platform which provides a C++
+compiler as a service (CaaS) for both rapid application development and
+computational performance.&lt;/p>
+&lt;p>The rest of this post intends to demonstrate the design and several features of
+Cling. Want to follow along? You can get cling from conda&lt;/p>
+&lt;pre>&lt;code>conda config --add channels conda-forge
+conda install cling
+conda install llvmdev=5.0.0
+&lt;/code>&lt;/pre>&lt;p>or from docker-hub if you don&amp;rsquo;t already use conda:&lt;/p>
+&lt;pre>&lt;code>docker pull compilerresearch/cling
+docker run -t -i compilerresearch/cling
+&lt;/code>&lt;/pre>&lt;p>Either way, type &amp;ldquo;cling&amp;rdquo; to start its interactive shell:&lt;/p>
+&lt;pre>&lt;code>cling
+****************** CLING ******************
+* Type C++ code and press enter to run it *
+* Type .q to exit *
+*******************************************
+[cling]$
+[cling]$ #include &amp;quot;cling/Interpreter/Interpreter.h&amp;quot;
+[cling]$ gCling-&amp;gt;allowRedefinition(false)
+&lt;/code>&lt;/pre>&lt;p>We will explain the purpose for these commands, and other alternatives for using
+cling in further parts of this post.&lt;/p>
+&lt;h1 id="interpreting-c">Interpreting C++&lt;/h1>
+&lt;p>Exploratory programming (or Rapid Application Development) is an effective way
+to gain understanding of the requirements for a project; to reduce the
+complexity of the problem; and to provide an early validation of the system
+design and implementation. In particular, interactively probing data and
+interfaces makes complex libraries and complex data more accessible users.
+It is important in data science, computational science and debugging. It
+significantly reduces the time consumed by edit-run cycles during development.
+In practice only few programming languages offer both a compiler and an
+interpreter translating them into machine code, although whether a language is
+to be interpreted or compiled is a property of the implementation.&lt;/p>
+&lt;p>Languages which enable exploratory programming tend to have interpreters which
+shorten the compile-link cycle, which generally has a noticeable cost in
+performance. Language developers who acknowledge the use case of exploratory
+programming may also put syntactic sugar, but that is mostly for convenience and
+terseness. The performance penalty is largely mitigated by using just-in-time
+(JIT) or ahead-of-time (AOT) compilation technology.&lt;/p>
+&lt;p>For the sake of this post series, interpreting C++ means enabling exploratory
+programming for C++ while mitigating the performance cost with JIT compilation.
+Figure 1 shows an illustrative example of exploratory programming. It becomes
+trivial to orient the shape, choose size and color or compare to previous
+settings. The invisible compile-link cycle aids interactive use which allows
+some qualitatively different approaches to program development and enhanced
+productivity.&lt;/p>
+&lt;!-- raw HTML omitted -->
+&lt;h2 id="design-principles">Design principles&lt;/h2>
+&lt;p>Some of the design goals of cling include:&lt;/p>
+&lt;ul>
+&lt;li>Do not pay for what you do not use &amp;ndash; prioritize performance of processing
+correct code. For example, in order to provide error recovery do not penalize
+users typing syntactically and semantically correct C++; and interactive C++
+transformations are only done when necessary and can be disabled.&lt;/li>
+&lt;li>Reuse Clang &amp;amp; LLVM at (almost) any cost &amp;ndash; do not reinvent the wheel. If a
+feature is not available, then try finding a minimalistic way to implement it
+and propose it for a review to the LLVM community. Otherwise find the minimal
+patch, even at the cost of misusing API, which satisfies the requirements.&lt;/li>
+&lt;li>Continuous feature delivery &amp;ndash; focus on a minimal feature, its integration
+in the main use-case (ROOT), deployment in production, repeat.&lt;/li>
+&lt;li>Library design &amp;ndash; allow Cling to be used as a library from third party
+frameworks.&lt;/li>
+&lt;li>Learn and evolve &amp;ndash; experiment with user experience. There is no formal
+specification or consensus on overall user experience. Apply lessons learned
+from the legacy from CINT.&lt;/li>
+&lt;/ul>
+&lt;h2 id="architecture">Architecture&lt;/h2>
+&lt;p>Cling accepts partial input and ensures that the compiler process keeps running
+to act on code as it comes in. It includes an API providing access to the
+properties of recently compiled chunks of code. Cling can apply custom
+transformations to each chunk before execution. Cling orchestrates the existing
+LLVM and Clang infrastructure following a data flow described in Figure 2.&lt;/p>
+&lt;!-- raw HTML omitted -->
+&lt;ol>
+&lt;li>The tool controls the input infrastructure by interactive prompt or by an
+interface allowing the incremental processing of input (➀).&lt;/li>
+&lt;li>It sends the input to the underlying clang library for compilation (➁).&lt;/li>
+&lt;li>Clang compiles the input, possibly wrapped into a function, into an AST (➂).&lt;/li>
+&lt;li>When necessary the AST is further transformed in order to attach specific
+behavior (➃).&lt;/li>
+&lt;/ol>
+&lt;p>For example, reporting execution results, or other interpreter-related features.
+Once the high-level AST representation is ready, it is sent for lowering to an
+LLVM-specific assembly format, the LLVM IR (➄). The LLVM IR is the input format
+for LLVM’s just-in-time compilation infrastructure. Cling instructs the JIT to
+run specified functions (➅), translating them into machine code (MC) targeting
+the underlying device architecture (eg. Intel x86 or NVPTX) (➆,➇).&lt;/p>
+&lt;p>The C++ standard is developed towards compilers and does not cover interactive
+use well. Execution of statements on the global scope, reporting execution
+results, and entity redefinitions are the three most important features when it
+comes to user friendliness. Long running interpreter sessions are prone to
+typing errors and make flawless error recovery essential. More advanced
+use-cases require extra flexibility at runtime and lookup rules extensions
+aiding eval-style programming. Efficient watermark-based code removal is
+important when C++ is used as scripting language.&lt;/p>
+&lt;h2 id="execution-of-statements">Execution of statements&lt;/h2>
+&lt;p>Cling processes C++ incrementally. Incremental input consists of one or multiple
+C++ statements. C++ does not allow expressions in the global scope.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">[cling] &lt;span style="color:#960050;background-color:#1e0010">#&lt;/span>include &lt;span style="color:#f92672">&amp;lt;&lt;/span>vector&lt;span style="color:#f92672">&amp;gt;&lt;/span>
+[cling] &lt;span style="color:#960050;background-color:#1e0010">#&lt;/span>include &lt;span style="color:#f92672">&amp;lt;&lt;/span>iostream&lt;span style="color:#f92672">&amp;gt;&lt;/span>
+[cling] std&lt;span style="color:#f92672">::&lt;/span>vector&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">int&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> v &lt;span style="color:#f92672">=&lt;/span> {&lt;span style="color:#ae81ff">1&lt;/span>,&lt;span style="color:#ae81ff">2&lt;/span>,&lt;span style="color:#ae81ff">3&lt;/span>,&lt;span style="color:#ae81ff">4&lt;/span>,&lt;span style="color:#ae81ff">5&lt;/span>}; v[&lt;span style="color:#ae81ff">0&lt;/span>]&lt;span style="color:#f92672">++&lt;/span>;
+[cling] std&lt;span style="color:#f92672">::&lt;/span>cout &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#e6db74">&amp;#34;v[0]=&amp;#34;&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> v[&lt;span style="color:#ae81ff">0&lt;/span>] &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>;
+v[&lt;span style="color:#ae81ff">0&lt;/span>]&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">2&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Instead, Cling moves each input into a unique wrapper function. Eg:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">__unique_1&lt;/span> () { std&lt;span style="color:#f92672">::&lt;/span>vector&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">int&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> v &lt;span style="color:#f92672">=&lt;/span> {&lt;span style="color:#ae81ff">1&lt;/span>,&lt;span style="color:#ae81ff">2&lt;/span>,&lt;span style="color:#ae81ff">3&lt;/span>,&lt;span style="color:#ae81ff">4&lt;/span>,&lt;span style="color:#ae81ff">5&lt;/span>};v[&lt;span style="color:#ae81ff">0&lt;/span>]&lt;span style="color:#f92672">++&lt;/span>;; } &lt;span style="color:#75715e">// #1
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">__unique_2&lt;/span> () { std&lt;span style="color:#f92672">::&lt;/span>cout &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#e6db74">&amp;#34;v[0]=&amp;#34;&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> v[&lt;span style="color:#ae81ff">0&lt;/span>] &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>;; } &lt;span style="color:#75715e">// #2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After the clang AST is built, cling detects that wrapper #1 contains a
+declaration and moves the declaration&amp;rsquo;s AST node to the global scope, such that
+&lt;code>v&lt;/code> can be referenced by subsequent inputs. Wrapper #2 contains a statement and
+is executed as is. Internally to Cling, the example is transformed to:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">&lt;span style="color:#75715e">#include&lt;/span> &lt;span style="color:#75715e">&amp;lt;vector&amp;gt;&lt;/span>&lt;span style="color:#75715e">
+&lt;/span>&lt;span style="color:#75715e">#include&lt;/span> &lt;span style="color:#75715e">&amp;lt;iostream&amp;gt;&lt;/span>&lt;span style="color:#75715e">
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>std&lt;span style="color:#f92672">::&lt;/span>vector&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">int&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> v &lt;span style="color:#f92672">=&lt;/span> {&lt;span style="color:#ae81ff">1&lt;/span>,&lt;span style="color:#ae81ff">2&lt;/span>,&lt;span style="color:#ae81ff">3&lt;/span>,&lt;span style="color:#ae81ff">4&lt;/span>,&lt;span style="color:#ae81ff">5&lt;/span>};
+&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">__unique_1&lt;/span> () { v[&lt;span style="color:#ae81ff">0&lt;/span>]&lt;span style="color:#f92672">++&lt;/span>;; }
+&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">__unique_2&lt;/span> () { std&lt;span style="color:#f92672">::&lt;/span>cout &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#e6db74">&amp;#34;v[0]=&amp;#34;&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> v[&lt;span style="color:#ae81ff">0&lt;/span>] &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>;; }
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Cling runs these wrappers after they are compiled to machine code.&lt;/p>
+&lt;h2 id="reporting-execution-results">Reporting execution results&lt;/h2>
+&lt;p>An integral part of interactivity is printing expression values. Typing &lt;code>printf&lt;/code>
+each time is laborious and does not naturally include object type information.
+Instead, omitting the semicolon of the last statement of the input tells Cling
+to report the expression result. When wrapping the input, Cling textually
+attaches a semicolon to the end of it. If an execution report is requested the
+corresponding wrapper AST does not contain a &lt;em>NullStmt&lt;/em> (modelling extra
+semicolons).&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">[cling] &lt;span style="color:#960050;background-color:#1e0010">#&lt;/span>include &lt;span style="color:#f92672">&amp;lt;&lt;/span>vector&lt;span style="color:#f92672">&amp;gt;&lt;/span>
+[cling] std&lt;span style="color:#f92672">::&lt;/span>vector&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">int&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> v &lt;span style="color:#f92672">=&lt;/span> {&lt;span style="color:#ae81ff">1&lt;/span>,&lt;span style="color:#ae81ff">2&lt;/span>,&lt;span style="color:#ae81ff">3&lt;/span>,&lt;span style="color:#ae81ff">4&lt;/span>,&lt;span style="color:#ae81ff">5&lt;/span>} &lt;span style="color:#75715e">// Note the missing semicolon
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>(std&lt;span style="color:#f92672">::&lt;/span>vector&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">int&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> &lt;span style="color:#f92672">&amp;amp;&lt;/span>) { &lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">2&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>, &lt;span style="color:#ae81ff">4&lt;/span>, &lt;span style="color:#ae81ff">5&lt;/span> }
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>A transformation injects extra code depending on the properties of the
+particular entity such as if it is copyable, if it is a wrapper temporary or an
+array. Cling can report information about non-copyable or temporary objects by
+providing a ‘managed’ storage. The managed storage (&lt;em>cling::Value&lt;/em>) is also used
+for exchanging values between interpreted and compiled code in embedded setup.&lt;/p>
+&lt;h2 id="entity-redefinition">Entity Redefinition&lt;/h2>
+&lt;p>Name redefinition is an important scripting feature. It is also essential for
+notebook-based C++ as each cell is a somewhat separate computation. C++ does not
+support redefinitions of entities.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#f92672">[&lt;/span>cling&lt;span style="color:#f92672">]&lt;/span> &lt;span style="color:#75715e">#include &amp;lt;string&amp;gt;&lt;/span>
+&lt;span style="color:#f92672">[&lt;/span>cling&lt;span style="color:#f92672">]&lt;/span> std::string v
+&lt;span style="color:#f92672">(&lt;/span>std::string &amp;amp;&lt;span style="color:#f92672">)&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>
+&lt;span style="color:#f92672">[&lt;/span>cling&lt;span style="color:#f92672">]&lt;/span> &lt;span style="color:#75715e">#include &amp;lt;vector&amp;gt;&lt;/span>
+&lt;span style="color:#f92672">[&lt;/span>cling&lt;span style="color:#f92672">]&lt;/span> std::vector&amp;lt;int&amp;gt; v
+input_line_7:2:19: error: redefinition of &lt;span style="color:#e6db74">&amp;#39;v&amp;#39;&lt;/span> with a different type: &lt;span style="color:#e6db74">&amp;#39;std::vector&amp;lt;int&amp;gt;&amp;#39;&lt;/span> vs &lt;span style="color:#e6db74">&amp;#39;std::string&amp;#39;&lt;/span> &lt;span style="color:#f92672">(&lt;/span>aka &lt;span style="color:#e6db74">&amp;#39;basic_string&amp;lt;char, char_traits&amp;lt;char&amp;gt;,
+&lt;/span>&lt;span style="color:#e6db74"> allocator&amp;lt;char&amp;gt; &amp;gt;&amp;#39;&lt;/span>&lt;span style="color:#f92672">)&lt;/span>
+std::vector&amp;lt;int&amp;gt; v
+^
+input_line_4:2:14: note: previous definition is here
+std::string v
+^
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Cling implements entity redefinition using inline namespaces and rewires clang
+lookup rules to give higher priority to more recent declarations. The full
+description of this feature was published as a conference paper on CC 2020
+(&lt;a href="https://doi.org/10.1145/3377555.3377901">ACM conference on Compiler Construction&lt;/a>).
+We enable it by calling &lt;code>gCling-&amp;gt;allowRedefinition()&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#f92672">[&lt;/span>cling&lt;span style="color:#f92672">]&lt;/span> &lt;span style="color:#75715e">#include &amp;#34;cling/Interpreter/Interpreter.h&amp;#34;&lt;/span>
+&lt;span style="color:#f92672">[&lt;/span>cling&lt;span style="color:#f92672">]&lt;/span> gCling-&amp;gt;allowRedefinition&lt;span style="color:#f92672">()&lt;/span>
+&lt;span style="color:#f92672">[&lt;/span>cling&lt;span style="color:#f92672">]&lt;/span> &lt;span style="color:#75715e">#include &amp;lt;vector&amp;gt;&lt;/span>
+&lt;span style="color:#f92672">[&lt;/span>cling&lt;span style="color:#f92672">]&lt;/span> std::vector&amp;lt;int&amp;gt; v
+&lt;span style="color:#f92672">(&lt;/span>std::vector&amp;lt;int&amp;gt; &amp;amp;&lt;span style="color:#f92672">)&lt;/span> &lt;span style="color:#f92672">{}&lt;/span>
+&lt;span style="color:#f92672">[&lt;/span>cling&lt;span style="color:#f92672">]&lt;/span> &lt;span style="color:#75715e">#include &amp;lt;string&amp;gt;&lt;/span>
+&lt;span style="color:#f92672">[&lt;/span>cling&lt;span style="color:#f92672">]&lt;/span> std::string v
+&lt;span style="color:#f92672">(&lt;/span>std::string &amp;amp;&lt;span style="color:#f92672">)&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="invalid-code-error-recovery">Invalid Code. Error Recovery&lt;/h2>
+&lt;p>When used in interactive mode, invalid C++ does not terminate the session.
+Instead invalid code is discarded. The underlying clang process keeps the
+invalid AST nodes in its internal data structures for better error diagnostics
+and recovery, expecting the process will end shortly after issuing the
+diagnostics. This particular example is more challenging because it first
+contains both valid and invalid constructs. The error recovery should undo a
+significant amount of changes in internal structures such as the name lookup and
+the AST. Cling is used in many high-performance environments; using
+checkpointing is not a viable option as it introduces overhead for correct code.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#f92672">[&lt;/span>cling&lt;span style="color:#f92672">]&lt;/span> &lt;span style="color:#75715e">#include &amp;lt;vector&amp;gt;&lt;/span>
+&lt;span style="color:#f92672">[&lt;/span>cling&lt;span style="color:#f92672">]&lt;/span> std::vector&amp;lt;int&amp;gt; v; v&lt;span style="color:#f92672">[&lt;/span>0&lt;span style="color:#f92672">]&lt;/span>.error_here;
+input_line_4:2:26: error: member reference base type &lt;span style="color:#e6db74">&amp;#39;std::__1::__vector_base&amp;lt;int, std::__1::allocator&amp;lt;int&amp;gt; &amp;gt;::value_type&amp;#39;&lt;/span> &lt;span style="color:#f92672">(&lt;/span>aka &lt;span style="color:#e6db74">&amp;#39;int&amp;#39;&lt;/span>&lt;span style="color:#f92672">)&lt;/span> is not a structure or union
+std::vector&amp;lt;int&amp;gt; v; v&lt;span style="color:#f92672">[&lt;/span>0&lt;span style="color:#f92672">]&lt;/span>.error_here;
+~~~~^~~~~~~~~~~
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>In order to handle the example, Cling models the incremental input into a
+&lt;em>Transaction&lt;/em>. A transaction represents the delta of the changes of internal
+data structures of Clang. Cling listens to events coming from various Clang
+callbacks such as declaration creation, deserialization and macro definition.
+This information is sufficient to undo the changes and continue with a valid
+state. The implementation is very intricate and in many cases requires extra
+work depending on the input declaration kinds.&lt;/p>
+&lt;p>Cling also protects against null pointer dereferences via a code transformation,
+avoiding a session crash.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#f92672">[&lt;/span>cling&lt;span style="color:#f92672">]&lt;/span> int *p &lt;span style="color:#f92672">=&lt;/span> nullptr; *p
+input_line_3:2:21: warning: null passed to a callee that requires a non-null argument &lt;span style="color:#f92672">[&lt;/span>-Wnonnull&lt;span style="color:#f92672">]&lt;/span>
+int *p &lt;span style="color:#f92672">=&lt;/span> nullptr; *p
+^
+&lt;span style="color:#f92672">[&lt;/span>cling&lt;span style="color:#f92672">]&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The implementation of error recovery and code unloading still has rough edges
+and it is being improved constantly.&lt;/p>
+&lt;h2 id="code-removal">Code Removal&lt;/h2>
+&lt;p>Incremental, interactive C++ assumes long lived sessions where not only syntax
+error can happen but also semantic ones. That poses one level of extra
+complexity if we want to re-execute the same code with minor adjustments.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">[cling] .L Adder.h &lt;span style="color:#75715e">// #1, similar to #include &amp;#34;Adder.h&amp;#34;
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>[cling] Add(&lt;span style="color:#ae81ff">3&lt;/span>, &lt;span style="color:#ae81ff">1&lt;/span>) &lt;span style="color:#75715e">// int Add(int a, int b) {return a - b; }
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span>) &lt;span style="color:#ae81ff">2&lt;/span>
+[cling] .U Adder.h &lt;span style="color:#75715e">// reverts the state prior to #1
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>[cling] .L Adder.h
+[cling] Add(&lt;span style="color:#ae81ff">3&lt;/span>, &lt;span style="color:#ae81ff">1&lt;/span>) &lt;span style="color:#75715e">// int Add(int a, int b) {return a + b; }
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span>) &lt;span style="color:#ae81ff">4&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>In the example, we include a header file with the &lt;em>.L&lt;/em> meta command;
+&amp;ldquo;uninclude&amp;rdquo; it with &lt;em>.U&lt;/em> and “reinclude” it with &lt;em>.L&lt;/em> to re-read the modified
+file. Unlike in the error recovery case, Cling cannot fence the machine code
+lowering infrastructure and needs to undo state changes in clang CodeGen and the
+llvm JIT and machine code infrastructure. The implementation of this feature
+requires expertise in a big portion of the LLVM toolchain.&lt;/p>
+&lt;h1 id="conclusion">Conclusion&lt;/h1>
+&lt;p>Cling has been one of the systems enabling interactive C++ for more than decade.
+Cling’s extensibility and fast prototyping features is of fundamental importance
+for researchers in high-energy physics, and an enabler for many of the
+technologies that they rely on. Cling has several unique features tailored to
+the challenges which comes with incremental C++. Our work on interactive C++ is
+always evolving. In the next blog post we will focus on interactive C++ for Data
+Science; Eval-Style Programming; Interactive CUDA; and C++ in notebooks.&lt;/p>
+&lt;p>You can find out more about our activities at
+&lt;a href="https://root.cern/cling/">https://root.cern/cling/&lt;/a> and
+&lt;a href="https://compiler-research.org">https://compiler-research.org&lt;/a>.&lt;/p>
+&lt;h1 id="acknowledgements">Acknowledgements&lt;/h1>
+&lt;p>The author would like to thank Sylvain Corlay, Simeon Ehrig, David Lange,
+Chris Lattner, Wim Lavrijsen, Axel Naumann, Alexander Penev, Xavier Valls Pla,
+Richard Smith, Martin Vassilev, who contributed to this post.&lt;/p></description></item><item><title>The 2020 Virtual LLVM Developers' Meeting Program</title><link>https://blog.llvm.org/posts/2020-08-23-llvmdevmtgprogram/</link><pubDate>Sun, 23 Aug 2020 17:00:06 -0700</pubDate><guid>https://blog.llvm.org/posts/2020-08-23-llvmdevmtgprogram/</guid><description>&lt;p>&lt;img src="https://blog.llvm.org/img/750x300-1.png" alt="2020 Virtual LLVM Developers&amp;rsquo; Meeting">&lt;/p>
 &lt;p>The LLVM Foundation is excited to announce the &lt;a href="https://llvm.org/devmtg/2020-09/">2020 Virtual LLVM Developers&amp;rsquo; Meeting&lt;/a> program! Registration will open this week.&lt;/p>
 &lt;p>&lt;strong>Keynote:&lt;/strong>&lt;/p>
 &lt;ul>
