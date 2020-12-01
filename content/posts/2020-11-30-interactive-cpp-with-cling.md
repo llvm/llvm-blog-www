@@ -3,6 +3,7 @@ author: Vassil Vassilev
 date: "2020-11-30T10:00:00Z"
 tags: ["Cling"]
 title: Interactive C++ with Cling
+permalink: /2020-11-17-interactive-cpp-with-cling/
 ---
 
 # Interactive C++ with Cling
