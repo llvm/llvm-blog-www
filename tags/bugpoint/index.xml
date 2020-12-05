@@ -118,7 +118,7 @@ properties of recently compiled chunks of code. Cling can apply custom
 transformations to each chunk before execution. Cling orchestrates the existing
 LLVM and Clang infrastructure following a data flow described in Figure 2.&lt;/p>
 &lt;div style="max-width:600px; margin:0 auto;">
-&lt;img src="https://blog.llvm.org/img/cling-2020-11-30-figure2.svg" style="max-width:90%;">&lt;br />
+&lt;img src="https://blog.llvm.org/img/cling-2020-11-30-figure2.svg">&lt;br />
 &lt;!--- ![alt_text](/img/cling-2020-11-30-figure2.svg "image_tooltip") --->
 &lt;p align="center">
 Figure 2. Information flow in Cling
