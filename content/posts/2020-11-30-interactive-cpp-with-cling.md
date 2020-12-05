@@ -147,7 +147,7 @@ transformations to each chunk before execution. Cling orchestrates the existing
 LLVM and Clang infrastructure following a data flow described in Figure 2.
 
 <div style="max-width:600px; margin:0 auto;">
-  <img src="/img/cling-2020-11-30-figure2.svg" style="max-width:90%;"><br />
+  <img src="/img/cling-2020-11-30-figure2.svg"><br />
   <!--- ![alt_text](/img/cling-2020-11-30-figure2.svg "image_tooltip") --->
 <p align="center">
 Figure 2. Information flow in Cling
