@@ -1,4 +1,243 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>llvm-users on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/llvm-users/</link><description>Recent content in llvm-users on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Tue, 14 Apr 2015 07:03:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/llvm-users/index.xml" rel="self" type="application/rss+xml"/><item><title>Interactive C++ with Cling</title><link>https://blog.llvm.org/posts/2020-11-30-interactive-cpp-with-cling/</link><pubDate>Mon, 30 Nov 2020 10:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2020-11-30-interactive-cpp-with-cling/</guid><description>&lt;h1 id="interactive-c-with-cling">Interactive C++ with Cling&lt;/h1>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>llvm-users on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/llvm-users/</link><description>Recent content in llvm-users on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Tue, 14 Apr 2015 07:03:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/llvm-users/index.xml" rel="self" type="application/rss+xml"/><item><title>Interactive C++ for Data Science</title><link>https://blog.llvm.org/posts/2020-12-21-interactive-cpp-for-data-science/</link><pubDate>Sun, 20 Dec 2020 10:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2020-12-21-interactive-cpp-for-data-science/</guid><description>&lt;h1 id="interactive-c-for-data-science">Interactive C++ for Data Science&lt;/h1>
+&lt;p>In our previous blog post &lt;a href="https://blog.llvm.org/posts/2020-11-30-interactive-cpp-with-cling/">&amp;ldquo;Interactive C++ with Cling&amp;rdquo;&lt;/a>
+we mentioned that exploratory programming is an effective way to reduce the
+complexity of the problem. This post will discuss some applications of Cling
+developed to support data science researchers. In particular, interactively
+probing data and interfaces makes complex libraries and complex data more
+accessible users. We aim to demonstrate some of Cling’s features at scale;
+Cling’s eval-style programming support; projects related to Cling; and show
+interactive C++/CUDA.&lt;/p>
+&lt;h2 id="eval-style-programming">Eval-style programming&lt;/h2>
+&lt;p>A Cling instance can access itself through its runtime. The example creates a
+&lt;code>cling::Value&lt;/code> to store the execution result of the incremented variable &lt;code>i&lt;/code>.
+That mechanism can be used further to support dynamic scopes extending the name
+lookup at runtime.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">[cling]&lt;span style="color:#960050;background-color:#1e0010">$&lt;/span> &lt;span style="color:#960050;background-color:#1e0010">#&lt;/span>include &lt;span style="color:#f92672">&amp;lt;&lt;/span>cling&lt;span style="color:#f92672">/&lt;/span>Interpreter&lt;span style="color:#f92672">/&lt;/span>Value.h&lt;span style="color:#f92672">&amp;gt;&lt;/span>
+[cling]&lt;span style="color:#960050;background-color:#1e0010">$&lt;/span> &lt;span style="color:#960050;background-color:#1e0010">#&lt;/span>include &lt;span style="color:#f92672">&amp;lt;&lt;/span>cling&lt;span style="color:#f92672">/&lt;/span>Interpreter&lt;span style="color:#f92672">/&lt;/span>Interpreter.h&lt;span style="color:#f92672">&amp;gt;&lt;/span>
+[cling]&lt;span style="color:#960050;background-color:#1e0010">$&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> i &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>;
+[cling]&lt;span style="color:#960050;background-color:#1e0010">$&lt;/span> cling&lt;span style="color:#f92672">::&lt;/span>Value V;
+[cling]&lt;span style="color:#960050;background-color:#1e0010">$&lt;/span> gCling&lt;span style="color:#f92672">-&amp;gt;&lt;/span>evaluate(&lt;span style="color:#e6db74">&amp;#34;++i&amp;#34;&lt;/span>, V);
+[cling]&lt;span style="color:#960050;background-color:#1e0010">$&lt;/span> i
+(&lt;span style="color:#66d9ef">int&lt;/span>) &lt;span style="color:#ae81ff">2&lt;/span>
+[cling]&lt;span style="color:#960050;background-color:#1e0010">$&lt;/span> V
+(cling&lt;span style="color:#f92672">::&lt;/span>Value &lt;span style="color:#f92672">&amp;amp;&lt;/span>) boxes [(&lt;span style="color:#66d9ef">int&lt;/span>) &lt;span style="color:#ae81ff">2&lt;/span>]
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>V&lt;/code> &amp;ldquo;boxes&amp;rdquo; the expression result providing extended lifetime if necessary.
+The &lt;code>cling::Value&lt;/code> can be used to communicate expression values from the
+interpreter to compiled code.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">[cling]&lt;span style="color:#960050;background-color:#1e0010">$&lt;/span> &lt;span style="color:#f92672">++&lt;/span>i
+(&lt;span style="color:#66d9ef">int&lt;/span>) &lt;span style="color:#ae81ff">3&lt;/span>
+[cling]&lt;span style="color:#960050;background-color:#1e0010">$&lt;/span> V
+(cling&lt;span style="color:#f92672">::&lt;/span>Value &lt;span style="color:#f92672">&amp;amp;&lt;/span>) boxes [(&lt;span style="color:#66d9ef">int&lt;/span>) &lt;span style="color:#ae81ff">2&lt;/span>]
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This mechanism introduces a delayed until runtime evaluation which enables some
+features increasing the dynamic look and feel of the C++ language.&lt;/p>
+&lt;h2 id="the-root-data-analysis-package">The ROOT data analysis package&lt;/h2>
+&lt;p>The main tool for storage, research and visualization of scientific data in the
+field of high energy physics (HEP) is the specialized software package &lt;a href="https://root.cern">ROOT&lt;/a>.
+ROOT is a set of interconnected components that assist scientists from data
+storage and research to their visualization when published in a scientific
+paper. ROOT has played a significant role in scientific discoveries such as
+gravitational waves, the great cavity in the Pyramid of Cheops, the discovery of
+the Higgs boson by the Large Hadron Collider. For the last 5 years, Cling has
+helped to analyze 1 EB physical data, serving as a basis for over 1000
+scientific publications, and supports software run across a distributed million
+CPU core computing facility.&lt;/p>
+&lt;p>ROOT uses Cling as a reflection information service for data serialization. The
+C++ objects are stored in a binary format, vertically. The content of a loaded
+data file is made available to the users and C++ objects become a first class
+citizen.&lt;/p>
+&lt;p>A central component of ROOT enabled by Cling is eval-style programming. We use
+this in HEP to make it easy to inspect and use C++ objects stored by ROOT.
+Cling enables ROOT to inject available object names into the name lookup when
+a file is opened:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">[root] ntuple&lt;span style="color:#f92672">-&amp;gt;&lt;/span>GetTitle()
+error: use of undeclared identifier &lt;span style="color:#960050;background-color:#1e0010">&amp;#39;&lt;/span>ntuple&lt;span style="color:#960050;background-color:#1e0010">&amp;#39;&lt;/span>
+[root] TFile&lt;span style="color:#f92672">::&lt;/span>Open(&lt;span style="color:#e6db74">&amp;#34;tutorials/hsimple.root&amp;#34;&lt;/span>); ntuple&lt;span style="color:#f92672">-&amp;gt;&lt;/span>GetTitle() &lt;span style="color:#75715e">// #1
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>(&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span> &lt;span style="color:#f92672">*&lt;/span>) &lt;span style="color:#e6db74">&amp;#34;Demo ntuple&amp;#34;&lt;/span>
+[root] gFile&lt;span style="color:#f92672">-&amp;gt;&lt;/span>ls();
+TFile&lt;span style="color:#f92672">**&lt;/span> tutorials&lt;span style="color:#f92672">/&lt;/span>hsimple.root Demo ROOT file with histograms
+TFile&lt;span style="color:#f92672">*&lt;/span> tutorials&lt;span style="color:#f92672">/&lt;/span>hsimple.root Demo ROOT file with histograms
+OBJ: TH1F hpx This is the px distribution : &lt;span style="color:#ae81ff">0&lt;/span> at: &lt;span style="color:#ae81ff">0x7fadbb84e390&lt;/span>
+OBJ: TNtuple ntuple Demo ntuple : &lt;span style="color:#ae81ff">0&lt;/span> at: &lt;span style="color:#ae81ff">0x7fadbb93a890&lt;/span>
+KEY: TH1F hpx;&lt;span style="color:#ae81ff">1&lt;/span> This is the px distribution
+[...]
+KEY: TNtuple ntuple;&lt;span style="color:#ae81ff">1&lt;/span> Demo ntuple
+[root] hpx&lt;span style="color:#f92672">-&amp;gt;&lt;/span>Draw()
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The ROOT framework injects additional names to the name lookup on two stages.
+First, it builds an invalid AST by marking the occurrence of ntuple (#1), then
+it is transformed into
+&lt;code>gCling-&amp;gt;EvaluateT&amp;lt;/*return type*/void&amp;gt;(&amp;quot;ntuple-&amp;gt;GetTitle()&amp;quot;, /*context*/);&lt;/code>
+On the next stage, at runtime, ROOT opens the file, reads its preambule and
+injects the names via the external name lookup facility in clang. The
+transformation becomes more complex if &lt;code>ntuple-&amp;gt;GetTitle()&lt;/code> takes arguments.&lt;/p>
+&lt;div style="max-width:600px; margin:0 auto;">
+&lt;img src="https://blog.llvm.org/img/cling-2020-12-21-figure1.png">&lt;br />
+&lt;!--- ![alt_text](/img/cling-2020-12-21-figure1.png "image_tooltip") --->
+&lt;p align="center">
+Figure 1. Interactive plot of the &lt;i>px&lt;/i> distribution read from a root
+file.
+&lt;/p>
+&lt;/div>
+&lt;h2 id="c-in-notebooks">C++ in Notebooks&lt;/h2>
+&lt;p>&lt;em>Section Author:&lt;/em> &lt;strong>Sylvain Corlay, QuantStack&lt;/strong>&lt;/p>
+&lt;p>The &lt;a href="https://jupyter-notebook.readthedocs.io/en/stable/notebook.html">Jupyter Notebook&lt;/a>
+technology allows users to create and share documents that contain live code,
+equations, visualizations and narrative text. It enables data scientists to
+easily exchange ideas or collaborate by sharing their analyses in a
+straight-forward and reproducible way. Language agnosticism is a key design
+principle for the Jupyter project, and the Jupyter frontend communicates with
+the kernel (the part of the infrastructure that runs the code) through a
+well-specified protocol. Kernels have been developed for dozens of programming
+languages, such as R, Julia, Python, Fortran (through the LLVM-based LFortran
+project).&lt;/p>
+&lt;p>Jupyter&amp;rsquo;s official C++ kernel relies on &lt;a href="https://github.com/jupyter-xeus/xeus">Xeus&lt;/a>,
+a C++ implementation of the kernel protocol, and Cling. An advantage of using a
+reference implementation for the kernel protocol is that a lot of features come
+for free, such as rich mime type display, interactive widgets, auto-complete,
+and much more.&lt;/p>
+&lt;p>Rich mime-type rendering for user-defined types can be specified by providing
+an overload of &lt;code>mime_bundle_repr&lt;/code> for the said type, which is picked up by
+argument dependent lookup.&lt;/p>
+&lt;div style="max-width:600px; margin:0 auto;">
+&lt;img src="https://blog.llvm.org/img/cling-2020-12-21-figure2.png">&lt;br />
+&lt;!--- ![alt_text](/img/cling-2020-12-21-figure2.png "image_tooltip") --->
+&lt;p align="center">
+Figure 2. Inline rendering of images in JupyterLab for a user-defined image
+type.
+&lt;/p>
+&lt;/div>
+&lt;p>Possibilities with rich mime type rendering are endless, such as rich display of
+dataframes with HTML tables, or even mime types that are rendered in the
+front-end with JavaScript extensions.&lt;/p>
+&lt;p>An advanced example making use of rich rendering with Mathjax is the SymEngine
+symbolic computing library.&lt;/p>
+&lt;div style="max-width:600px; margin:0 auto;">
+&lt;img src="https://blog.llvm.org/img/cling-2020-12-21-figure3.png">&lt;br />
+&lt;!--- ![alt_text](/img/cling-2020-12-21-figure3.png "image_tooltip") --->
+&lt;p align="center">
+Figure 3. Using rich mime type rendering in Jupyter with the Symengine
+package.
+&lt;/p>
+&lt;/div>
+&lt;p>Xeus-cling comes along with an implementation of the Jupyter widgets protocol
+which enables bidirectional communication with the backend.&lt;/p>
+&lt;div style="max-width:600px; margin:0 auto;">
+&lt;img src="https://blog.llvm.org/img/cling-2020-12-21-figure4.gif">&lt;br />
+&lt;!--- ![alt_text](/img/cling-2020-12-21-figure4.gif "image_tooltip") --->
+&lt;p align="center">
+Figure 4. Interactive widgets in the JupyterLab with the C++ kernel.
+&lt;/p>
+&lt;/div>
+&lt;p>More complex widget libraries have been enabled through this framework like
+&lt;a href="https://github.com/jupyter-xeus/xleaflet">xleaflet&lt;/a>.&lt;/p>
+&lt;div style="max-width:600px; margin:0 auto;">
+&lt;img src="https://blog.llvm.org/img/cling-2020-12-21-figure5.gif">&lt;br />
+&lt;!--- ![alt_text](/img/cling-2020-12-21-figure5.gif "image_tooltip") --->
+&lt;p align="center">
+Figure 5. Interactive GIS in C++ in JupyterLab with xleaflet.
+&lt;/p>
+&lt;/div>
+&lt;p>Other features include rich HTML help for the standard library and third-party
+packages:&lt;/p>
+&lt;div style="max-width:600px; margin:0 auto;">
+&lt;img src="https://blog.llvm.org/img/cling-2020-12-21-figure6.png">&lt;br />
+&lt;!--- ![alt_text](/img/cling-2020-12-21-figure6.png "image_tooltip") --->
+&lt;p align="center">
+Figure 6. Accessing cppreference for std::vector from JupyterLab by typing
+`?std::vector`.
+&lt;/p>
+&lt;/div>
+&lt;p>The Xeus and Xeus-cling kernels were recently incorporated as subprojects to
+Jupyter, and are governed by its code of conduct and general governance.&lt;/p>
+&lt;p>Planned future developments for the xeus-cling kernel include: adding support
+for the Jupyter console interface, through an implementation of the Jupyter
+&lt;code>is_complete&lt;/code> message, currently lacking; adding support for cling
+&amp;ldquo;dot commands&amp;rdquo; as Jupyter magics; and supporting the new debugger protocol that
+was recently added to the Jupyter kernel protocol, which will enable the use of
+the JupyterLab visual debugger with the C++ kernel.&lt;/p>
+&lt;p>Another tool that brings interactive plotting features to xeus-cling is xvega,
+which is at an early stage of development, produces vega charts that can be
+displayed in the notebook.&lt;/p>
+&lt;div style="max-width:600px; margin:0 auto;">
+&lt;img src="https://blog.llvm.org/img/cling-2020-12-21-figure7.png">&lt;br />
+&lt;!--- ![alt_text](/img/cling-2020-12-21-figure7.png "image_tooltip") --->
+&lt;p align="center">
+Figure 7. The xvega plotting library in the xeus-cling kernel.
+&lt;/p>
+&lt;/div>
+&lt;h2 id="cuda-c">CUDA C++&lt;/h2>
+&lt;p>&lt;em>Section Author:&lt;/em> &lt;strong>Simeon Ehrig, HZDR&lt;/strong>&lt;/p>
+&lt;p>The Cling CUDA extension brings the workflows of interactive C++ to GPUs without
+losing performance and compatibility to existing software. To execute CUDA C++
+Code, Cling activates an extension in the compiler frontend to understand the
+CUDA C++ dialect and creates a second compiler instance that compiles the code
+for the GPU.&lt;/p>
+&lt;div style="max-width:600px; margin:0 auto;">
+&lt;img src="https://blog.llvm.org/img/cling-2020-12-21-figure8.png">&lt;br />
+&lt;!--- ![alt_text](/img/cling-2020-12-21-figure8.png "image_tooltip") --->
+&lt;p align="center">
+Figure 8. CUDA/C++ information flow in Cling.
+&lt;/p>
+&lt;/div>
+&lt;p>Like the normal C++ mode, the CUDA C++ mode uses AST transformation to enable
+interactive CUDA C++ or special features as the Cling print system. In contrast
+to the normal Cling compiler pipeline used for the host code, the device
+compiler pipeline does not use all the transformations of the host pipeline.
+Therefore, the device pipeline has some special transformation.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-cpp" data-lang="cpp">[cling] &lt;span style="color:#960050;background-color:#1e0010">#&lt;/span>include &lt;span style="color:#f92672">&amp;lt;&lt;/span>iostream&lt;span style="color:#f92672">&amp;gt;&lt;/span>
+[cling] &lt;span style="color:#960050;background-color:#1e0010">#&lt;/span>include &lt;span style="color:#f92672">&amp;lt;&lt;/span>cublas_v2.h&lt;span style="color:#f92672">&amp;gt;&lt;/span>
+[cling] &lt;span style="color:#960050;background-color:#1e0010">#&lt;/span>pragma cling(load &lt;span style="color:#e6db74">&amp;#34;libcublas.so&amp;#34;&lt;/span>) &lt;span style="color:#75715e">// link a shared library
+&lt;/span>&lt;span style="color:#75715e">// set parameters
+&lt;/span>&lt;span style="color:#75715e">// allocate memory
+&lt;/span>&lt;span style="color:#75715e">// ...
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>[cling] __global__ &lt;span style="color:#66d9ef">void&lt;/span> init(&lt;span style="color:#66d9ef">float&lt;/span> &lt;span style="color:#f92672">*&lt;/span>matrix, &lt;span style="color:#66d9ef">int&lt;/span> size){
+[cling] &lt;span style="color:#f92672">?&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> x &lt;span style="color:#f92672">=&lt;/span> blockIdx.x &lt;span style="color:#f92672">*&lt;/span> blockDim.x &lt;span style="color:#f92672">+&lt;/span> threadIdx.x;
+[cling] &lt;span style="color:#f92672">?&lt;/span> &lt;span style="color:#66d9ef">if&lt;/span> (x &lt;span style="color:#f92672">&amp;lt;&lt;/span> size)
+[cling] &lt;span style="color:#f92672">?&lt;/span> matrix[x] &lt;span style="color:#f92672">=&lt;/span> x;
+[cling] &lt;span style="color:#f92672">?&lt;/span> }
+[cling]
+[cling] &lt;span style="color:#75715e">// launching a function direct in the global space
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>[cling] init&lt;span style="color:#f92672">&amp;lt;&amp;lt;&amp;lt;&lt;/span>blocks, threads&lt;span style="color:#f92672">&amp;gt;&amp;gt;&amp;gt;&lt;/span>(d_A, dim&lt;span style="color:#f92672">*&lt;/span>dim);
+[cling] init&lt;span style="color:#f92672">&amp;lt;&amp;lt;&amp;lt;&lt;/span>blocks, threads&lt;span style="color:#f92672">&amp;gt;&amp;gt;&amp;gt;&lt;/span>(d_B, dim&lt;span style="color:#f92672">*&lt;/span>dim);
+[cling]
+[cling] cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, dim, dim, dim, &lt;span style="color:#f92672">&amp;amp;&lt;/span>alpha, d_A, dim, d_B, dim, &lt;span style="color:#f92672">&amp;amp;&lt;/span>beta, d_C, dim);
+[cling] cublasGetVector(dim&lt;span style="color:#f92672">*&lt;/span>dim, &lt;span style="color:#66d9ef">sizeof&lt;/span>(h_C[&lt;span style="color:#ae81ff">0&lt;/span>]), d_C, &lt;span style="color:#ae81ff">1&lt;/span>, h_C, &lt;span style="color:#ae81ff">1&lt;/span>);
+[cling] cudaGetLastError()
+(cudaError_t) (cudaError&lt;span style="color:#f92672">::&lt;/span>cudaSuccess) &lt;span style="color:#f92672">:&lt;/span> (&lt;span style="color:#66d9ef">unsigned&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span>) &lt;span style="color:#ae81ff">0&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Like the normal C++ mode, the CUDA mode can be used in a Jupyter Notebook.&lt;/p>
+&lt;div style="max-width:600px; margin:0 auto;">
+&lt;img src="https://blog.llvm.org/img/cling-2020-12-21-figure9.gif">&lt;br />
+&lt;!--- ![alt_text](/img/cling-2020-12-21-figure9.gif "image_tooltip") --->
+&lt;p align="center">
+Figure 9. CUDA/C++ information flow in Cling.
+&lt;/p>
+&lt;/div>
+&lt;p>A special property of Cling in CUDA mode is that the Cling application becomes a
+normal CUDA application at the time of the first CUDA API call. This enables the
+CUDA SDK with Cling. For example, you can use the CUDA profiler
+&lt;code>nvprof ./cling -xcuda&lt;/code> to profile your interactive application.
+&lt;a href="https://hub.docker.com/r/sehrig/cling">This docker&lt;/a> container can be used to
+experiment with Cling&amp;rsquo;s CUDA mode.&lt;/p>
+&lt;p>Planned future developments for the CUDA mode include: Supporting of the
+complete current CUDA API; Redefining CUDA Kernels; Supporting other GPU SDK&amp;rsquo;s
+like HIP (AMD) and SYCL (Intel).&lt;/p>
+&lt;h2 id="conclusion">Conclusion&lt;/h2>
+&lt;p>We see the use of Interactive C++ as an important tool to develop for
+researchers in the data science community. Cling has enabled ROOT to be the
+&amp;ldquo;go to&amp;rdquo; data analysis tool in the field of High Energy Physics for everything
+from efficient I/O to plotting and fitting. The interactive CUDA backend allows
+easy integration of research workflows and simpler communication between C++ and
+CUDA. As Jupyter Notebooks have become a standard way for data analysts to
+explore ideas, Xeus-cling ensures that great interactive C++ ingredients are
+available in every C++ notebook.&lt;/p>
+&lt;p>In the next blog post we will focus on Cling enabling features beyond
+interactive C++, and in particular language interoperability.&lt;/p>
+&lt;h2 id="acknowledgements">Acknowledgements&lt;/h2>
+&lt;p>The author would like to thank Sylvain Corlay, Simeon Ehrig, David Lange,
+Chris Lattner, Javier Lopez Gomez, Wim Lavrijsen, Axel Naumann, Alexander Penev,
+Xavier Valls Pla, Richard Smith, Martin Vassilev, who contributed to this post.&lt;/p>
+&lt;p>You can find out more about our activities at
+&lt;a href="https://root.cern/cling/">https://root.cern/cling/&lt;/a> and
+&lt;a href="https://compiler-research.org">https://compiler-research.org&lt;/a>.&lt;/p></description></item><item><title>Interactive C++ with Cling</title><link>https://blog.llvm.org/posts/2020-11-30-interactive-cpp-with-cling/</link><pubDate>Mon, 30 Nov 2020 10:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2020-11-30-interactive-cpp-with-cling/</guid><description>&lt;h1 id="interactive-c-with-cling">Interactive C++ with Cling&lt;/h1>
 &lt;p>The C++ programming language is used for many numerically intensive scientific
 applications. A combination of performance and solid backward compatibility has
 led to its use for many research software codes over the past 20 years. Despite
@@ -273,8 +512,8 @@ Science; Eval-Style Programming; Interactive CUDA; and C++ in notebooks.&lt;/p>
 &lt;a href="https://compiler-research.org">https://compiler-research.org&lt;/a>.&lt;/p>
 &lt;h1 id="acknowledgements">Acknowledgements&lt;/h1>
 &lt;p>The author would like to thank Sylvain Corlay, Simeon Ehrig, David Lange,
-Chris Lattner, Wim Lavrijsen, Axel Naumann, Alexander Penev, Xavier Valls Pla,
-Richard Smith, Martin Vassilev, who contributed to this post.&lt;/p></description></item><item><title>The 2020 Virtual LLVM Developers' Meeting Program</title><link>https://blog.llvm.org/posts/2020-08-23-llvmdevmtgprogram/</link><pubDate>Sun, 23 Aug 2020 17:00:06 -0700</pubDate><guid>https://blog.llvm.org/posts/2020-08-23-llvmdevmtgprogram/</guid><description>&lt;p>&lt;img src="https://blog.llvm.org/img/750x300-1.png" alt="2020 Virtual LLVM Developers&amp;rsquo; Meeting">&lt;/p>
+Chris Lattner, Javier Lopez Gomez, Wim Lavrijsen, Axel Naumann, Alexander Penev,
+Xavier Valls Pla, Richard Smith, Martin Vassilev, who contributed to this post.&lt;/p></description></item><item><title>The 2020 Virtual LLVM Developers' Meeting Program</title><link>https://blog.llvm.org/posts/2020-08-23-llvmdevmtgprogram/</link><pubDate>Sun, 23 Aug 2020 17:00:06 -0700</pubDate><guid>https://blog.llvm.org/posts/2020-08-23-llvmdevmtgprogram/</guid><description>&lt;p>&lt;img src="https://blog.llvm.org/img/750x300-1.png" alt="2020 Virtual LLVM Developers&amp;rsquo; Meeting">&lt;/p>
 &lt;p>The LLVM Foundation is excited to announce the &lt;a href="https://llvm.org/devmtg/2020-09/">2020 Virtual LLVM Developers&amp;rsquo; Meeting&lt;/a> program! Registration will open this week.&lt;/p>
 &lt;p>&lt;strong>Keynote:&lt;/strong>&lt;/p>
 &lt;ul>
