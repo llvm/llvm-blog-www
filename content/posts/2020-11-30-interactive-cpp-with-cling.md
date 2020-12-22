@@ -374,5 +374,5 @@ You can find out more about our activities at
 # Acknowledgements
 
 The author would like to thank Sylvain Corlay, Simeon Ehrig, David Lange,
-Chris Lattner, Wim Lavrijsen, Axel Naumann, Alexander Penev, Xavier Valls Pla,
-Richard Smith, Martin Vassilev, who contributed to this post.
+Chris Lattner, Javier Lopez Gomez, Wim Lavrijsen, Axel Naumann, Alexander Penev,
+Xavier Valls Pla, Richard Smith, Martin Vassilev, who contributed to this post.
