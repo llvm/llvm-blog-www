@@ -97,17 +97,17 @@ testsuite is executed, presenting about 29 days of machine time for about 9000
 tasks.
 
 Thanks to this infrastructure, we have identified an [issue with
-`alloca(0)`][alloca] generating buggy machine code.  Fortunatelly, the [fix][bug47657] was already in
-the trunk version of LLVM . We cherry-picked the fix in our custom
-clang build which addressed our issue.
+`alloca(0)`][alloca] generating buggy machine code.
+Fortunatelly, the [fix][bug47657] was already in the trunk version of LLVM.
+We cherry-picked the fix in our custom clang build which addressed our issue.
 
 
 ## Performance Testing
 
 Over the years, Mozilla has developped a few tools to evaluate performance
 impact of changes, from microbenchmark to page loads. These tools have been key
-to improve Firefox overall performances but also evaluate the impact of the move
-to Clang on all platforms done a couple years ago (TODO add a link).
+to improve Firefox overall performances but also evaluate the impact of the [move
+to Clang][move-clang] on all platforms done a couple years ago.
 
 The usual procedure to evaluate performances improvements/regressions is to:
 
@@ -127,7 +127,7 @@ performances.
 ## Current status
 
 Firefox nightly on Linux is now compiled with the stack-clash-option from
-December 15st 2020. We have not seen any regressions since it landed.
+January 8st 2021. We have not detected any regressions since it landed.
 If everything goes well, this change should ship with Firefox 86 (planned for
 mid february 2021).
 
@@ -274,3 +274,5 @@ some impacting both Clang and GCC implementation, the circle is complete!
 [alloca]: https://bugzilla.mozilla.org/show_bug.cgi?id=1588710#c40
 
 [bug47657]: https://bugs.llvm.org/show_bug.cgi?id=47657
+
+[move-clang]: https://blog.mozilla.org/nfroyd/2018/05/29/when-implementation-monoculture-right-thing/
