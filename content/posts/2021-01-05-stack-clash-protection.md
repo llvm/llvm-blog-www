@@ -9,7 +9,7 @@ aliases: [/posts/2021-01-05-stack-clash-protection/]
 # Context
 
 Stack clash is an attack that dates back to 2017, when the Qualys Research Team
-released an adivsory with a [joint blogpost][QualysAdvisory]. It basically
+released an advisory with a [joint blogpost][QualysAdvisory]. It basically
 exploits large stack allocation (greater than `PAGE_SIZE`) that can lead to
 stack read/write *not* triggering the [stack guard page][StackGuardPage] allocated by the Linux
 Kernel.
@@ -63,7 +63,7 @@ This probe cannot be done after the stack update, even with an offset, because
 of (3). Otherwise we end up with a bug as this one found in gcc [GCCProbeBug]_
 
 The following scheme attempts to summarize the allocation and probing
-interaction netween static and dynamic allocations:
+interaction between static and dynamic allocations:
 
          + ----- <- ------------ <- ------------- <- ------------ +
          |                                                        |
@@ -74,7 +74,7 @@ interaction netween static and dynamic allocations:
 
 # Validation with Firefox
 
-Firefox provides an amazing testbench to evaluate the impact of compiler
+Firefox provides an amazing test bench to evaluate the impact of compiler
 changes. Indeed, with more than 12MLOC of C/C++ and 3MLOC of Rust built using
 PGO/LTO and [XLTO][XLTO], most of the important cases are covered.
 
@@ -82,7 +82,7 @@ Moreover, Firefox being supported on a large set of operating system and
 architectures, it was a great way to test the Stack Clash protection on various
 set of configurations.
 
-The work is detailled in the [bug 1588710][bug1588710].
+The work is detailed in the [bug 1588710][bug1588710].
 
 
 ## Functional Testing
@@ -92,20 +92,20 @@ suite to verify that the product would still work as expected with this option.
 
 We used the [`try auto`][ml-test], a new command which will run the most
 appropriate set of tests for such kind of changes during the development phase.
-Then, once the patch landed into Mozilla-central (firefox nightly), the whole
-testsuite is executed, presenting about 29 days of machine time for about 9000
+Then, once the patch landed into Mozilla-central (Firefox nightly), the whole
+test suite is executed, presenting about 29 days of machine time for about 9000
 tasks.
 
 Thanks to this infrastructure, we have identified an [issue with
 `alloca(0)`][alloca] generating buggy machine code.
-Fortunatelly, the [fix][bug47657] was already in the trunk version of LLVM.
+Fortunately, the [fix][bug47657] was already in the trunk version of LLVM.
 We cherry-picked the fix in our custom clang build which addressed our issue.
 
 
 ## Performance Testing
 
-Over the years, Mozilla has developped a few tools to evaluate performance
-impact of changes, from microbenchmark to page loads. These tools have been key
+Over the years, Mozilla has developed a few tools to evaluate performance
+impact of changes, from micro-benchmark to page loads. These tools have been key
 to improve Firefox overall performances but also evaluate the impact of the [move
 to Clang][move-clang] on all platforms done a couple years ago.
 
@@ -142,7 +142,7 @@ especially for those cases that could use just a few unrolled probes inline.
 Furthermore, Rust only has this callback implemented for its Tier 1 (most
 supported) targets, namely i686 and x86_64, leaving other architectures without
 protection so far. Therefore, letting LLVM generate inline stack probes is
-beneficial both for the performance of avoiding a calland for the increased
+beneficial both for the performance of avoiding a call and for the increased
 architecture support.
 
 Since the Rust compiler is written in Rust itself, with stack probing enabled by
@@ -158,17 +158,15 @@ actually executing generated code.
 
 An [issue][RustStackAlign] also led to the realization that there was a more
 general bug impacting both GCC and LLVM implementation of
-`-fstack-clash-protector`, leading to a new patchset on the LLVM side.
+`-fstack-clash-protector`, leading to a new patch set on the LLVM side.
 Essentially, the observed behavior is the following:
 
 Alignment requirement behave similarly to allocation with respect to the stack:
 they (may) make it grow. For instance the stack allocation for an `char
 foo[4096] __attribute__((aligned(2048)));` is done through:
 
-```asm
-and     rsp, -2048
-sub     rsp, 6024
-```
+    and     rsp, -2048
+    sub     rsp, 6024
 
 Both `and` and the `sub` actually update the stack! To take that effect into
 account, the LLVM patch considers the `and rsp, -2048` as a `sub rsp, 2048`
@@ -197,43 +195,43 @@ binary, logs them and checks that no stack allocation is greater than
 
 Here is a sample session that showcases large stack allocation issues:
 
-  $ cat main.c
-  #include <alloca.h>
-  #include <string.h>
-  int main(int argc, char**argv) {
-    char buffer[5000];
-    strcpy(buffer, argv[0]);
-    char* dynbuffer = alloca(argc * 1000);
-    strcpy(dynbuffer, argv[0]);
-    return buffer[argc] + dynbuffer[argc];
-  }
-  $ gcc main.c -o main
-  $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1
-  [sct][error] stack allocation is too big (5024)
-  $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1 2 3 4 5
-  [sct][error] stack allocation is too big (5024)
-  [sct][error] stack allocation is too big (6016)
+    $ cat main.c
+    #include <alloca.h>
+    #include <string.h>
+    int main(int argc, char**argv) {
+      char buffer[5000];
+      strcpy(buffer, argv[0]);
+      char* dynbuffer = alloca(argc * 1000);
+      strcpy(dynbuffer, argv[0]);
+      return buffer[argc] + dynbuffer[argc];
+    }
+    $ gcc main.c -o main
+    $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1
+    [sct][error] stack allocation is too big (5024)
+    $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1 2 3 4 5
+    [sct][error] stack allocation is too big (5024)
+    [sct][error] stack allocation is too big (6016)
 
-The same code, compiled with `-fstack-clash-protection`, is safer (appart from
+The same code, compiled with `-fstack-clash-protection`, is safer (apart from
 the stupid use of `strcpy`, that is)
 
-  $ gcc main.c -fstack-clash-protection -o main
-  $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1
-  $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1 2 3 4 5
+    $ gcc main.c -fstack-clash-protection -o main
+    $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1
+    $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1 2 3 4 5
 
 Small bonus of this compiler-independent approach: we can verify both GCC and
 Clang implementation `:-)`
 
-  $ clang main.c -fstack-clash-protection -o main
-  $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1
-  $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1 2 3 4 5
+    $ clang main.c -fstack-clash-protection -o main
+    $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1
+    $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1 2 3 4 5
 
 To come back on the Firefox test case, before we landed the change, we could
 see:
 
 
-  $ LD_PRELOAD=./libstack_clash_tracer.so firefox-bin
-  [sct][error] stack allocation is too big (4168)
+    $ LD_PRELOAD=./libstack_clash_tracer.so firefox-bin
+    [sct][error] stack allocation is too big (4168)
 
 Once Firefox nightly shipped with stack clash protection, this warning
 disappears.
