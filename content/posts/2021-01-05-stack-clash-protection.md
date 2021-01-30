@@ -1,9 +1,8 @@
 ---
-authors: Serge Guelton, Sylvestre Ledru, Josh Stone
+author: Serge Guelton, Sylvestre Ledru, Josh Stone
 date: "2021-01-05T10:00:00Z"
 tags: ["Clang", "llvm"]
 title: Bringing Stack Clash Protection to Clang / X86 — the Open Source Way
-aliases: [/posts/2021-01-05-stack-clash-protection/]
 ---
 
 # Context
@@ -60,7 +59,7 @@ can be unrolled. Otherwise a probing loop alternates stack allocation of
 As side effect of (2) is that when performing a dynamic allocation, we need to
 probe *before* updating the stack, otherwise we got a hole in the protection.
 This probe cannot be done after the stack update, even with an offset, because
-of (3). Otherwise we end up with a bug as this one found in GCC [GCCProbeBug]_
+of (3). Otherwise we end up with a bug as this one found in [GCC][GCCProbeBug]
 
 The following scheme attempts to summarize the allocation and probing
 interaction between static and dynamic allocations:
@@ -247,9 +246,9 @@ some impacting both Clang and GCC implementation, the circle is complete!
 
 # References
 
-[QualyAdvisory]: https://blog.qualys.com/vulnerabilities-research/2017/06/19/the-stack-clash
+[QualysAdvisory]: https://blog.qualys.com/vulnerabilities-research/2017/06/19/the-stack-clash
 
-[StackGuadPage]: https://lkml.org/lkml/2017/6/22/345
+[StackGuardPage]: https://lkml.org/lkml/2017/6/22/345
 
 [GCCStackClashProtection]: https://gcc.gnu.org/legacy-ml/gcc-patches/2017-07/msg00556.html
 
