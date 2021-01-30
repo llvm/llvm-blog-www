@@ -19,7 +19,7 @@ basically consists in splitting large allocation in chunks of `PAGE_SIZE`,
 with a probe in each chunk to trigger the kernel stack guard page.
 
 This has been a major security difference between GCC and Clang since then. It
-has even been identified as a blocker by Fedora to move from gcc to clang as the
+has even been identified as a blocker by Fedora to move from GCC to Clang as the
 compiler for some projects that already made the move upstream, leading to [extra
 maintenance][FedoraClangGCC] for packagers.
 
@@ -28,7 +28,7 @@ only for X86, SystemZ and PowerPC. Its implementation is a result of a fruitful
 collaboration between LLVM, Firefox and Rust developpers.
 
 
-Rust already had a countermeasure implemnted in the form of a runtime call to
+Rust already had a countermeasure implemented in the form of a runtime call to
 perform the stack probing. With LLVM catching up, using a more leightweight
 approach got [investigated in Rust][RustStackProbe].
 
@@ -60,7 +60,7 @@ can be unrolled. Otherwise a probing loop alternates stack allocation of
 As side effect of (2) is that when performing a dynamic allocation, we need to
 probe *before* updating the stack, otherwise we got a hole in the protection.
 This probe cannot be done after the stack update, even with an offset, because
-of (3). Otherwise we end up with a bug as this one found in gcc [GCCProbeBug]_
+of (3). Otherwise we end up with a bug as this one found in GCC [GCCProbeBug]_
 
 The following scheme attempts to summarize the allocation and probing
 interaction between static and dynamic allocations:
@@ -99,7 +99,7 @@ tasks.
 Thanks to this infrastructure, we have identified an [issue with
 `alloca(0)`][alloca] generating buggy machine code.
 Fortunately, the [fix][bug47657] was already in the trunk version of LLVM.
-We cherry-picked the fix in our custom clang build which addressed our issue.
+We cherry-picked the fix in our custom Clang build which addressed our issue.
 
 
 ## Performance Testing
@@ -111,7 +111,7 @@ to Clang][move-clang] on all platforms done a couple years ago.
 
 The usual procedure to evaluate performances improvements/regressions is to:
 
-1. Run two builds with benchmarks. One with the without the patch, one with it.
+1. Run two builds with benchmarks. One without the patch, one with it.
 
 2. Leverage the tooling to rerun the benchmark (usually 5 to 20 times) to limit
    the noise.
@@ -127,13 +127,13 @@ performances.
 ## Current status
 
 Firefox nightly on Linux is now compiled with the stack-clash-option from
-January 8st 2021. We have not detected any regressions since it landed.
+January 8th 2021. We have not detected any regressions since it landed.
 If everything goes well, this change should ship with Firefox 86 (planned for
-mid february 2021).
+mid February 2021).
 
 # Validation With Rust
 
-Rust has long support the callback style of the LLVM `probe-stack` attribute,
+Rust has long supported the callback style of the LLVM `probe-stack` attribute,
 using the function `__rust_probestack` defined in its own compiler builtins
 library. In Rust's spirit of safety, this attribute is added to *all* functions,
 letting LLVM sort out which actually need probing. However, forcing such a call
