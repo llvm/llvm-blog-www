@@ -1,4 +1,201 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>MC on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/mc/</link><description>Recent content in MC on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Fri, 02 Aug 2013 11:00:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/mc/index.xml" rel="self" type="application/rss+xml"/><item><title>Interactive C++ for Data Science</title><link>https://blog.llvm.org/posts/2020-12-21-interactive-cpp-for-data-science/</link><pubDate>Sun, 20 Dec 2020 10:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2020-12-21-interactive-cpp-for-data-science/</guid><description>&lt;h1 id="interactive-c-for-data-science">Interactive C++ for Data Science&lt;/h1>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>MC on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/mc/</link><description>Recent content in MC on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Fri, 02 Aug 2013 11:00:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/mc/index.xml" rel="self" type="application/rss+xml"/><item><title>Bringing Stack Clash Protection to Clang / X86 — the Open Source Way</title><link>https://blog.llvm.org/posts/2021-01-05-stack-clash-protection/</link><pubDate>Tue, 05 Jan 2021 10:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-01-05-stack-clash-protection/</guid><description>&lt;h1 id="context">Context&lt;/h1>
+&lt;p>Stack clash is an attack that dates back to 2017, when the Qualys Research Team
+released an advisory with a [joint blogpost][QualysAdvisory]. It basically
+exploits large stack allocation (greater than &lt;code>PAGE_SIZE&lt;/code>) that can lead to
+stack read/write &lt;em>not&lt;/em> triggering the [stack guard page][StackGuardPage] allocated by the Linux
+Kernel.&lt;/p>
+&lt;p>Shortly after the advisory got released, GCC provided a &lt;a href="https://gcc.gnu.org/legacy-ml/gcc-patches/2017-07/msg00556.html">couter-measure&lt;/a> activated by &lt;code>-fstack-clash-protection&lt;/code> that
+basically consists in splitting large allocation in chunks of &lt;code>PAGE_SIZE&lt;/code>,
+with a probe in each chunk to trigger the kernel stack guard page.&lt;/p>
+&lt;p>This has been a major security difference between GCC and Clang since then. It
+has even been identified as a blocker by Fedora to move from GCC to Clang as the
+compiler for some projects that already made the move upstream, leading to &lt;a href="https://pagure.io/fesco/issue/2020">extra
+maintenance&lt;/a> for packagers.&lt;/p>
+&lt;p>Support for this flag [landed in Clang in 2020][CLANGStackClashProtection],
+only for X86, SystemZ and PowerPC. Its implementation is a result of a fruitful
+collaboration between LLVM, Firefox and Rust developpers.&lt;/p>
+&lt;p>Rust already had a countermeasure implemented in the form of a runtime call to
+perform the stack probing. With LLVM catching up, using a more leightweight
+approach got &lt;a href="https://github.com/rust-lang/rust/pull/77885">investigated in Rust&lt;/a>.&lt;/p>
+&lt;h1 id="countermeasure-description">Countermeasure Description&lt;/h1>
+&lt;p>The Clang implementation for X86 is derived from the GCC implementation, with a
+few distinctions. The core ideas are:&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>thanks to X86 calling convention, we get a free probe at each call site,
+which means that each function starts with a probed stack&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>when probing the stack in the function prologue, we don&amp;rsquo;t probe the tail of
+the allocation. Stated otherwise, if the stack size is &lt;code>PAGE_SIZE + PAGE_SIZE/2&lt;/code>,
+we want to probe only once. This is important to limit the number
+of probes: if the stack size is lower than &lt;code>PAGE_SIZE&lt;/code> no probe is needed&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>because a signal can interrupt the execution flow any time, at no point
+should we have two stack allocations (lower than &lt;code>PAGE_SIZE&lt;/code>) without a probe
+in between.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>The probing strategy for stack allocation varies based on the size of the stack
+allocation. If it&amp;rsquo;s smaller than &lt;code>PAGE_SIZE&lt;/code>, thanks to (2) no probing is
+needing. If it&amp;rsquo;s below a small multiple of &lt;code>PAGE_SIZE&lt;/code>, then the probing loop
+can be unrolled. Otherwise a probing loop alternates stack allocation of
+&lt;code>PAGE_SIZE&lt;/code> bytes and probe, starting with the allocation thanks to (1).&lt;/p>
+&lt;p>As side effect of (2) is that when performing a dynamic allocation, we need to
+probe &lt;em>before&lt;/em> updating the stack, otherwise we got a hole in the protection.
+This probe cannot be done after the stack update, even with an offset, because
+of (3). Otherwise we end up with a bug as this one found in GCC &lt;a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=97928">GCCProbeBug&lt;/a>_&lt;/p>
+&lt;p>The following scheme attempts to summarize the allocation and probing
+interaction between static and dynamic allocations:&lt;/p>
+&lt;pre>&lt;code> + ----- &amp;lt;- ------------ &amp;lt;- ------------- &amp;lt;- ------------ +
+| |
+[free probe] -&amp;gt; [page alloc] -&amp;gt; [alloc probe] -&amp;gt; [tail alloc] + -&amp;gt; [dyn probe] -&amp;gt; [page alloc] -&amp;gt; [dyn probe] -&amp;gt; [tail alloc] +
+| |
++ &amp;lt;- ----------- &amp;lt;- ------------ &amp;lt;- ----------- &amp;lt;- ------------ +
+&lt;/code>&lt;/pre>
+&lt;h1 id="validation-with-firefox">Validation with Firefox&lt;/h1>
+&lt;p>Firefox provides an amazing test bench to evaluate the impact of compiler
+changes. Indeed, with more than 12MLOC of C/C++ and 3MLOC of Rust built using
+PGO/LTO and &lt;a href="https://blog.llvm.org/2019/09/closing-gap-cross-language-lto-between.html">XLTO&lt;/a>, most of the important cases are covered.&lt;/p>
+&lt;p>Moreover, Firefox being supported on a large set of operating system and
+architectures, it was a great way to test the Stack Clash protection on various
+set of configurations.&lt;/p>
+&lt;p>The work is detailed in the &lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1588710">bug 1588710&lt;/a>.&lt;/p>
+&lt;h2 id="functional-testing">Functional Testing&lt;/h2>
+&lt;p>To make sure that Firefox would perform as expected, we leveraged the huge test
+suite to verify that the product would still work as expected with this option.&lt;/p>
+&lt;p>We used the &lt;a href="https://hacks.mozilla.org/2020/07/testing-firefox-more-efficiently-with-machine-learning/">&lt;code>try auto&lt;/code>&lt;/a>, a new command which will run the most
+appropriate set of tests for such kind of changes during the development phase.
+Then, once the patch landed into Mozilla-central (Firefox nightly), the whole
+test suite is executed, presenting about 29 days of machine time for about 9000
+tasks.&lt;/p>
+&lt;p>Thanks to this infrastructure, we have identified an &lt;a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1588710#c40">issue with
+&lt;code>alloca(0)&lt;/code>&lt;/a> generating buggy machine code.
+Fortunately, the &lt;a href="https://bugs.llvm.org/show_bug.cgi?id=47657">fix&lt;/a> was already in the trunk version of LLVM.
+We cherry-picked the fix in our custom Clang build which addressed our issue.&lt;/p>
+&lt;h2 id="performance-testing">Performance Testing&lt;/h2>
+&lt;p>Over the years, Mozilla has developed a few tools to evaluate performance
+impact of changes, from micro-benchmark to page loads. These tools have been key
+to improve Firefox overall performances but also evaluate the impact of the &lt;a href="https://blog.mozilla.org/nfroyd/2018/05/29/when-implementation-monoculture-right-thing/">move
+to Clang&lt;/a> on all platforms done a couple years ago.&lt;/p>
+&lt;p>The usual procedure to evaluate performances improvements/regressions is to:&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>Run two builds with benchmarks. One without the patch, one with it.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Leverage the tooling to rerun the benchmark (usually 5 to 20 times) to limit
+the noise.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>Compare the various benchmark to see if significant regressions can be
+identified.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>In the context of this project, we run the usual benchmarks sensitive to C++
+changes and we haven&amp;rsquo;t identified any &lt;a href="https://treeherder.mozilla.org/perfherder/comparesubtest?originalProject=try&amp;amp;newProject=try&amp;amp;newRevision=62108fa48bd15fe01f1a0f1ffab133af9b4207cc&amp;amp;originalSignature=1904137&amp;amp;newSignature=1904137&amp;amp;framework=10&amp;amp;originalRevision=a47c98b909b61035dae2e1e00883f2ade0fef129">regression&lt;/a> in term of
+performances.&lt;/p>
+&lt;h2 id="current-status">Current status&lt;/h2>
+&lt;p>Firefox nightly on Linux is now compiled with the stack-clash-option from
+January 8th 2021. We have not detected any regressions since it landed.
+If everything goes well, this change should ship with Firefox 86 (planned for
+mid February 2021).&lt;/p>
+&lt;h1 id="validation-with-rust">Validation With Rust&lt;/h1>
+&lt;p>Rust has long supported the callback style of the LLVM &lt;code>probe-stack&lt;/code> attribute,
+using the function &lt;code>__rust_probestack&lt;/code> defined in its own compiler builtins
+library. In Rust&amp;rsquo;s spirit of safety, this attribute is added to &lt;em>all&lt;/em> functions,
+letting LLVM sort out which actually need probing. However, forcing such a call
+into every function with a large stack frame is not ideal for performance,
+especially for those cases that could use just a few unrolled probes inline.
+Furthermore, Rust only has this callback implemented for its Tier 1 (most
+supported) targets, namely i686 and x86_64, leaving other architectures without
+protection so far. Therefore, letting LLVM generate inline stack probes is
+beneficial both for the performance of avoiding a call and for the increased
+architecture support.&lt;/p>
+&lt;p>Since the Rust compiler is written in Rust itself, with stack probing enabled by
+default, it makes a great functional test for any new code generation feature.
+The compiler is bootstrapped in stages, first building with a prior version,
+then rebuilding with the result of that first stage. Codegen issues are often
+revealed if the compiler crashes during that rebuild, and experiments with
+inline stack probes were no different, leading to fixes in
+&lt;a href="https://reviews.llvm.org/D82867">D82867&lt;/a> and
+&lt;a href="https://reviews.llvm.org/D90216">D90216&lt;/a>. Both of these were simple errors that
+were not apparent in existing FileCheck tests, showing the importance of
+actually executing generated code.&lt;/p>
+&lt;p>An &lt;a href="https://github.com/rust-lang/rust/issues/70143">issue&lt;/a> also led to the realization that there was a more
+general bug impacting both GCC and LLVM implementation of
+&lt;code>-fstack-clash-protector&lt;/code>, leading to a new patch set on the LLVM side.
+Essentially, the observed behavior is the following:&lt;/p>
+&lt;p>Alignment requirement behave similarly to allocation with respect to the stack:
+they (may) make it grow. For instance the stack allocation for an &lt;code>char foo[4096] __attribute__((aligned(2048)));&lt;/code> is done through:&lt;/p>
+&lt;pre>&lt;code>and rsp, -2048
+sub rsp, 6024
+&lt;/code>&lt;/pre>
+&lt;p>Both &lt;code>and&lt;/code> and the &lt;code>sub&lt;/code> actually update the stack! To take that effect into
+account, the LLVM patch considers the &lt;code>and rsp, -2048&lt;/code> as a &lt;code>sub rsp, 2048&lt;/code>
+when computing the probing distance, which means considering the worst
+case scenario.&lt;/p>
+&lt;p>For future work on the Rust side, inline stack probes will replace
+&lt;code>__rust_probestack&lt;/code> on i686 and x86_64 soon in &lt;a href="https://github.com/rust-lang/rust/pull/77885">Rust
+pr77885&lt;/a>, and that will include
+&lt;a href="https://perf.rust-lang.org/">perf results&lt;/a> to monitor the effect. After that,
+additional architectures can be functionally tested and enabled for inline stack
+probes as well, increasing the reach of Rust&amp;rsquo;s memory safety.&lt;/p>
+&lt;h1 id="validation-with-a-binary-tracer">Validation with a Binary Tracer&lt;/h1>
+&lt;p>None of the above validation validates the security aspect of the protection. To
+have more confidence on the actual probing scheme implementation, we implemented
+a binary tracer based on the (awesome) &lt;a href="https://github.com/QBDI/QBDI">QBDI&lt;/a>
+Dynamic Binary Instrumentation framework. This Proof Of Concept (POC) is
+available on GitHub:
+&lt;a href="https://github.com/serge-sans-paille/stack-clash-tracer">stack-clash-tracer&lt;/a>&lt;/p>
+&lt;p>This tool instruments all stack allocation and memory access of a running
+binary, logs them and checks that no stack allocation is greater than
+&lt;code>PAGE_SIZE&lt;/code> and that we get an actual probing between two allocations.&lt;/p>
+&lt;p>Here is a sample session that showcases large stack allocation issues:&lt;/p>
+&lt;pre>&lt;code>$ cat main.c
+#include &amp;lt;alloca.h&amp;gt;
+#include &amp;lt;string.h&amp;gt;
+int main(int argc, char**argv) {
+char buffer[5000];
+strcpy(buffer, argv[0]);
+char* dynbuffer = alloca(argc * 1000);
+strcpy(dynbuffer, argv[0]);
+return buffer[argc] + dynbuffer[argc];
+}
+$ gcc main.c -o main
+$ LD_PRELOAD=./libstack_clash_tracer.so ./main 1
+[sct][error] stack allocation is too big (5024)
+$ LD_PRELOAD=./libstack_clash_tracer.so ./main 1 2 3 4 5
+[sct][error] stack allocation is too big (5024)
+[sct][error] stack allocation is too big (6016)
+&lt;/code>&lt;/pre>
+&lt;p>The same code, compiled with &lt;code>-fstack-clash-protection&lt;/code>, is safer (apart from
+the stupid use of &lt;code>strcpy&lt;/code>, that is)&lt;/p>
+&lt;pre>&lt;code>$ gcc main.c -fstack-clash-protection -o main
+$ LD_PRELOAD=./libstack_clash_tracer.so ./main 1
+$ LD_PRELOAD=./libstack_clash_tracer.so ./main 1 2 3 4 5
+&lt;/code>&lt;/pre>
+&lt;p>Small bonus of this compiler-independent approach: we can verify both GCC and
+Clang implementation &lt;code>:-)&lt;/code>&lt;/p>
+&lt;pre>&lt;code>$ clang main.c -fstack-clash-protection -o main
+$ LD_PRELOAD=./libstack_clash_tracer.so ./main 1
+$ LD_PRELOAD=./libstack_clash_tracer.so ./main 1 2 3 4 5
+&lt;/code>&lt;/pre>
+&lt;p>To come back on the Firefox test case, before we landed the change, we could
+see:&lt;/p>
+&lt;pre>&lt;code>$ LD_PRELOAD=./libstack_clash_tracer.so firefox-bin
+[sct][error] stack allocation is too big (4168)
+&lt;/code>&lt;/pre>
+&lt;p>Once Firefox nightly shipped with stack clash protection, this warning
+disappears.&lt;/p>
+&lt;h1 id="conclusion">Conclusion&lt;/h1>
+&lt;p>Aside from the technical aspects of the countermeasure, it is interesting to
+note that its Clang implementation was derived from the GCC implementation, but
+led to an issue being reported in the GCC codebase. The Clang-generated code got
+validated by Firefox People, tested by Rust people who reported several bugs,
+some impacting both Clang and GCC implementation, the circle is complete!&lt;/p>
+&lt;h1 id="references">References&lt;/h1></description></item><item><title>Interactive C++ for Data Science</title><link>https://blog.llvm.org/posts/2020-12-21-interactive-cpp-for-data-science/</link><pubDate>Sun, 20 Dec 2020 10:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2020-12-21-interactive-cpp-for-data-science/</guid><description>&lt;h1 id="interactive-c-for-data-science">Interactive C++ for Data Science&lt;/h1>
 &lt;p>In our previous blog post &lt;a href="https://blog.llvm.org/posts/2020-11-30-interactive-cpp-with-cling/">&amp;ldquo;Interactive C++ with Cling&amp;rdquo;&lt;/a>
 we mentioned that exploratory programming is an effective way to reduce the
 complexity of the problem. This post will discuss some applications of Cling
