@@ -1,8 +1,8 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>apt on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/apt/</link><description>Recent content in apt on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Tue, 25 Sep 2018 08:29:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/apt/index.xml" rel="self" type="application/rss+xml"/><item><title>Bringing Stack Clash Protection to Clang / X86 — the Open Source Way</title><link>https://blog.llvm.org/posts/2021-01-05-stack-clash-protection/</link><pubDate>Tue, 05 Jan 2021 10:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-01-05-stack-clash-protection/</guid><description>&lt;h1 id="context">Context&lt;/h1>
 &lt;p>Stack clash is an attack that dates back to 2017, when the Qualys Research Team
-released an advisory with a [joint blogpost][QualysAdvisory]. It basically
+released an advisory with a &lt;a href="https://blog.qualys.com/vulnerabilities-research/2017/06/19/the-stack-clash">joint blogpost&lt;/a>. It basically
 exploits large stack allocation (greater than &lt;code>PAGE_SIZE&lt;/code>) that can lead to
-stack read/write &lt;em>not&lt;/em> triggering the [stack guard page][StackGuardPage] allocated by the Linux
+stack read/write &lt;em>not&lt;/em> triggering the &lt;a href="https://lkml.org/lkml/2017/6/22/345">stack guard page&lt;/a> allocated by the Linux
 Kernel.&lt;/p>
 &lt;p>Shortly after the advisory got released, GCC provided a &lt;a href="https://gcc.gnu.org/legacy-ml/gcc-patches/2017-07/msg00556.html">couter-measure&lt;/a> activated by &lt;code>-fstack-clash-protection&lt;/code> that
 basically consists in splitting large allocation in chunks of &lt;code>PAGE_SIZE&lt;/code>,
@@ -45,7 +45,7 @@ can be unrolled. Otherwise a probing loop alternates stack allocation of
 &lt;p>As side effect of (2) is that when performing a dynamic allocation, we need to
 probe &lt;em>before&lt;/em> updating the stack, otherwise we got a hole in the protection.
 This probe cannot be done after the stack update, even with an offset, because
-of (3). Otherwise we end up with a bug as this one found in GCC &lt;a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=97928">GCCProbeBug&lt;/a>_&lt;/p>
+of (3). Otherwise we end up with a bug as this one found in &lt;a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=97928">GCC&lt;/a>&lt;/p>
 &lt;p>The following scheme attempts to summarize the allocation and probing
 interaction between static and dynamic allocations:&lt;/p>
 &lt;pre>&lt;code> + ----- &amp;lt;- ------------ &amp;lt;- ------------- &amp;lt;- ------------ +
