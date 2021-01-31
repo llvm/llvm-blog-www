@@ -244,7 +244,7 @@ validated by Firefox People, tested by Rust people who reported several bugs,
 some impacting both Clang and GCC implementation, the circle is complete!
 
 
-# References
+[CLANGStackClashProtection] https://reviews.llvm.org/D68720
 
 [QualysAdvisory]: https://blog.qualys.com/vulnerabilities-research/2017/06/19/the-stack-clash
 
