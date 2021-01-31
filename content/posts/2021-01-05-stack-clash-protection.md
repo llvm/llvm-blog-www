@@ -252,6 +252,8 @@ some impacting both Clang and GCC implementation, the circle is complete!
 
 [GCCStackClashProtection]: https://gcc.gnu.org/legacy-ml/gcc-patches/2017-07/msg00556.html
 
+[CLANGStackClashProtection]: https://reviews.llvm.org/D68720
+
 [RustStackProbe]: https://github.com/rust-lang/rust/pull/77885
 
 [FedoraClangGCC]: https://pagure.io/fesco/issue/2020
