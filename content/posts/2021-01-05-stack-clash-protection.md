@@ -1,6 +1,6 @@
 ---
 author: Serge Guelton, Sylvestre Ledru, Josh Stone
-date: "2021-01-05T10:00:00Z"
+date: "2021-01-30T10:00:00Z"
 tags: ["Clang", "llvm"]
 title: Bringing Stack Clash Protection to Clang / X86 — the Open Source Way
 ---
