@@ -160,7 +160,7 @@ general bug impacting both GCC and LLVM implementation of
 `-fstack-clash-protector`, leading to a new patch set on the LLVM side.
 Essentially, the observed behavior is the following:
 
-Alignment requirement behave similarly to allocation with respect to the stack:
+Alignment requirements behave similarly to allocation with respect to the stack:
 they (may) make it grow. For instance the stack allocation for an `char
 foo[4096] __attribute__((aligned(2048)));` is done through:
 
