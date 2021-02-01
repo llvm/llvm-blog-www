@@ -11,9 +11,9 @@ with a probe in each chunk to trigger the kernel stack guard page.&lt;/p>
 has even been identified as a blocker by Fedora to move from GCC to Clang as the
 compiler for some projects that already made the move upstream, leading to &lt;a href="https://pagure.io/fesco/issue/2020">extra
 maintenance&lt;/a> for packagers.&lt;/p>
-&lt;p>Support for this flag [landed in Clang in 2020][CLANGStackClashProtection],
+&lt;p>Support for this flag &lt;a href="https://reviews.llvm.org/D68720">landed in Clang in 2020&lt;/a>,
 only for X86, SystemZ and PowerPC. Its implementation is a result of a fruitful
-collaboration between LLVM, Firefox and Rust developpers.&lt;/p>
+collaboration between LLVM, Firefox and Rust developers.&lt;/p>
 &lt;p>Rust already had a countermeasure implemented in the form of a runtime call to
 perform the stack probing. With LLVM catching up, using a more leightweight
 approach got &lt;a href="https://github.com/rust-lang/rust/pull/77885">investigated in Rust&lt;/a>.&lt;/p>
@@ -127,7 +127,7 @@ actually executing generated code.&lt;/p>
 general bug impacting both GCC and LLVM implementation of
 &lt;code>-fstack-clash-protector&lt;/code>, leading to a new patch set on the LLVM side.
 Essentially, the observed behavior is the following:&lt;/p>
-&lt;p>Alignment requirement behave similarly to allocation with respect to the stack:
+&lt;p>Alignment requirements behave similarly to allocation with respect to the stack:
 they (may) make it grow. For instance the stack allocation for an &lt;code>char foo[4096] __attribute__((aligned(2048)));&lt;/code> is done through:&lt;/p>
 &lt;pre>&lt;code>and rsp, -2048
 sub rsp, 6024

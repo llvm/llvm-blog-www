@@ -9,9 +9,9 @@ basically consists in splitting large allocation in chunks of <code>PAGE_SIZE</c
 with a probe in each chunk to trigger the kernel stack guard page.</p><p>This has been a major security difference between GCC and Clang since then. It
 has even been identified as a blocker by Fedora to move from GCC to Clang as the
 compiler for some projects that already made the move upstream, leading to <a href=https://pagure.io/fesco/issue/2020>extra
-maintenance</a> for packagers.</p><p>Support for this flag [landed in Clang in 2020][CLANGStackClashProtection],
+maintenance</a> for packagers.</p><p>Support for this flag <a href=https://reviews.llvm.org/D68720>landed in Clang in 2020</a>,
 only for X86, SystemZ and PowerPC. Its implementation is a result of a fruitful
-collaboration between LLVM, Firefox and Rust developpers.</p><p>Rust already had a countermeasure implemented in the form of a runtime call to
+collaboration between LLVM, Firefox and Rust developers.</p><p>Rust already had a countermeasure implemented in the form of a runtime call to
 perform the stack probing. With LLVM catching up, using a more leightweight
 approach got <a href=https://github.com/rust-lang/rust/pull/77885>investigated in Rust</a>.</p><h1 id=countermeasure-description>Countermeasure Description</h1><p>The Clang implementation for X86 is derived from the GCC implementation, with a
 few distinctions. The core ideas are:</p><ol><li><p>thanks to X86 calling convention, we get a free probe at each call site,
@@ -77,7 +77,7 @@ were not apparent in existing FileCheck tests, showing the importance of
 actually executing generated code.</p><p>An <a href=https://github.com/rust-lang/rust/issues/70143>issue</a> also led to the realization that there was a more
 general bug impacting both GCC and LLVM implementation of
 <code>-fstack-clash-protector</code>, leading to a new patch set on the LLVM side.
-Essentially, the observed behavior is the following:</p><p>Alignment requirement behave similarly to allocation with respect to the stack:
+Essentially, the observed behavior is the following:</p><p>Alignment requirements behave similarly to allocation with respect to the stack:
 they (may) make it grow. For instance the stack allocation for an <code>char foo[4096] __attribute__((aligned(2048)));</code> is done through:</p><pre><code>and     rsp, -2048
 sub     rsp, 6024
 </code></pre><p>Both <code>and</code> and the <code>sub</code> actually update the stack! To take that effect into
