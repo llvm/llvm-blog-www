@@ -24,7 +24,7 @@ maintenance][FedoraClangGCC] for packagers.
 
 Support for this flag [landed in Clang in 2020][CLANGStackClashProtection],
 only for X86, SystemZ and PowerPC. Its implementation is a result of a fruitful
-collaboration between LLVM, Firefox and Rust developpers.
+collaboration between LLVM, Firefox and Rust developers.
 
 
 Rust already had a countermeasure implemented in the form of a runtime call to
