@@ -8,12 +8,12 @@ title: Bringing Stack Clash Protection to Clang / X86 — the Open Source Way
 # Context
 
 Stack clash is an attack that dates back to 2017, when the Qualys Research Team
-released an advisory with a [joint blogpost][QualysAdvisory]. It basically
+released an advisory with a [joint blog post][QualysAdvisory]. It basically
 exploits large stack allocation (greater than `PAGE_SIZE`) that can lead to
 stack read/write *not* triggering the [stack guard page][StackGuardPage] allocated by the Linux
 Kernel.
 
-Shortly after the advisory got released, GCC provided a [couter-measure][GCCStackClashProtection] activated by `-fstack-clash-protection` that
+Shortly after the advisory got released, GCC provided a [countermeasure][GCCStackClashProtection] activated by `-fstack-clash-protection` that
 basically consists in splitting large allocation in chunks of `PAGE_SIZE`,
 with a probe in each chunk to trigger the kernel stack guard page.
 
@@ -28,7 +28,7 @@ collaboration between LLVM, Firefox and Rust developers.
 
 
 Rust already had a countermeasure implemented in the form of a runtime call to
-perform the stack probing. With LLVM catching up, using a more leightweight
+perform the stack probing. With LLVM catching up, using a more lightweight
 approach got [investigated in Rust][RustStackProbe].
 
 
