@@ -1,10 +1,10 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on The LLVM Project Blog</title><link>https://blog.llvm.org/posts/</link><description>Recent content in Posts on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Sat, 30 Jan 2021 10:00:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Bringing Stack Clash Protection to Clang / X86 — the Open Source Way</title><link>https://blog.llvm.org/posts/2021-01-05-stack-clash-protection/</link><pubDate>Sat, 30 Jan 2021 10:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-01-05-stack-clash-protection/</guid><description>&lt;h1 id="context">Context&lt;/h1>
 &lt;p>Stack clash is an attack that dates back to 2017, when the Qualys Research Team
-released an advisory with a &lt;a href="https://blog.qualys.com/vulnerabilities-research/2017/06/19/the-stack-clash">joint blogpost&lt;/a>. It basically
+released an advisory with a &lt;a href="https://blog.qualys.com/vulnerabilities-research/2017/06/19/the-stack-clash">joint blog post&lt;/a>. It basically
 exploits large stack allocation (greater than &lt;code>PAGE_SIZE&lt;/code>) that can lead to
 stack read/write &lt;em>not&lt;/em> triggering the &lt;a href="https://lkml.org/lkml/2017/6/22/345">stack guard page&lt;/a> allocated by the Linux
 Kernel.&lt;/p>
-&lt;p>Shortly after the advisory got released, GCC provided a &lt;a href="https://gcc.gnu.org/legacy-ml/gcc-patches/2017-07/msg00556.html">couter-measure&lt;/a> activated by &lt;code>-fstack-clash-protection&lt;/code> that
+&lt;p>Shortly after the advisory got released, GCC provided a &lt;a href="https://gcc.gnu.org/legacy-ml/gcc-patches/2017-07/msg00556.html">countermeasure&lt;/a> activated by &lt;code>-fstack-clash-protection&lt;/code> that
 basically consists in splitting large allocation in chunks of &lt;code>PAGE_SIZE&lt;/code>,
 with a probe in each chunk to trigger the kernel stack guard page.&lt;/p>
 &lt;p>This has been a major security difference between GCC and Clang since then. It
@@ -15,7 +15,7 @@ maintenance&lt;/a> for packagers.&lt;/p>
 only for X86, SystemZ and PowerPC. Its implementation is a result of a fruitful
 collaboration between LLVM, Firefox and Rust developers.&lt;/p>
 &lt;p>Rust already had a countermeasure implemented in the form of a runtime call to
-perform the stack probing. With LLVM catching up, using a more leightweight
+perform the stack probing. With LLVM catching up, using a more lightweight
 approach got &lt;a href="https://github.com/rust-lang/rust/pull/77885">investigated in Rust&lt;/a>.&lt;/p>
 &lt;h1 id="countermeasure-description">Countermeasure Description&lt;/h1>
 &lt;p>The Clang implementation for X86 is derived from the GCC implementation, with a
