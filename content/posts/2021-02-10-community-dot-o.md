@@ -12,7 +12,7 @@ Why [Community.o?](https://community-dot-o.llvm.org) The name is inspired by the
 
 While our main focus is on the [LLVM community](https://llvm.org) and the field of compilers and tools, we want to collaborate with other open source communities and provide resources and exchange ideas. 
 
-Are you interested in learning more, getting involved with Community.o or joining a specific group such as Women in Compilers and Tools? Please see the [Community.o website]((https://community-dot-o.llvm.org)).
+Are you interested in learning more, getting involved with Community.o or joining a specific group such as Women in Compilers and Tools? Please see the [Community.o website](https://community-dot-o.llvm.org).
 
 ![Community.o Summit](/img/SummitLogo.png) 
 
