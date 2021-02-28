@@ -1,4 +1,194 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>LLDB on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/lldb/</link><description>Recent content in LLDB on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Mon, 06 Mar 2017 12:59:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/lldb/index.xml" rel="self" type="application/rss+xml"/><item><title>Introducing Community.o and the Community.o Summit</title><link>https://blog.llvm.org/posts/2021-02-10-community-dot-o/</link><pubDate>Wed, 10 Feb 2021 00:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-02-10-community-dot-o/</guid><description>&lt;p>&lt;img src="https://blog.llvm.org/img/community-dot-o-logo.png" alt="Community.o">&lt;/p>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>LLDB on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/lldb/</link><description>Recent content in LLDB on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Mon, 06 Mar 2017 12:59:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/lldb/index.xml" rel="self" type="application/rss+xml"/><item><title>LLVM meets Code Property Graphs</title><link>https://blog.llvm.org/posts/2021-02-23-llvm-meets-code-property-graphs/</link><pubDate>Tue, 23 Feb 2021 00:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-02-23-llvm-meets-code-property-graphs/</guid><description>&lt;p>The code property graph (CPG) is a data structure designed to mine large codebases for instances of programming patterns via a domain-specific query language. It was first introduced in the proceedings of the IEEE Security and Privacy conference in 2014 (&lt;a href="https://ieeexplore.ieee.org/abstract/document/6956589">publication&lt;/a>, &lt;a href="https://www.sec.cs.tu-bs.de/pubs/2014-ieeesp.pdf">PDF&lt;/a>) in the context of vulnerability discovery in C system code and the Linux kernel in particular. The core ideas of the approach are the following:&lt;/p>
+&lt;ul>
+&lt;li>the CPG combines several program representations into one&lt;/li>
+&lt;li>the CPG is stored in a graph database&lt;/li>
+&lt;li>the graph database comes with a DSL allowing to traverse and query the CPG&lt;/li>
+&lt;/ul>
+&lt;p>Currently, the CPG infrastructure is supported by several tools:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://ocular.shiftleft.io">Ocular&lt;/a> - a proprietary code analysis tool supporting Java, Scala, C#, Go, Python, and JavaScript languages&lt;/li>
+&lt;li>&lt;a href="https://joern.io">Joern&lt;/a> - an open-source counterpart of Ocular supporting C and C++&lt;/li>
+&lt;li>&lt;a href="https://plume-oss.github.io/plume-docs/">Plume&lt;/a> - an open-source tool supporting Java Bytecode&lt;/li>
+&lt;/ul>
+&lt;p>This article presents &lt;a href="https://www.shiftleft.io">ShiftLeft&lt;/a>&amp;lsquo;s open-source implementation of &lt;a href="https://github.com/ShiftLeftSecurity/llvm2cpg">llvm2cpg&lt;/a> - a standalone tool that brings LLVM Bitcode support to Joern.
+But before we dive into details, let us say few more words about CPG and Joern.&lt;/p>
+&lt;h1 id="code-property-graph">Code Property Graph&lt;/h1>
+&lt;p>The core idea of the CPG is that different classic program representations are merged into a property graph, a single data structure that holds information about the program&amp;rsquo;s syntax, control- and intra-procedural data-flow.&lt;/p>
+&lt;p>Graphically speaking, the following piece of code:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">foo&lt;/span>() {
+&lt;span style="color:#66d9ef">int&lt;/span> x &lt;span style="color:#f92672">=&lt;/span> source();
+&lt;span style="color:#66d9ef">if&lt;/span> (x &lt;span style="color:#f92672">&amp;lt;&lt;/span> MAX) {
+&lt;span style="color:#66d9ef">int&lt;/span> y &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span> &lt;span style="color:#f92672">*&lt;/span> x;
+sink(y);
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>combines these three different representations:&lt;/p>
+&lt;p>&lt;img src="https://blog.llvm.org/img/cpg/different-representations.png" alt="Different program representations">&lt;/p>
+&lt;p>into a single representation - Code Property Graph:&lt;/p>
+&lt;p>&lt;img src="https://blog.llvm.org/img/cpg/cpg.png" alt="Code Property Graph">&lt;/p>
+&lt;h1 id="joern">Joern&lt;/h1>
+&lt;p>The property graph is stored in a graph database and made accessible via a domain-specific language (DSL) to identify programming patterns based on a DSL for graph traversals. The query language allows a seamless transition between the original code representations, making it possible to combine aspects of the code from different views these representations offer.&lt;/p>
+&lt;p>One of the primary interfaces to the code property graphs is a tool called &lt;a href="https://joern.io">Joern&lt;/a>. It provides the mentioned DSL and allows to query the CPG to discover specific properties of a program.
+Here are some examples of the Joern&amp;rsquo;s DSL:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-scala" data-lang="scala">joern&lt;span style="color:#f92672">&amp;gt;&lt;/span> cpg&lt;span style="color:#f92672">.&lt;/span>typeDecl&lt;span style="color:#f92672">.&lt;/span>name&lt;span style="color:#f92672">.&lt;/span>p
+&lt;span style="color:#a6e22e">List&lt;/span>&lt;span style="color:#f92672">[&lt;/span>&lt;span style="color:#66d9ef">String&lt;/span>&lt;span style="color:#f92672">]&lt;/span> &lt;span style="color:#66d9ef">=&lt;/span> &lt;span style="color:#a6e22e">List&lt;/span>&lt;span style="color:#f92672">(&lt;/span>&lt;span style="color:#e6db74">&amp;#34;ANY&amp;#34;&lt;/span>&lt;span style="color:#f92672">,&lt;/span> &lt;span style="color:#e6db74">&amp;#34;int&amp;#34;&lt;/span>&lt;span style="color:#f92672">,&lt;/span> &lt;span style="color:#e6db74">&amp;#34;void&amp;#34;&lt;/span>&lt;span style="color:#f92672">)&lt;/span>
+joern&lt;span style="color:#f92672">&amp;gt;&lt;/span> cpg&lt;span style="color:#f92672">.&lt;/span>method&lt;span style="color:#f92672">.&lt;/span>name&lt;span style="color:#f92672">.&lt;/span>p
+&lt;span style="color:#a6e22e">List&lt;/span>&lt;span style="color:#f92672">[&lt;/span>&lt;span style="color:#66d9ef">String&lt;/span>&lt;span style="color:#f92672">]&lt;/span> &lt;span style="color:#66d9ef">=&lt;/span> &lt;span style="color:#a6e22e">List&lt;/span>&lt;span style="color:#f92672">(&lt;/span>
+&lt;span style="color:#e6db74">&amp;#34;foo&amp;#34;&lt;/span>&lt;span style="color:#f92672">,&lt;/span>
+&lt;span style="color:#e6db74">&amp;#34;&amp;lt;operator&amp;gt;.multiplication&amp;#34;&lt;/span>&lt;span style="color:#f92672">,&lt;/span>
+&lt;span style="color:#e6db74">&amp;#34;source&amp;#34;&lt;/span>&lt;span style="color:#f92672">,&lt;/span>
+&lt;span style="color:#e6db74">&amp;#34;&amp;lt;operator&amp;gt;.lessThan&amp;#34;&lt;/span>&lt;span style="color:#f92672">,&lt;/span>
+&lt;span style="color:#e6db74">&amp;#34;&amp;lt;operator&amp;gt;.assignment&amp;#34;&lt;/span>&lt;span style="color:#f92672">,&lt;/span>
+&lt;span style="color:#e6db74">&amp;#34;sink&amp;#34;&lt;/span>
+&lt;span style="color:#f92672">)&lt;/span>
+joern&lt;span style="color:#f92672">&amp;gt;&lt;/span> cpg&lt;span style="color:#f92672">.&lt;/span>method&lt;span style="color:#f92672">(&lt;/span>&lt;span style="color:#e6db74">&amp;#34;foo&amp;#34;&lt;/span>&lt;span style="color:#f92672">).&lt;/span>ast&lt;span style="color:#f92672">.&lt;/span>isControlStructure&lt;span style="color:#f92672">.&lt;/span>code&lt;span style="color:#f92672">.&lt;/span>p
+&lt;span style="color:#a6e22e">List&lt;/span>&lt;span style="color:#f92672">[&lt;/span>&lt;span style="color:#66d9ef">String&lt;/span>&lt;span style="color:#f92672">]&lt;/span> &lt;span style="color:#66d9ef">=&lt;/span> &lt;span style="color:#a6e22e">List&lt;/span>&lt;span style="color:#f92672">(&lt;/span>&lt;span style="color:#e6db74">&amp;#34;if (x &amp;lt; MAX)&amp;#34;&lt;/span>&lt;span style="color:#f92672">)&lt;/span>
+joern&lt;span style="color:#f92672">&amp;gt;&lt;/span> cpg&lt;span style="color:#f92672">.&lt;/span>method&lt;span style="color:#f92672">(&lt;/span>&lt;span style="color:#e6db74">&amp;#34;foo&amp;#34;&lt;/span>&lt;span style="color:#f92672">).&lt;/span>ast&lt;span style="color:#f92672">.&lt;/span>isCall&lt;span style="color:#f92672">.&lt;/span>map&lt;span style="color:#f92672">(&lt;/span>c &lt;span style="color:#66d9ef">=&amp;gt;&lt;/span> c&lt;span style="color:#f92672">.&lt;/span>file&lt;span style="color:#f92672">.&lt;/span>name&lt;span style="color:#f92672">.&lt;/span>head &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#e6db74">&amp;#34;:&amp;#34;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> c&lt;span style="color:#f92672">.&lt;/span>lineNumber&lt;span style="color:#f92672">.&lt;/span>get &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#e6db74">&amp;#34; &amp;#34;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> c&lt;span style="color:#f92672">.&lt;/span>name &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#e6db74">&amp;#34;: &amp;#34;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> c&lt;span style="color:#f92672">.&lt;/span>code&lt;span style="color:#f92672">).&lt;/span>p
+&lt;span style="color:#a6e22e">List&lt;/span>&lt;span style="color:#f92672">[&lt;/span>&lt;span style="color:#66d9ef">String&lt;/span>&lt;span style="color:#f92672">]&lt;/span> &lt;span style="color:#66d9ef">=&lt;/span> &lt;span style="color:#a6e22e">List&lt;/span>&lt;span style="color:#f92672">(&lt;/span>
+&lt;span style="color:#e6db74">&amp;#34;main.c:2 &amp;lt;operator&amp;gt;.assignment: x = source()&amp;#34;&lt;/span>&lt;span style="color:#f92672">,&lt;/span>
+&lt;span style="color:#e6db74">&amp;#34;main.c:2 source: source()&amp;#34;&lt;/span>&lt;span style="color:#f92672">,&lt;/span>
+&lt;span style="color:#e6db74">&amp;#34;main.c:3 &amp;lt;operator&amp;gt;.lessThan: x &amp;lt; MAX&amp;#34;&lt;/span>&lt;span style="color:#f92672">,&lt;/span>
+&lt;span style="color:#e6db74">&amp;#34;main.c:4 &amp;lt;operator&amp;gt;.assignment: y = 2 * x&amp;#34;&lt;/span>&lt;span style="color:#f92672">,&lt;/span>
+&lt;span style="color:#e6db74">&amp;#34;main.c:4 &amp;lt;operator&amp;gt;.multiplication: 2 * x&amp;#34;&lt;/span>&lt;span style="color:#f92672">,&lt;/span>
+&lt;span style="color:#e6db74">&amp;#34;main.c:5 sink: sink(y)&amp;#34;&lt;/span>
+&lt;span style="color:#f92672">)&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Besides the DSL, Joern comes with a data-flow tracker enabling more sophisticated queries, such as &amp;ldquo;is there a user controlled malloc in the program?&amp;rdquo;&lt;/p>
+&lt;p>The DSL is much more powerful than in the example, but that is out of scope of this article. Please, refer to the &lt;a href="https://docs.joern.io/home">documentation&lt;/a> to learn more.&lt;/p>
+&lt;h1 id="llvm-and-cpg">LLVM and CPG&lt;/h1>
+&lt;p>This part is split into two smaller parts: the first one covers a few implementation details, the second one shows an example of how to use &lt;code>llvm2cpg&lt;/code>.
+If you are not interested in the implementation - scroll down :)&lt;/p>
+&lt;h2 id="implementation-details">Implementation Details&lt;/h2>
+&lt;p>When we decided to add LLVM support for CPG, one of the first questions was: how do we map bitcode representation onto CPG?&lt;/p>
+&lt;p>We took a simple approach - let&amp;rsquo;s pretend the SSA representation is just a flat source program. In other words, the following bitcode&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-llvm" data-lang="llvm">&lt;span style="color:#66d9ef">define&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span> @sum(&lt;span style="color:#66d9ef">i32&lt;/span> %a, &lt;span style="color:#66d9ef">i32&lt;/span> %a) {
+%r = &lt;span style="color:#66d9ef">add&lt;/span> &lt;span style="color:#66d9ef">nsw&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span> %a, %b
+&lt;span style="color:#66d9ef">ret&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span> %r
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>can be seen as a C program:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">i32 &lt;span style="color:#a6e22e">sum&lt;/span>(i32 a, i32 b) {
+i32 r &lt;span style="color:#f92672">=&lt;/span> add(a, b);
+&lt;span style="color:#66d9ef">return&lt;/span> r;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>From the high-level perspective, the approach is simple, but there are some tiny details we had to overcome.&lt;/p>
+&lt;h3 id="instruction-semantics">Instruction semantics&lt;/h3>
+&lt;p>We can map some of the LLVM instructions back onto the internal CPG operations. Here are some examples:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>add&lt;/code>, &lt;code>fadd&lt;/code> -&amp;gt; &lt;code>&amp;lt;operator&amp;gt;.addition&lt;/code>&lt;/li>
+&lt;li>&lt;code>bitcast&lt;/code> -&amp;gt; &lt;code>&amp;lt;operator&amp;gt;.cast&lt;/code>&lt;/li>
+&lt;li>&lt;code>fcmp eq&lt;/code>, &lt;code>icmp eq&lt;/code> -&amp;gt; &lt;code>&amp;lt;operator&amp;gt;.equals&lt;/code>&lt;/li>
+&lt;li>&lt;code>urem&lt;/code>, &lt;code>srem&lt;/code>, &lt;code>frem&lt;/code> -&amp;gt; &lt;code>&amp;lt;operator&amp;gt;.modulo&lt;/code>&lt;/li>
+&lt;li>&lt;code>getelementptr&lt;/code> -&amp;gt; a combination of &lt;code>&amp;lt;operator&amp;gt;.pointerShift&lt;/code>, &lt;code>&amp;lt;operator&amp;gt;.indexAccess&lt;/code>, and &lt;code>&amp;lt;operator&amp;gt;.memberAccess&lt;/code> depending on the underlying types of the GEP operand&lt;/li>
+&lt;/ul>
+&lt;p>Most of these &lt;code>&amp;lt;operator&amp;gt;.*&lt;/code>s have special semantics, which plays a crucial role in the Joern and Ocular built-in data-flow trackers.&lt;/p>
+&lt;p>Unfortunately, not every LLVM instruction has a corresponding operator in the CPG. In those cases, we had to fall back to function calls.
+For example:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>select i1 %cond, i32 %v1, i32 %v3&lt;/code> turns into &lt;code>select(cond, v1, v2)&lt;/code>&lt;/li>
+&lt;li>&lt;code>atomicrmw add i32* %ptr, i32 1&lt;/code> turns into &lt;code>atomicrmwAdd(ptr, 1)&lt;/code> (same for any other &lt;code>atomicrmw&lt;/code> operator)&lt;/li>
+&lt;li>&lt;code>fneg float %val&lt;/code> turns into &lt;code>fneg(val)&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>The only instruction we could not map to the CPG is the &lt;code>phi&lt;/code>: CPG doesn&amp;rsquo;t have a Phi node concept.
+We had to eliminate &lt;code>phi&lt;/code> instructions using &lt;code>reg2mem&lt;/code> machinery.&lt;/p>
+&lt;h3 id="redundancy">Redundancy&lt;/h3>
+&lt;p>For a small C program&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">sum&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> a, &lt;span style="color:#66d9ef">int&lt;/span> b) {
+&lt;span style="color:#66d9ef">return&lt;/span> a &lt;span style="color:#f92672">+&lt;/span> b;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Clang emits a lot of redundant instructions by default&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-llvm" data-lang="llvm">&lt;span style="color:#66d9ef">define&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span> @sum(&lt;span style="color:#66d9ef">i32&lt;/span> %0, &lt;span style="color:#66d9ef">i32&lt;/span> %1) {
+%3 = &lt;span style="color:#66d9ef">alloca&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span>, &lt;span style="color:#66d9ef">align&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span>
+%4 = &lt;span style="color:#66d9ef">alloca&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span>, &lt;span style="color:#66d9ef">align&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span>
+&lt;span style="color:#66d9ef">store&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span> %0, &lt;span style="color:#66d9ef">i32&lt;/span>* %3, &lt;span style="color:#66d9ef">align&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span>
+&lt;span style="color:#66d9ef">store&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span> %1, &lt;span style="color:#66d9ef">i32&lt;/span>* %4, &lt;span style="color:#66d9ef">align&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span>
+%5 = &lt;span style="color:#66d9ef">load&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span>, &lt;span style="color:#66d9ef">i32&lt;/span>* %3, &lt;span style="color:#66d9ef">align&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span>
+%6 = &lt;span style="color:#66d9ef">load&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span>, &lt;span style="color:#66d9ef">i32&lt;/span>* %4, &lt;span style="color:#66d9ef">align&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span>
+%7 = &lt;span style="color:#66d9ef">add&lt;/span> &lt;span style="color:#66d9ef">nsw&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span> %5, %6
+&lt;span style="color:#66d9ef">ret&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span> %7
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>instead of a more concise version&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-llvm" data-lang="llvm">&lt;span style="color:#66d9ef">define&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span> @sum(&lt;span style="color:#66d9ef">i32&lt;/span> %0, &lt;span style="color:#66d9ef">i32&lt;/span> %1) {
+%3 = &lt;span style="color:#66d9ef">add&lt;/span> &lt;span style="color:#66d9ef">nsw&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span> %1, %0
+&lt;span style="color:#66d9ef">ret&lt;/span> &lt;span style="color:#66d9ef">i32&lt;/span> %3
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>In general, this is not a problem, but it adds more complexity for the data-flow tracker and needlessly increases the graph&amp;rsquo;s size.
+One of the considerations was to run optimizations before emitting CPG for the bitcode. Still, in the end, we decided to offload this work to an end-user: if you want fewer instructions, then apply the optimizations manually before emitting the CPG.&lt;/p>
+&lt;h3 id="type-equality">Type Equality&lt;/h3>
+&lt;p>The other issue is related to the way LLVM handles types. If two modules in the same context use the same struct with the same name, LLVM renames the other struct to prevent name collisions. For example&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-llvm" data-lang="llvm">&lt;span style="color:#75715e">; Module1
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>%struct.Point = &lt;span style="color:#66d9ef">type&lt;/span> { &lt;span style="color:#66d9ef">i32&lt;/span>, &lt;span style="color:#66d9ef">i32&lt;/span> }
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>and&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-llvm" data-lang="llvm">&lt;span style="color:#75715e">; Module 2
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>%struct.Point = &lt;span style="color:#66d9ef">type&lt;/span> { &lt;span style="color:#66d9ef">i32&lt;/span>, &lt;span style="color:#66d9ef">i32&lt;/span> }
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>when loaded into the same context yield two types&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-llvm" data-lang="llvm">%struct.Point = &lt;span style="color:#66d9ef">type&lt;/span> { &lt;span style="color:#66d9ef">i32&lt;/span>, &lt;span style="color:#66d9ef">i32&lt;/span> }
+%struct.Point.1 = &lt;span style="color:#66d9ef">type&lt;/span> { &lt;span style="color:#66d9ef">i32&lt;/span>, &lt;span style="color:#66d9ef">i32&lt;/span> }
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>We wanted to deduplicate these types for a better user experience and only emit &lt;code>Point&lt;/code> in the final graph.&lt;/p>
+&lt;p>The obvious solution was to consider two structs with &amp;ldquo;similar&amp;rdquo; names and the same layout to be the same.
+However, we could not rely on the &lt;code>llvm::StructType::isLayoutIdentical&lt;/code> because, despite the name, it produces misleading results.&lt;/p>
+&lt;p>According to &lt;code>llvm::StructType::isLayoutIdentical&lt;/code> the structs &lt;code>Point&lt;/code> and &lt;code>Pair&lt;/code> have identical layout, but &lt;code>PointWrap&lt;/code> and &lt;code>PairWrap&lt;/code> are not.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-llvm" data-lang="llvm">&lt;span style="color:#75715e">; these two have identical layout
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>%Point = &lt;span style="color:#66d9ef">type&lt;/span> { &lt;span style="color:#66d9ef">i32&lt;/span>, &lt;span style="color:#66d9ef">i32&lt;/span> }
+%Pair = &lt;span style="color:#66d9ef">type&lt;/span> { &lt;span style="color:#66d9ef">i32&lt;/span>, &lt;span style="color:#66d9ef">i32&lt;/span> }
+&lt;span style="color:#75715e">; these two DO NOT have identical layout
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>%PointWrap = &lt;span style="color:#66d9ef">type&lt;/span> { %Point }
+%PairWrap = &lt;span style="color:#66d9ef">type&lt;/span> { %Pair }
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This happens because &lt;code>llvm::StructType::isLayoutIdentical&lt;/code> determines equality based on the pointers. That is, if all the struct elements are identical, then the layout identical.
+It also meant we could not use this approach to compare types from different LLVM contexts.
+We had to roll out our custom solution based on the &lt;a href="https://lowlevelbits.org/type-equality-in-llvm/">Tree Automata&lt;/a> to solve this issue.&lt;/p>
+&lt;hr>
+&lt;p>There are few more details, but the article is getting longer than it needs to be.
+So let&amp;rsquo;s look at how to use &lt;code>llvm2cpg&lt;/code> with Joern.&lt;/p>
+&lt;h2 id="example">Example&lt;/h2>
+&lt;p>Once you have &lt;a href="https://docs.joern.io/installation">Joern&lt;/a> and &lt;a href="http://github.com/ShiftLeftSecurity/llvm2cpg/releases/latest">llvm2cpg&lt;/a> installed the usage is straightforward:&lt;/p>
+&lt;ol>
+&lt;li>Convert a program into LLVM Bitcode&lt;/li>
+&lt;li>Emit CPG&lt;/li>
+&lt;li>Load the CPG into Joern and start the analysis&lt;/li>
+&lt;/ol>
+&lt;p>Here are the steps codified:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ cat main.c
+extern int MAX;
+extern int source&lt;span style="color:#f92672">()&lt;/span>;
+extern void sink&lt;span style="color:#f92672">(&lt;/span>int&lt;span style="color:#f92672">)&lt;/span>;
+void foo&lt;span style="color:#f92672">()&lt;/span> &lt;span style="color:#f92672">{&lt;/span>
+int x &lt;span style="color:#f92672">=&lt;/span> source&lt;span style="color:#f92672">()&lt;/span>;
+&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#f92672">(&lt;/span>x &amp;lt; MAX&lt;span style="color:#f92672">)&lt;/span> &lt;span style="color:#f92672">{&lt;/span>
+int y &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span> * x;
+sink&lt;span style="color:#f92672">(&lt;/span>y&lt;span style="color:#f92672">)&lt;/span>;
+&lt;span style="color:#f92672">}&lt;/span>
+&lt;span style="color:#f92672">}&lt;/span>
+$ clang -S -emit-llvm -g -O1 main.c -o main.ll
+$ llvm2cpg -output&lt;span style="color:#f92672">=&lt;/span>/tmp/cpg.bin.zip main.ll
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Now you get the CPG saved at &lt;code>/tmp/cpg.bin.zip&lt;/code> which you can load into Joern and find if there is a flow from the &lt;code>source&lt;/code> function to the &lt;code>sink&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ joern
+joern&amp;gt; importCpg&lt;span style="color:#f92672">(&lt;/span>&lt;span style="color:#e6db74">&amp;#34;/tmp/cpg.bin.zip&amp;#34;&lt;/span>&lt;span style="color:#f92672">)&lt;/span>
+joern&amp;gt; run.ossdataflow
+joern&amp;gt; def source &lt;span style="color:#f92672">=&lt;/span> cpg.call&lt;span style="color:#f92672">(&lt;/span>&lt;span style="color:#e6db74">&amp;#34;source&amp;#34;&lt;/span>&lt;span style="color:#f92672">)&lt;/span>
+joern&amp;gt; def sink &lt;span style="color:#f92672">=&lt;/span> cpg.call&lt;span style="color:#f92672">(&lt;/span>&lt;span style="color:#e6db74">&amp;#34;sink&amp;#34;&lt;/span>&lt;span style="color:#f92672">)&lt;/span>.argument
+joern&amp;gt; sink.reachableByFlows&lt;span style="color:#f92672">(&lt;/span>source&lt;span style="color:#f92672">)&lt;/span>.p
+List&lt;span style="color:#f92672">[&lt;/span>String&lt;span style="color:#f92672">]&lt;/span> &lt;span style="color:#f92672">=&lt;/span> List&lt;span style="color:#f92672">(&lt;/span>
+&lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;_____________________________________________________
+&lt;/span>&lt;span style="color:#e6db74">| tracked | lineNumber| method| file |
+&lt;/span>&lt;span style="color:#e6db74">|====================================================|
+&lt;/span>&lt;span style="color:#e6db74">| source | 5 | foo | main.c |
+&lt;/span>&lt;span style="color:#e6db74">| &amp;lt;operator&amp;gt;.assignment | 5 | foo | main.c |
+&lt;/span>&lt;span style="color:#e6db74">| &amp;lt;operator&amp;gt;.lessThan | 6 | foo | main.c |
+&lt;/span>&lt;span style="color:#e6db74">| &amp;lt;operator&amp;gt;.shiftLeft | 7 | foo | main.c |
+&lt;/span>&lt;span style="color:#e6db74">| &amp;lt;operator&amp;gt;.shiftLeft | 7 | foo | main.c |
+&lt;/span>&lt;span style="color:#e6db74">| &amp;lt;operator&amp;gt;.assignment | 7 | foo | main.c |
+&lt;/span>&lt;span style="color:#e6db74">| sink | 8 | foo | main.c |
+&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;&lt;/span>
+&lt;span style="color:#f92672">)&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Which indeed exists!&lt;/p>
+&lt;h1 id="conclusion">Conclusion&lt;/h1>
+&lt;p>To conclude, let us outline some of the advantages and constraints implied by LLVM Bitcode:&lt;/p>
+&lt;ul>
+&lt;li>the &amp;ldquo;surface&amp;rdquo; of the LLVM language is smaller than that of C and C++&lt;/li>
+&lt;li>many high-level details do not exist at the IR level&lt;/li>
+&lt;li>the program must be compiled, thus limiting the range of programs that one can analyze with Joern&lt;/li>
+&lt;/ul>
+&lt;p>&lt;a href="https://docs.joern.io/llvm2cpg/hello-llvm">Here&lt;/a> you can find more tutorials and information.&lt;/p>
+&lt;p>If you get any questions, feel free to ping &lt;a href="https://twitter.com/fabsx00">Fabs&lt;/a> or &lt;a href="https://twitter.com/1101_debian">Alex&lt;/a> on Twitter, or better come over to the &lt;a href="https://gitter.im/joern-code-analyzer/community">Joern chat&lt;/a>.&lt;/p></description></item><item><title>Introducing Community.o and the Community.o Summit</title><link>https://blog.llvm.org/posts/2021-02-10-community-dot-o/</link><pubDate>Wed, 10 Feb 2021 00:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-02-10-community-dot-o/</guid><description>&lt;p>&lt;img src="https://blog.llvm.org/img/community-dot-o-logo.png" alt="Community.o">&lt;/p>
 &lt;p>The LLVM Foundation is excited to announce &lt;a href="https://community-dot-o.llvm.org">Community.o&lt;/a>! This is a new face to the &lt;a href="https://foundation.llvm.org">LLVM Foundation’s&lt;/a> Diversity and Inclusion and Women in Compilers and Tools program. We’ve adopted a name to represent what this program hopes to accomplish which is to build a strong, healthy, and diverse open source community. We believe that this can only be achieved by including people from all backgrounds, genders, and experiences and by ensuring that everyone feels welcome, included, and empowered to contribute.&lt;/p>
 &lt;p>Why &lt;a href="https://community-dot-o.llvm.org">Community.o?&lt;/a> The name is inspired by the compilation model where object files link together for a final program, much like how folks from different backgrounds come together to make up llvm’s community and shared goal of inclusivity.&lt;/p>
 &lt;p>While our main focus is on the &lt;a href="https://llvm.org">LLVM community&lt;/a> and the field of compilers and tools, we want to collaborate with other open source communities and provide resources and exchange ideas.&lt;/p>
