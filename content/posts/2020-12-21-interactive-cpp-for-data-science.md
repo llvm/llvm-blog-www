@@ -12,7 +12,7 @@ we mentioned that exploratory programming is an effective way to reduce the
 complexity of the problem. This post will discuss some applications of Cling
 developed to support data science researchers. In particular, interactively
 probing data and interfaces makes complex libraries and complex data more
-accessible users. We aim to demonstrate some of Cling’s features at scale;
+accessible to users. We aim to demonstrate some of Cling’s features at scale;
 Cling’s eval-style programming support; projects related to Cling; and show
 interactive C++/CUDA.
 

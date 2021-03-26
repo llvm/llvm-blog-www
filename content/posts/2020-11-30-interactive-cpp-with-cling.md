@@ -87,15 +87,15 @@ Exploratory programming (or Rapid Application Development) is an effective way
 to gain understanding of the requirements for a project; to reduce the
 complexity of the problem; and to provide an early validation of the system
 design and implementation. In particular, interactively probing data and
-interfaces makes complex libraries and complex data more accessible users.
+interfaces makes complex libraries and complex data more accessible to users.
 It is important in data science, computational science and debugging. It
 significantly reduces the time consumed by edit-run cycles during development.
-In practice only few programming languages offer both a compiler and an
+In practice, only few programming languages offer both a compiler and an
 interpreter translating them into machine code, although whether a language is
 to be interpreted or compiled is a property of the implementation.
 
 Languages which enable exploratory programming tend to have interpreters which
-shorten the compile-link cycle, which generally has a noticeable cost in
+shorten the compile-link cycle; this generally has a noticeable cost in
 performance. Language developers who acknowledge the use case of exploratory
 programming may also put syntactic sugar, but that is mostly for convenience and
 terseness. The performance penalty is largely mitigated by using just-in-time
@@ -358,11 +358,11 @@ requires expertise in a big portion of the LLVM toolchain.
 
 # Conclusion
 
-Cling has been one of the systems enabling interactive C++ for more than decade.
+Cling has been one of the systems enabling interactive C++ for more than a decade.
 Cling’s extensibility and fast prototyping features is of fundamental importance
 for researchers in  high-energy physics, and an enabler for many of the
 technologies that they rely on. Cling has several unique features tailored to
-the challenges which comes with incremental C++. Our work on interactive C++ is
+the challenges which come with incremental C++. Our work on interactive C++ is
 always evolving. In the next blog post we will focus on interactive C++ for Data
 Science; Eval-Style Programming; Interactive CUDA; and C++ in notebooks.
 
