@@ -1,0 +1,353 @@
+<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Vassil Vassilev, Wim Lavrijsen, Alexandru Militaru"><meta property="og:title" content="Cling -- Beyond Just Interpreting C++"><meta property="og:description" content="Interactive C++ with Cling In our previous blog post &ldquo;Interactive C++ for Data Science&rdquo; we described eval-style programming, interactive C++ in Notebooks and CUDA. This post will discuss some developed applications of Cling supporting interoperability and extensibility."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.llvm.org/posts/2021-03-25-cling-beyond-just-interpreting-cpp/"><meta property="article:published_time" content="2021-03-25T10:00:00+00:00"><meta property="article:modified_time" content="2021-03-25T10:00:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="Cling -- Beyond Just Interpreting C++"><meta name=twitter:description content="Interactive C++ with Cling In our previous blog post &ldquo;Interactive C++ for Data Science&rdquo; we described eval-style programming, interactive C++ in Notebooks and CUDA. This post will discuss some developed applications of Cling supporting interoperability and extensibility."><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>Cling -- Beyond Just Interpreting C++</h1><aside><ul><li><time class=post-date datetime=2021-03-25T10:00:00Z>Mar 25, 2021</time></li><li>Vassil Vassilev, Wim Lavrijsen, Alexandru Militaru</li><li><em><a href=https://blog.llvm.org/tags/cling>#Cling</a></em></li><li>12 minutes read</li></ul></aside><h1 id=interactive-c-with-cling>Interactive C++ with Cling</h1><p>In our previous blog post <a href=https://blog.llvm.org/posts/2020-12-21-interactive-cpp-for-data-science/>&ldquo;Interactive C++ for Data Science&rdquo;</a>
+we described eval-style programming, interactive C++ in Notebooks and CUDA. This
+post will discuss some developed applications of Cling supporting
+interoperability and extensibility. We aim to demonstrate template instantiation
+on demand; embedding Cling as a service; and showcase an extension enabling
+on-the-fly automatic differentiation.</p><h2 id=template-instantiation-on-demand>Template Instantiation on Demand</h2><p>Cling implements a facility called <code>LookupHelper</code>, which takes C++ code and
+checks if a declaration with that qualified name already exists. For instance:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp>[cling] <span style=color:#960050;background-color:#1e0010>#</span>include <span style=color:#e6db74>&#34;cling/Interpreter/Interpreter.h&#34;</span>
+[cling] <span style=color:#960050;background-color:#1e0010>#</span>include <span style=color:#e6db74>&#34;cling/Interpreter/LookupHelper.h&#34;</span>
+[cling] <span style=color:#960050;background-color:#1e0010>#</span>include <span style=color:#e6db74>&#34;clang/AST/Decl.h&#34;</span>
+[cling] <span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>S</span>{};
+[cling] cling<span style=color:#f92672>::</span>LookupHelper<span style=color:#f92672>&amp;</span> LH <span style=color:#f92672>=</span> gCling<span style=color:#f92672>-&gt;</span>getLookupHelper()
+(cling<span style=color:#f92672>::</span>LookupHelper <span style=color:#f92672>&amp;</span>) <span style=color:#960050;background-color:#1e0010>@</span><span style=color:#ae81ff>0x7fcba3c0bfc0</span>
+[cling] <span style=color:#66d9ef>auto</span> D <span style=color:#f92672>=</span> LH.findScope(<span style=color:#e6db74>&#34;std::vector&lt;S&gt;&#34;</span>,
+                 cling<span style=color:#f92672>::</span>LookupHelper<span style=color:#f92672>::</span>DiagSetting<span style=color:#f92672>::</span>NoDiagnostics)
+(<span style=color:#66d9ef>const</span> clang<span style=color:#f92672>::</span>Decl <span style=color:#f92672>*</span>) <span style=color:#ae81ff>0x1216bdcd8</span>
+[cling] D<span style=color:#f92672>-&gt;</span>getDeclKindName()
+(<span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span> <span style=color:#f92672>*</span>) <span style=color:#e6db74>&#34;ClassTemplateSpecialization&#34;</span>
+</code></pre></div><p>In this particular case, <code>findScope</code> instantiates the template and returns its
+clang AST representation. Template instantiation on demand addresses the common
+library problem of template combinatorial explosion. Template instantiation on
+demand and conversion of textual qualified C++ names into entity meta
+information has proven to be a very powerful mechanism aiding data serialization
+and language interoperability.</p><h2 id=language-interop-on-demand>Language Interop on Demand</h2><p>An example is <a href=https://cppyy.readthedocs.io/>cppyy</a>, which provides automatic
+Python bindings, at runtime, to C++ code through Cling. Python is itself a
+dynamic language executed by an interpreter, thus making the interaction with
+C++ code more natural when intermediated by Cling. Examples include runtime
+template instantiations, function (pointer) callbacks, cross-language
+inheritance, automatic downcasting, and exception mapping. Many advanced C++
+features such as placement new, multiple virtual inheritance,
+variadic templates, etc., are naturally resolved by the LookupHelper.</p><p>cppyy achieves high performance through an all-lazy approach to runtime bindings
+construction and specializations of common cases through runtime reflection.
+As such, it has a much lower call overhead than e.g. pybind11, and looping over
+a <code>std::vector</code> through cppyy is faster than looping over a numpy array of the
+same type. Taking it a step further, its implementation for PyPy, a fully
+compatible Python interpreter sporting at <a href=https://pypy.org>tracing JIT</a>, can
+in many cases provide native access to C++ code in PyPy&rsquo;s JIT, including
+overload resolution and JIT hints that allow for aggressive optimizations.</p><p>Thanks to Cling&rsquo;s runtime reflection, cppyy makes maintaining a large software
+stack simpler: except for cppyy&rsquo;s own python-interpreter binding, it does not
+have any compiled code that is Python-dependent. I.e., cppyy-based extension
+modules require no recompilation when switching Python versions (or even when
+switching between the CPython and PyPy interpreters, say).</p><p>The example below shows the tight integration of C++ and python; shows the tight
+back and forth communication of the template instantiation and the
+cross-inheritance overrides; and the runtime behaviors (everything happens at
+runtime, there is no compiled code here).</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#f92672>import</span> cppyy
+
+cppyy<span style=color:#f92672>.</span>cppdef(<span style=color:#e6db74>r</span><span style=color:#e6db74>&#34;&#34;&#34;\
+</span><span style=color:#e6db74>template&lt;typename T&gt; class Producer {
+</span><span style=color:#e6db74>private:
+</span><span style=color:#e6db74>  T m_value;
+</span><span style=color:#e6db74>
+</span><span style=color:#e6db74>protected:
+</span><span style=color:#e6db74>  virtual T produce_imp() = 0;
+</span><span style=color:#e6db74>
+</span><span style=color:#e6db74>public:
+</span><span style=color:#e6db74>  Producer(const T&amp; value) : m_value(value) {}
+</span><span style=color:#e6db74>  virtual ~Producer() {}
+</span><span style=color:#e6db74>
+</span><span style=color:#e6db74>  T produce_total() { return m_value + produce_imp(); }
+</span><span style=color:#e6db74>};
+</span><span style=color:#e6db74>
+</span><span style=color:#e6db74>class Consumer {
+</span><span style=color:#e6db74>public:
+</span><span style=color:#e6db74>  template&lt;typename T&gt;
+</span><span style=color:#e6db74>  void consume(Producer&lt;T&gt;&amp; p) {
+</span><span style=color:#e6db74>    std::cout &lt;&lt; &#34;received: \&#34;&#34; &lt;&lt; p.produce_total() &lt;&lt; &#34;\&#34;\n&#34;;
+</span><span style=color:#e6db74>  }
+</span><span style=color:#e6db74>};&#34;&#34;&#34;</span>)
+
+<span style=color:#66d9ef>def</span> <span style=color:#a6e22e>factory</span>(base_v, <span style=color:#f92672>*</span>derived_v):
+  <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>_F</span>(cppyy<span style=color:#f92672>.</span>gbl<span style=color:#f92672>.</span>Producer[type(base_v)]):
+    <span style=color:#66d9ef>def</span> __init__(self, base_v, <span style=color:#f92672>*</span>derived_v):
+      super()<span style=color:#f92672>.</span>__init__(base_v)
+      self<span style=color:#f92672>.</span>_values <span style=color:#f92672>=</span> derived_v
+
+    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>produce_imp</span>(self):
+      <span style=color:#66d9ef>return</span> type(base_v)(sum(self<span style=color:#f92672>.</span>_values))
+
+    <span style=color:#66d9ef>return</span> _F(base_v, <span style=color:#f92672>*</span>derived_v)
+
+consumer <span style=color:#f92672>=</span> cppyy<span style=color:#f92672>.</span>gbl<span style=color:#f92672>.</span>Consumer()
+<span style=color:#66d9ef>for</span> producer <span style=color:#f92672>in</span> [factory(<span style=color:#f92672>*</span>x) <span style=color:#66d9ef>for</span> x <span style=color:#f92672>in</span> \
+                  ((<span style=color:#e6db74>&#34;hello &#34;</span>, <span style=color:#ae81ff>42</span>), (<span style=color:#ae81ff>3.</span>, <span style=color:#ae81ff>0.14</span>, <span style=color:#ae81ff>0.0015</span>))]:
+  consumer<span style=color:#f92672>.</span>consume(producer)
+</code></pre></div><p>Output:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>python3 cppyy_demo.py
+received: <span style=color:#e6db74>&#34;hello 42&#34;</span>
+received: <span style=color:#e6db74>&#34;3.1415&#34;</span>
+</code></pre></div><p>In the snippet we create python classes based on python arguments, which derive
+from a templated C++ class instantiated with a type. The python class provides
+the implementation for a protected function that is called from a public
+function, resulting in the expected return value, which is printed. We aim to
+highlight:</p><ul><li>Python creates classes at runtime, as can Cling, even when they are
+declared in a module (the relevant classes are here created in a factory
+method);</li><li>Templated C++ classes can be instantiated on the fly from Python, by taking
+the type of the argument (i.e. using introspection at runtime in Python) to
+create the C++ base class for the Python class.</li><li>Cross-language derivation is at runtime, with no support needed from the C++
+class, other than a virtual destructor and virtual methods;</li><li>C++ &ldquo;protected&rdquo; methods can be overridden in Python, even though Python has
+no such concept and you can not actually call protected methods from bound
+C++ objects in Python;</li><li>It all works straight out of the box.</li></ul><p>cppyy is used in several large code bases in physics, chemistry, mathematics,
+and biology. It is readily installable through
+[pip from PyPI] (<a href=https://pypi.org/project/cppyy/>https://pypi.org/project/cppyy/</a>) and through
+<a href=https://anaconda.org/conda-forge/cppyy>conda</a>.</p><p>Another example is Symmetry Integration Language (SIL), a D-based
+domain-specific language of functional flavor developed and used internally by
+<a href=https://symmetryinvestments.com>Symmetry Investments</a>. One of the main goals
+of SIL is to be easily interoperable with all sorts of languages and systems,
+and this is achieved through various plugins. To call C++ code, SIL uses a
+plugin called <code>sil-cling</code>, which acts as a middle ground between SIL and Cling.
+However, sil-cling does not interact directly with Cling, but through
+cppyy-backend, that is cppyy&rsquo;s C/C++ wrapper around Cling that provides a stable
+C/C++ reflection API.</p><p>There are two core types that are exposed from sil-cling to SIL. One is
+<code>CPPNamespace</code>, which exposes a C++ namespace and allows free function calling,
+access to namespace&rsquo;s variables, and object instantiation for the classes
+defined in that namespace. The other is <code>ClingObj</code>, which is a proxy for a C++
+object, allowing construction, method calling and the manipulation of the
+object&rsquo;s data members. Given that cppyy represents C++ classes, structs and
+namespaces as &lsquo;scopes&rsquo; and reflection information about any of these C++
+entities is obtained through its associated &lsquo;scope&rsquo; object, both wrapper types
+exposed to SIL hold a reference to their associated scope object which is
+queried whenever the wrapper types are used to call C++ code.</p><p>All the calls that are done from SIL through the two wrapper types have 3
+arguments: the wrapper object used, the name of the C++ function that needs to
+be called, and (if needed) a sequence of arguments for that function. Once the
+overload resolution and the argument conversion are done, sil-cling calls the
+appropriate cppyy function that will wrap the call and dispatch it to Cling for
+JIT compilation. At the moment, sil-cling can be used to call C++ libraries like
+<code>Boost.Asio</code>, <code>dlib</code> or <code>Xapian</code>.</p><p>The example below creates a Boost Asio-based client-server application written
+in SIL using the sil-cling plugin. Server.sil contains the SIL code for the
+server. It starts by including the relevant header files, using <code>cppCompile</code>.
+The next step is to create wrapper objects for the namespaces that are needed,
+and this is done by calling cppNamespace with the names of the namespaces that
+one needs to access. These CPPNamespace wrappers are used to instantiate classes
+that are defined inside the C++ namespaces that they wrap. Using these wrappers,
+an endpoint, an acceptor socket (which listens for incoming connections) and an
+active socket (which handles communication with the client) are created. Then
+the server waits for a connection and, once a client connects, it reads its
+message and sends a reply.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-d data-lang=d><span style=color:#75715e>// Server.sil
+</span><span style=color:#75715e></span><span style=color:#f92672>import</span> <span style=color:#960050;background-color:#1e0010>* </span>from silcling
+<span style=color:#f92672>import</span> format from format
+
+<span style=color:#a6e22e>cppCompile</span> <span style=color:#f92672>(</span><span style=color:#e6db74>&#34;#include &lt;boost/asio.hpp&gt;&#34;</span><span style=color:#f92672>)</span>
+cppCompile <span style=color:#f92672>(</span><span style=color:#e6db74>&#34;#include \&#34;helper.hpp\&#34;&#34;</span><span style=color:#f92672>)</span>
+
+<span style=color:#75715e>// CPPNamespace wrappers
+</span><span style=color:#75715e></span>asio <span style=color:#f92672>=</span> cppNamespace<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;boost::asio&#34;</span><span style=color:#f92672>)</span>
+tcp <span style=color:#f92672>=</span> cppNamespace<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;boost::asio::ip::tcp&#34;</span><span style=color:#f92672>)</span>
+helpers <span style=color:#f92672>=</span> cppNamespace<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;helpme&#34;</span><span style=color:#f92672>)</span>
+
+<span style=color:#75715e>// Using namespace wrappers to instantiate classes - creates ClingObj(s)
+</span><span style=color:#75715e></span>ioService <span style=color:#f92672>=</span> asio<span style=color:#f92672>.</span><span style=color:#a6e22e>obj</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;io_service&#34;</span><span style=color:#f92672>)</span>
+endpoint <span style=color:#f92672>=</span> tcp<span style=color:#f92672>.</span><span style=color:#a6e22e>obj</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;endpoint&#34;</span><span style=color:#f92672>,</span> tcp<span style=color:#f92672>.</span><span style=color:#a6e22e>v4</span><span style=color:#f92672>(),</span> <span style=color:#ae81ff>9999</span><span style=color:#f92672>)</span>
+
+<span style=color:#75715e>// Acceptor socket - incoming connections
+</span><span style=color:#75715e></span>acceptorSocket <span style=color:#f92672>=</span> tcp<span style=color:#f92672>.</span><span style=color:#a6e22e>obj</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;acceptor&#34;</span><span style=color:#f92672>,</span> ioService<span style=color:#f92672>,</span> endpoint<span style=color:#f92672>)</span>
+<span style=color:#75715e>// Active socket - communication with client
+</span><span style=color:#75715e></span>activeSocket <span style=color:#f92672>=</span> tcp<span style=color:#f92672>.</span><span style=color:#a6e22e>obj</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;socket&#34;</span><span style=color:#f92672>,</span> ioService<span style=color:#f92672>)</span>
+
+<span style=color:#75715e>// Waiting for connection and use the activeSocket to connect with the client
+</span><span style=color:#75715e></span>helpers<span style=color:#f92672>.</span><span style=color:#a6e22e>accept</span><span style=color:#f92672>(</span>acceptorSocket<span style=color:#f92672>,</span> activeSocket<span style=color:#f92672>)</span>
+
+<span style=color:#75715e>// Waiting for message
+</span><span style=color:#75715e></span>message <span style=color:#f92672>=</span> helpers<span style=color:#f92672>.</span><span style=color:#a6e22e>getData</span><span style=color:#f92672>(</span>activeSocket<span style=color:#f92672>);</span>
+print<span style=color:#f92672>(</span>format<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;[Server]: Received \&#34;%s\&#34; from client.&#34;</span><span style=color:#f92672>,</span> message<span style=color:#f92672>.</span><span style=color:#a6e22e>getString</span><span style=color:#f92672>()))</span>
+
+<span style=color:#75715e>// Send reply
+</span><span style=color:#75715e></span>reply <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;Hello \&#39;&#34;</span> <span style=color:#f92672>~</span> message<span style=color:#f92672>.</span><span style=color:#a6e22e>getString</span><span style=color:#f92672>()</span> <span style=color:#f92672>~</span> <span style=color:#e6db74>&#34;\&#39;!&#34;</span>
+helpers<span style=color:#f92672>.</span><span style=color:#a6e22e>sendData</span><span style=color:#f92672>(</span>activeSocket<span style=color:#f92672>,</span> reply<span style=color:#f92672>)</span>
+print<span style=color:#f92672>(</span>format<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;[Server]: Sent \&#34;%s\&#34; to client.&#34;</span><span style=color:#f92672>,</span> reply<span style=color:#f92672>))</span>
+</code></pre></div><p>Client.sil contains the SIL code for the client. As the server, it includes the
+relevant headers, creates wrappers for the required namespaces and uses them to
+create an endpoint and a socket. Then the client connects to the server, sends a
+message, and waits for the server&rsquo;s reply. Once the reply arrives, the client
+prints it to the screen.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-d data-lang=d><span style=color:#75715e>// Client.sil
+</span><span style=color:#75715e></span><span style=color:#f92672>import</span> <span style=color:#960050;background-color:#1e0010>* </span>from silcling
+<span style=color:#f92672>import</span> format from format
+
+<span style=color:#a6e22e>cppCompile</span> <span style=color:#f92672>(</span><span style=color:#e6db74>&#34;#include &lt;boost/asio.hpp&gt;&#34;</span><span style=color:#f92672>)</span>
+cppCompile <span style=color:#f92672>(</span><span style=color:#e6db74>&#34;#include \&#34;helper.hpp\&#34;&#34;</span><span style=color:#f92672>)</span>
+
+asio <span style=color:#f92672>=</span> cppNamespace<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;boost::asio&#34;</span><span style=color:#f92672>)</span>
+tcp <span style=color:#f92672>=</span> cppNamespace<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;boost::asio::ip::tcp&#34;</span><span style=color:#f92672>)</span>
+helpers <span style=color:#f92672>=</span> cppNamespace<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;helpme&#34;</span><span style=color:#f92672>)</span>
+
+<span style=color:#75715e>// Scope resolution operator &lt;-&gt; address::static_method() or address::static_member
+</span><span style=color:#75715e></span>address <span style=color:#f92672>=</span> classScope<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;boost::asio::ip::address&#34;</span><span style=color:#f92672>)</span>
+
+ioService <span style=color:#f92672>=</span> asio<span style=color:#f92672>.</span><span style=color:#a6e22e>obj</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;io_service&#34;</span><span style=color:#f92672>)</span>
+endpoint <span style=color:#f92672>=</span> tcp<span style=color:#f92672>.</span><span style=color:#a6e22e>obj</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;endpoint&#34;</span><span style=color:#f92672>,</span> address<span style=color:#f92672>.</span><span style=color:#a6e22e>from_string</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;127.0.0.1&#34;</span><span style=color:#f92672>),</span> <span style=color:#ae81ff>9999</span><span style=color:#f92672>)</span>
+
+<span style=color:#75715e>// Creating socket
+</span><span style=color:#75715e></span>client_socket <span style=color:#f92672>=</span> tcp<span style=color:#f92672>.</span><span style=color:#a6e22e>obj</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;socket&#34;</span><span style=color:#f92672>,</span> ioService<span style=color:#f92672>)</span>
+<span style=color:#75715e>// Connect
+</span><span style=color:#75715e></span>client_socket<span style=color:#f92672>.</span><span style=color:#a6e22e>connect</span><span style=color:#f92672>(</span>endpoint<span style=color:#f92672>)</span>
+
+message <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;demo&#34;</span>
+helpers<span style=color:#f92672>.</span><span style=color:#a6e22e>sendData</span><span style=color:#f92672>(</span>client_socket<span style=color:#f92672>,</span> message<span style=color:#f92672>)</span>
+print<span style=color:#f92672>(</span>format<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;[Client]: Sent \&#34;%s\&#34; to server.&#34;</span><span style=color:#f92672>,</span> message<span style=color:#f92672>))</span>
+
+message <span style=color:#f92672>=</span> helpers<span style=color:#f92672>.</span><span style=color:#a6e22e>getData</span><span style=color:#f92672>(</span>client_socket<span style=color:#f92672>);</span>
+print<span style=color:#f92672>(</span>format<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;[Client]: Received \&#34;%s\&#34; from server.&#34;</span><span style=color:#f92672>,</span> message<span style=color:#f92672>.</span><span style=color:#a6e22e>getString</span><span style=color:#f92672>()))</span>
+</code></pre></div><p>Output:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=color:#f92672>[</span>Client<span style=color:#f92672>]</span>: Sent <span style=color:#e6db74>&#34;demo&#34;</span> to server.
+<span style=color:#f92672>[</span>Server<span style=color:#f92672>]</span>: Received <span style=color:#e6db74>&#34;demo&#34;</span> from client.
+<span style=color:#f92672>[</span>Server<span style=color:#f92672>]</span>: Sent <span style=color:#e6db74>&#34;Hello demo&#34;</span> to client.
+<span style=color:#f92672>[</span>Client<span style=color:#f92672>]</span>: Received <span style=color:#e6db74>&#34;Hello demo&#34;</span> from server.
+</code></pre></div><h2 id=interpretercompiler-as-a-service>Interpreter/Compiler as a Service</h2><p>The design of Cling, just like Clang, allows it to be used as a library. In the
+next example we show how to incorporate libCling in a C++ program. Cling can be
+used on-demand, as a service, to compile, modify or describe C++ code. The
+example program shows several ways in which compiled and interpreted C++ can
+interact:</p><ul><li><code>callCompiledFn</code> &ndash; The cling-demo.cpp defines an in global variable,
+<code>aGlobal</code>; a static float variable, <code>anotherGlobal</code>; and its accessors. The
+<code>interp</code> argument is an earlier created instance of the Cling interpreter.
+Just like in standard C++, it is sufficient to forward declare the compiled
+entities to the interpreter to be able to use them. Then, the execution
+information from the different calls to process is stored in a generic Cling
+<code>Value</code> object which is used to exchange information between compiled and
+interpreted code.</li><li><code>callInterpretedFn</code> &ndash; Complementing <code>callCompiledFn</code>, compiled code can
+call an interpreted function by asking Cling to form a function pointer from
+a given mangled name. Then the call uses the standard C++ syntax.</li><li><code>modifyCompiledValue</code> &ndash; Cling has full understanding of C++ and thus we can
+support complex low-level operations on stack-allocated memory. In the
+example we ask the compiler for the memory address of the local variable loc
+and ask the interpreter, at runtime, to square its value.</li></ul><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#75715e>// cling-demo.cpp
+</span><span style=color:#75715e>// g++ ... cling-demo.cpp; ./cling-demo
+</span><span style=color:#75715e></span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;cling/Interpreter/Interpreter.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;cling/Interpreter/Value.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;cling/Utils/Casting.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;string&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;sstream&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>
+<span style=color:#75715e>/// Definitions of declarations injected also into cling.
+</span><span style=color:#75715e>/// NOTE: this could also stay in a header #included here and into cling, but
+</span><span style=color:#75715e>/// for the sake of simplicity we just redeclare them here.
+</span><span style=color:#75715e></span><span style=color:#66d9ef>int</span> aGlobal <span style=color:#f92672>=</span> <span style=color:#ae81ff>42</span>;
+<span style=color:#66d9ef>static</span> <span style=color:#66d9ef>float</span> anotherGlobal <span style=color:#f92672>=</span> <span style=color:#ae81ff>3.141</span>;
+<span style=color:#66d9ef>float</span> <span style=color:#a6e22e>getAnotherGlobal</span>() { <span style=color:#66d9ef>return</span> anotherGlobal; }
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>setAnotherGlobal</span>(<span style=color:#66d9ef>float</span> val) { anotherGlobal <span style=color:#f92672>=</span> val; }
+
+<span style=color:#75715e>///\brief Call compiled functions from the interpreter.
+</span><span style=color:#75715e></span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>callCompiledFn</span>(cling<span style=color:#f92672>::</span>Interpreter<span style=color:#f92672>&amp;</span> interp) {
+  <span style=color:#75715e>// We could use a header, too...
+</span><span style=color:#75715e></span>  interp.declare(<span style=color:#e6db74>&#34;int aGlobal;</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>
+                 <span style=color:#e6db74>&#34;float getAnotherGlobal();</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>
+                 <span style=color:#e6db74>&#34;void setAnotherGlobal(float val);</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
+
+  cling<span style=color:#f92672>::</span>Value res; <span style=color:#75715e>// Will hold the result of the expression evaluation.
+</span><span style=color:#75715e></span>  interp.process(<span style=color:#e6db74>&#34;aGlobal;&#34;</span>, <span style=color:#f92672>&amp;</span>res);
+  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;aGlobal is &#34;</span> <span style=color:#f92672>&lt;&lt;</span> res.getAs<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span><span style=color:#f92672>&gt;</span>() <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#39;\n&#39;</span>;
+  interp.process(<span style=color:#e6db74>&#34;getAnotherGlobal();&#34;</span>, <span style=color:#f92672>&amp;</span>res);
+  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;getAnotherGlobal() returned &#34;</span> <span style=color:#f92672>&lt;&lt;</span> res.getAs<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>float</span><span style=color:#f92672>&gt;</span>() <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#39;\n&#39;</span>;
+
+  setAnotherGlobal(<span style=color:#ae81ff>1.</span>); <span style=color:#75715e>// We modify the compiled value,
+</span><span style=color:#75715e></span>  interp.process(<span style=color:#e6db74>&#34;getAnotherGlobal();&#34;</span>, <span style=color:#f92672>&amp;</span>res); <span style=color:#75715e>// does the interpreter see it?
+</span><span style=color:#75715e></span>  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;getAnotherGlobal() returned &#34;</span> <span style=color:#f92672>&lt;&lt;</span> res.getAs<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>float</span><span style=color:#f92672>&gt;</span>() <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#39;\n&#39;</span>;
+
+  <span style=color:#75715e>// We modify using the interpreter, now the binary sees the new value.
+</span><span style=color:#75715e></span>  interp.process(<span style=color:#e6db74>&#34;setAnotherGlobal(7.777); getAnotherGlobal();&#34;</span>);
+  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;getAnotherGlobal() returned &#34;</span> <span style=color:#f92672>&lt;&lt;</span> getAnotherGlobal() <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#39;\n&#39;</span>;
+}
+
+<span style=color:#75715e>/// Call an interpreted function using its symbol address.
+</span><span style=color:#75715e></span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>callInterpretedFn</span>(cling<span style=color:#f92672>::</span>Interpreter<span style=color:#f92672>&amp;</span> interp) {
+  <span style=color:#75715e>// Declare a function to the interpreter. Make it extern &#34;C&#34; to remove
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// mangling from the game.
+</span><span style=color:#75715e></span>  interp.declare(<span style=color:#e6db74>&#34;extern </span><span style=color:#ae81ff>\&#34;</span><span style=color:#e6db74>C</span><span style=color:#ae81ff>\&#34;</span><span style=color:#e6db74> int plutification(int siss, int sat) &#34;</span>
+                 <span style=color:#e6db74>&#34;{ return siss * sat; }&#34;</span>);
+  <span style=color:#66d9ef>void</span><span style=color:#f92672>*</span> addr <span style=color:#f92672>=</span> interp.getAddressOfGlobal(<span style=color:#e6db74>&#34;plutification&#34;</span>);
+  <span style=color:#66d9ef>using</span> func_t <span style=color:#f92672>=</span> <span style=color:#66d9ef>int</span>(<span style=color:#66d9ef>int</span>, <span style=color:#66d9ef>int</span>);
+  func_t<span style=color:#f92672>*</span> pFunc <span style=color:#f92672>=</span> cling<span style=color:#f92672>::</span>utils<span style=color:#f92672>::</span>VoidToFunctionPtr<span style=color:#f92672>&lt;</span>func_t<span style=color:#f92672>*&gt;</span>(addr);
+  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;7 * 8 = &#34;</span> <span style=color:#f92672>&lt;&lt;</span> pFunc(<span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>8</span>) <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#39;\n&#39;</span>;
+}
+
+<span style=color:#75715e>/// Pass a pointer into cling as a string.
+</span><span style=color:#75715e></span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>modifyCompiledValue</span>(cling<span style=color:#f92672>::</span>Interpreter<span style=color:#f92672>&amp;</span> interp) {
+  <span style=color:#66d9ef>int</span> loc <span style=color:#f92672>=</span> <span style=color:#ae81ff>17</span>; <span style=color:#75715e>// The value that will be modified
+</span><span style=color:#75715e></span>
+  <span style=color:#75715e>// Update the value of loc by passing it to the interpreter.
+</span><span style=color:#75715e></span>  std<span style=color:#f92672>::</span>ostringstream sstr;
+  <span style=color:#75715e>// on Windows, to prefix the hexadecimal value of a pointer with &#39;0x&#39;,
+</span><span style=color:#75715e></span>  <span style=color:#75715e>// one need to write: std::hex &lt;&lt; std::showbase &lt;&lt; (size_t)pointer
+</span><span style=color:#75715e></span>  sstr <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;int&amp; ref = *(int*)&#34;</span> <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>hex <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>showbase <span style=color:#f92672>&lt;&lt;</span> (size_t)<span style=color:#f92672>&amp;</span>loc <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#39;;&#39;</span>;
+  sstr <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;ref = ref * ref;&#34;</span>;
+  interp.process(sstr.str());
+  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;The square of 17 is &#34;</span> <span style=color:#f92672>&lt;&lt;</span> loc <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#39;\n&#39;</span>;
+}
+
+<span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>(<span style=color:#66d9ef>int</span> argc, <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>*</span> <span style=color:#66d9ef>const</span><span style=color:#f92672>*</span> argv) {
+  <span style=color:#75715e>// Create the Interpreter. LLVMDIR is provided as -D during compilation.
+</span><span style=color:#75715e></span>  cling<span style=color:#f92672>::</span>Interpreter interp(argc, argv, LLVMDIR);
+
+  callCompiledFn(interp);
+  callInterpretedFn(interp);
+  modifyCompiledValue(interp);
+
+  <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+}
+</code></pre></div><p>Output:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>./cling-demo
+
+aGlobal is <span style=color:#ae81ff>42</span>
+getAnotherGlobal<span style=color:#f92672>()</span> returned 3.141
+getAnotherGlobal<span style=color:#f92672>()</span> returned <span style=color:#ae81ff>1</span>
+getAnotherGlobal<span style=color:#f92672>()</span> returned 7.777
+<span style=color:#ae81ff>7</span> * 8 <span style=color:#f92672>=</span> <span style=color:#ae81ff>56</span>
+The square of <span style=color:#ae81ff>17</span> is <span style=color:#ae81ff>289</span>
+</code></pre></div><p>Crossing the compiled-interpreted boundary relies on the stability of Clang&rsquo;s
+implementation of the host&rsquo;s application binary interface (ABI). Over the years
+it has been very reliable for both Unix and Windows however, Cling is heavily
+used to interact with GCC-compiled codebases and is sensitive to ABI
+incompatibilities between GCC and Clang with respect to the Itanium ABI
+specification.</p><h2 id=extensions>Extensions</h2><p>Just like Clang, Cling can be extended by plugins. The next example demonstrates
+embedded use of Cling&rsquo;s extension for automatic differentiation,
+<a href=https://compiler-research.org/clad/>Clad</a>. Clad transforms the clang&rsquo;s AST to
+produce derivatives and gradients of mathematical functions. When creating the
+Cling instance we specify -fplugin and the path to the plugin itself. Then we
+define a target function, pow2, and ask for its derivative with respect to its
+first argument.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;cling/Interpreter/Interpreter.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;cling/Interpreter/Value.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>
+<span style=color:#75715e>// Derivatives as a service.
+</span><span style=color:#75715e></span>
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>gimme_pow2dx</span>(cling<span style=color:#f92672>::</span>Interpreter <span style=color:#f92672>&amp;</span>interp) {
+  <span style=color:#75715e>// Definitions of declarations injected also into cling.
+</span><span style=color:#75715e></span>  interp.declare(<span style=color:#e6db74>&#34;double pow2(double x) { return x*x; }&#34;</span>);
+  interp.declare(<span style=color:#e6db74>&#34;#include &lt;clad/Differentiator/Differentiator.h&gt;&#34;</span>);
+  interp.declare(<span style=color:#e6db74>&#34;auto dfdx = clad::differentiate(pow2, 0);&#34;</span>);
+
+  cling<span style=color:#f92672>::</span>Value res; <span style=color:#75715e>// Will hold the evaluation result.
+</span><span style=color:#75715e></span>  interp.process(<span style=color:#e6db74>&#34;dfdx.getFunctionPtr();&#34;</span>, <span style=color:#f92672>&amp;</span>res);
+
+  <span style=color:#66d9ef>using</span> func_t <span style=color:#f92672>=</span> <span style=color:#66d9ef>double</span>(<span style=color:#66d9ef>double</span>);
+  func_t<span style=color:#f92672>*</span> pFunc <span style=color:#f92672>=</span> res.getAs<span style=color:#f92672>&lt;</span>func_t<span style=color:#f92672>*&gt;</span>();
+  printf(<span style=color:#e6db74>&#34;dfdx at 1 = %f</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, pFunc(<span style=color:#ae81ff>1</span>));
+}
+
+<span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>(<span style=color:#66d9ef>int</span> argc, <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>*</span> <span style=color:#66d9ef>const</span><span style=color:#f92672>*</span> argv) {
+ std<span style=color:#f92672>::</span>vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>*&gt;</span> argvExt(argv, argv<span style=color:#f92672>+</span>argc);
+  argvExt.push_back(<span style=color:#e6db74>&#34;-fplugin=etc/cling/plugins/lib/clad.dylib&#34;</span>);
+  <span style=color:#75715e>// Create cling. LLVMDIR is provided as -D during compilation.
+</span><span style=color:#75715e></span>  cling<span style=color:#f92672>::</span>Interpreter interp(argvExt.size(), <span style=color:#f92672>&amp;</span>argvExt[<span style=color:#ae81ff>0</span>], LLVMDIR);
+  gimme_pow2dx(interp);
+  <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+}
+</code></pre></div><p>Output:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>./clad-demo
+dfdx at 1 <span style=color:#f92672>=</span> 2.000000
+</code></pre></div><h2 id=conclusion>Conclusion</h2><p>We have demonstrated Cling&rsquo;s capabilities for template instantiation on demand;
+incorporating an interpreter in third-party code; and facilitating interpreter
+extension. The lazy template instantiation in an embedded interpreter provides a
+service which is very suitable for interoperability with C++. Extending such a
+service with domain-specific capabilities such as automatic differentiation can
+be an key enabler for various science cases and for other broader communities.</p><h2 id=acknowledgements>Acknowledgements</h2><p>The author would like to thank Sylvain Corlay, Simeon Ehrig, David Lange,
+Chris Lattner, Javier Lopez Gomez, Wim Lavrijsen, Axel Naumann, Alexander Penev,
+Xavier Valls Pla, Richard Smith, Martin Vassilev, Ioana Ifrim who contributed to
+this post.</p><p>You can find out more about our activities at
+<a href=https://root.cern/cling/>https://root.cern/cling/</a> and
+<a href=https://compiler-research.org>https://compiler-research.org</a>.</p></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/posts/2021-02-23-llvm-meets-code-property-graphs/><i class="fa fa-chevron-circle-left"></i>LLVM meets Code Property Graphs</a></li></ul></section></main><footer><h6>llvm.org |
+Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
+<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
