@@ -2,10 +2,10 @@
 author: Amy Huang
 date: "2021-04-05"
 tags: ["llvm"]
-title:  The New Pass Manager
+title:  Smaller debug info with constructor type homing
 ---
 
-# Smaller debug info with constructor type homing
+# Constructor type homing for debug info
 
 ## Background
 Class type information is a large contributor to debug info size. Clang already has a few optimizations to reduce the size of class type information based on the assumption that debug info can be spread out over multiple compilation units. So, instead of emitting class type info in every compilation unit that references a class, we only really have to emit it in one place. (For all the other references, emitting the much smaller forward declaration of the class is sufficient.) As an example, one of the existing optimizations is vtable homing, where the type info for a dynamic C++ class is only emitted when its vtable is emitted.
