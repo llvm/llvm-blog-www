@@ -1,4 +1,57 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>asip on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/asip/</link><description>Recent content in asip on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Tue, 29 Jun 2010 08:38:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/asip/index.xml" rel="self" type="application/rss+xml"/><item><title>Smaller debug info with constructor type homing</title><link>https://blog.llvm.org/posts/2021-04-05-constructor-homing-for-debug-info/</link><pubDate>Mon, 05 Apr 2021 00:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-04-05-constructor-homing-for-debug-info/</guid><description>&lt;h1 id="constructor-type-homing-for-debug-info">Constructor type homing for debug info&lt;/h1>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>asip on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/asip/</link><description>Recent content in asip on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Tue, 29 Jun 2010 08:38:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/asip/index.xml" rel="self" type="application/rss+xml"/><item><title>Meet the LLVM Outreachy Interns!</title><link>https://blog.llvm.org/posts/2021-07-14-llvm-and-outreachy/</link><pubDate>Wed, 14 Jul 2021 00:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-07-14-llvm-and-outreachy/</guid><description>&lt;p>The LLVM Project is participating in the &lt;a href="https://www.outreachy.org">Outreachy&lt;/a> program for the first time. Two interns have been selected: Sushma Unnibhavi &amp;amp; Pooja Yadav.&lt;/p>
+&lt;p>Outreachy provides paid, remote internships with the goal of increasing diversity in open source. Outreachy interns work with mentors from open source communites on projects in programming, user experience, documentation, illustration, graphical design, data science, project marketing, user advocacy, or community event planning.&lt;/p>
+&lt;p>Sushma will be working with her mentor Kit Barton on her project to &lt;em>Create Documentation and Tutorials for the LLVM Global Instruction Selection Framework&lt;/em>. Pooja will be working with her mentor Anshil Gandhi on her project to &lt;em>Implement GlobalISel for the M68k backend in LLVM&lt;/em>. T&lt;/p>
+&lt;p>Thank you to the &lt;a href="https://foundation.llvm.org/docs/sponsors/">sponsors&lt;/a> of the &lt;a href="https://foundation.llvm.org">LLVM Foundation&lt;/a> as their support has made these internships possible. In addition, we would like to give a huge thank you to Kit and Anshil for mentoring!&lt;/p>
+&lt;p>We asked Sushma and Pooja a few questions about themselves and the project they are working on. Here are their answers:&lt;/p>
+&lt;p>&lt;strong>Sushma Unnibhavi&lt;/strong>&lt;/p>
+&lt;p>&lt;em>Can you tell us about yourself and your background?&lt;/em>&lt;/p>
+&lt;p>I am Sushma, a final year Information Science Engineering undergrad
+from India. My hobbies include drawing, dancing and reading. I love
+writing code. I have been obsessed with the idea of using software to
+solve practical problems. I love to dig into problems and solve them
+with modern technology. I am constantly learning because I never
+settle. I focus on making high-quality decisions and love meeting new
+people and hearing new perspectives. My specialities include learning
+new skills and programming languages and problem-solving.&lt;/p>
+&lt;p>&lt;em>How did you hear about Outreachy and why did you apply?&lt;/em>&lt;/p>
+&lt;p>I first came to know about Outreachy from my brother and searched for
+it right away. I found out that Outreachy seeks interns who are
+talented and have a zeal to learn while most of the other internships
+sought for the experience. I have always wanted to contribute to open
+source but never got proper guidance. Then I read the experiences of
+previous Outreachy interns which really motivated me. Many of them
+didn’t have any prior experience and they were supported so much from
+the mentors that made them reach greater heights. This made me
+think…..If they can, why can’t I? Hence I decided to apply to
+Outreachy. The way I have seen myself grow by contributing to LLVM in
+the one month time span of the contribution period is really
+surprising.&lt;/p>
+&lt;p>&lt;em>Which project will you be working on?&lt;/em>&lt;/p>
+&lt;p>I will be implementing GloballSel for M68k. I will be adding minimal
+support necessary to select a function that returns sum of two i32
+values. This includes some very naive and hardcoded argument/return
+lowering as well as handling of copy and add instructions throughout
+globalisel pipeline. I will also be implementing lowering for
+operations including add, sub, mul, div, comp, phi, load and store.&lt;/p>
+&lt;p>&lt;em>What are you most looking forward to during your internship?&lt;/em>&lt;/p>
+&lt;p>One thing I am looking forward to in this internship is a great
+learning experience. When I first started contributing to LLVM, I
+thought I wouldn’t stand a chance because I had never worked on a
+project with such a huge codebase and that too working on compilers
+was a nightmare for me. Through this internship I want to let go of
+this fear and become more confident. I want to prove to myself that
+with hard work and consistency nothing is impossible.&lt;/p>
+&lt;p>&lt;strong>Pooja Yadav&lt;/strong>&lt;/p>
+&lt;p>&lt;em>Can you tell us about yourself and your background?&lt;/em>&lt;/p>
+&lt;p>Hi! I am Pooja Yadav from India. I am currently pursuing my undergraduate degree in Computer Science and Engineering at National Institute of Technology, Goa, India. I have been interested in computer science since high school and feel lucky to get the branch of my choice in one of the deemed universities in India for my Btech degree. I like badminton and skipping in sports and I was a national player in rope skipping at my high school. Sometimes, to relax myself I draw sketches and play with paints sometimes. It is really therapeutic.&lt;/p>
+&lt;p>I am also a supporter of equity and diversity in the tech field. I am the General Secretory of SPIE student chapter of our college and we have organised many events to support equity. diversity and inclusion.&lt;/p>
+&lt;p>&lt;em>How did you hear about Outreachy and why did you apply?&lt;/em>&lt;/p>
+&lt;p>I heard about Outreachy in my second year of college from one of my seniors who is also an Outreachy alum. So, I also thought about participating in it. Outreachy provides great opportunity to people subjected to systematic bias and underrepresented in the technical industry. This was what encouraged me to participate in it. I got introduced to the vast ocean of computer science field in my first year of college and It seemed so overwhelming to me. So, I thought Outreachy would be a good place to start and that is how I got introduced to open source. I tried for Outreachy internship last year also but my final application was not selected. However, I learned a lot of things and was determined to try this year as well. I met many amazing people during the contribution period. All mentors and participants were very friendly and it was always a pleasure to talk to them. Mentors were very patient to answer all my questions, even the dumbest one. Also, the projects were so exciting and I wanted to dive into one of them because I knew that would raise my learning curve to another level. And this year the LLVM project on which I would be working got my interest. So, I decided to contribute to it and luckily I got selected for it.&lt;/p>
+&lt;p>&lt;em>Which project will you be working on?&lt;/em>&lt;/p>
+&lt;p>The project on which I am working is &amp;lsquo;Create Documentation and Tutorials for the LLVM Global Instruction Selection Framework&amp;rsquo;. Working on it was quite adventurous during my contribution period and currently I am learning a lot of things. This project is about reading present documentation of GlobalISel and updating or making the required changes. Then make a good tutorial for GIobalISel which would help many contributors in future; beginners as well as professionals. For creating documentation and tutorials I have to understand everything about GlobalIsel. So I am learning along as I move ahead in my project.&lt;/p>
+&lt;p>&lt;em>What are you most looking forward to during your internship?&lt;/em>&lt;/p>
+&lt;p>I had never heard about LLVM IR before. When I first read about it I was intrigued by the idea of improving the performance of a compiler with one more intermediate representation i.e machine IR and how we can write a generalised IR for compilers so that we don&amp;rsquo;t need to do it from scratch for every backend. I have learnt many things while working on this project, which include other things apart from this project topic like the concept of compilers, git, open source contributing rules, interaction with other contributors, communication skills, etc.&lt;/p>
+&lt;p>I am looking forward to learning more about this project and contributing my best to it. I like to explore different fields and this is a great opportunity to observe what other contributors are doing and learn from their project as well.&lt;/p></description></item><item><title>Smaller debug info with constructor type homing</title><link>https://blog.llvm.org/posts/2021-04-05-constructor-homing-for-debug-info/</link><pubDate>Mon, 05 Apr 2021 00:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-04-05-constructor-homing-for-debug-info/</guid><description>&lt;h1 id="constructor-type-homing-for-debug-info">Constructor type homing for debug info&lt;/h1>
 &lt;h2 id="background">Background&lt;/h2>
 &lt;p>Class type information is a large contributor to debug info size. Clang already has a few optimizations to reduce the size of class type information based on the assumption that debug info can be spread out over multiple compilation units. So, instead of emitting class type info in every compilation unit that references a class, we only really have to emit it in one place. (For all the other references, emitting the much smaller forward declaration of the class is sufficient.) As an example, one of the existing optimizations is vtable homing, where the type info for a dynamic C++ class is only emitted when its vtable is emitted.&lt;/p>
 &lt;h2 id="constructor-type-homing">Constructor type homing&lt;/h2>
