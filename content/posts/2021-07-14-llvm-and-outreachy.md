@@ -8,7 +8,7 @@ The LLVM Project is participating in the [Outreachy](https://www.outreachy.org) 
 
 Outreachy provides paid, remote internships with the goal of increasing diversity in open source. Outreachy interns work with mentors from open source communites on projects in programming, user experience, documentation, illustration, graphical design,  data science, project marketing, user advocacy, or community event planning.
 
-Sushma will be working with her mentor Kit Barton on her project to *Create Documentation and Tutorials for the LLVM Global Instruction Selection Framework*. Pooja will be working with her mentor Anshil Gandhi on her project to *Implement GlobalISel for the M68k backend in LLVM*. T
+Pooja will be working with her mentor Kit Barton on her project to *Create Documentation and Tutorials for the LLVM Global Instruction Selection Framework*. Sushma will be working with her mentor Anshil Gandhi on her project to *Implement GlobalISel for the M68k backend in LLVM*. T
 
 Thank you to the [sponsors](https://foundation.llvm.org/docs/sponsors/) of the [LLVM Foundation](https://foundation.llvm.org) as their support has made these internships possible. In addition, we would like to give a huge thank you to Kit and Anshil for mentoring!
 
