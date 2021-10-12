@@ -77,7 +77,7 @@ Therefore, the task of achieving relocatable code is worth looking into. It shou
 
 It brought up a new task – to retrieve the program’s offset value in the Flash relative to its initial address that was defined at linking time. For example, one could use the following trick. Global addresses remained the same, while the PC value was different. You got the difference between a global address and a PC one during run from a “normal address” and “hardcoded” it into the program. When run from an offset address this difference was different, and calculating how much it had changed gave you the offset value. However, as it will be shown later, there is a more direct way to get the offset value, so for now, let’s just say that the offset value is known.
 
-##Implementation (Initial Approach)
+## Implementation (Initial Approach)
 
 So, the processor loaded the global address into the register. When you use assembler, you only have to insert a specific instruction right after it, which will add the offset value to the result.
 
