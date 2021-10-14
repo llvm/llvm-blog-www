@@ -7,9 +7,10 @@ title: Byte types, or how to get rid of i8 abuse for chars in LLVM IR
 
 # Part 0, where we introduce our work
 
-This May, a proposal was made to add a new type in LLVM IR that represents raw
-memory. The goals of this type were to make compiler-introduced load type punning
-correct and fix associated bugs that are reported by [Alive2 dashboard][alive2].
+This May, together with Nuno Lopes and Juneyoung Lee we made a proposal to add a new
+type in LLVM IR that represents raw memory. The goals of this type were to make
+compiler-introduced load type punning correct and fix associated bugs that are
+reported by [Alive2 dashboard][alive2].
 
 While our [proposal][proposal] was accepted for GSoC, our [initial RFC][rfc] on
 the mailing list was received somewhat negatively and sparked many questions on
