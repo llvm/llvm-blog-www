@@ -12,7 +12,7 @@ type in LLVM IR that represents raw memory. The goals of this type were to make
 compiler-introduced load type punning correct and fix associated bugs that are
 reported by [Alive2 dashboard][alive2].
 
-While our [proposal][proposal] was accepted for GSoC, our [initial RFC][rfc] on
+While our [proposal][proposal] was accepted for the Google Summer of Code 2021 (GSoC), our [initial RFC][rfc] on
 the mailing list was received somewhat negatively and sparked many questions on
 the current semantics around `ptrtoint`, `inttoptr`, pointer provenance and memory
 in LLVM. In particular, the following was mentioned:
