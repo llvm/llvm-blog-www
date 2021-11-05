@@ -1,4 +1,107 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>libc++ on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/libc++/</link><description>Recent content in libc++ on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Tue, 25 Sep 2018 08:29:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/libc++/index.xml" rel="self" type="application/rss+xml"/><item><title>Generating relocatable code for ARM processors</title><link>https://blog.llvm.org/posts/2021-10-01-generating-relocatable-code-for-arm-processors/</link><pubDate>Fri, 01 Oct 2021 00:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-10-01-generating-relocatable-code-for-arm-processors/</guid><description>&lt;h2 id="abstract">Abstract&lt;/h2>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>libc++ on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/libc++/</link><description>Recent content in libc++ on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Tue, 25 Sep 2018 08:29:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/libc++/index.xml" rel="self" type="application/rss+xml"/><item><title>apt.llvm.org - moving from physical server to the cloud</title><link>https://blog.llvm.org/posts/2021-11-02-apt.llvm.org-moving-from-physical-server-to-the-cloud/</link><pubDate>Tue, 02 Nov 2021 00:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-11-02-apt.llvm.org-moving-from-physical-server-to-the-cloud/</guid><description>&lt;p>In this blog post, I would like to explain how I migrated
+&lt;a href="https://apt.llvm.org">apt.llvm.org&lt;/a> from physical hardware hosted in
+a datacenter to the Google cloud. This has resulted in better security
+and faster builds for LLVM Debian/Ubuntu nightly builds.&lt;/p>
+&lt;h1 id="previous-infrastructure">Previous infrastructure&lt;/h1>
+&lt;p>About 10 years ago, Nick Lewycky from Google offered to replace my mix
+of old and terrible servers with 16 blade servers in a chassis and a
+control server. Below are pictures of the front and back of these
+servers, which have served us faithfully for 10 years:&lt;/p>
+&lt;hr>
+&lt;p>&lt;img src="https://blog.llvm.org/img/gcp/servers-front.png" alt="Old server - front"> &lt;img src="https://blog.llvm.org/img/gcp/servers-back.png" alt="Old server - back">&lt;/p>
+&lt;hr>
+&lt;p>The hosting was sponsored by &lt;a href="https://www.irill.org/">&lt;em>IRILL&lt;/em>&lt;/a>, at
+Inria, next to Versailles.&lt;/p>
+&lt;p>This setup was running using a PXE install with preseed to set up
+everything on the 16 blades.&lt;/p>
+&lt;p>While it served us very well for years, it is now holding us back.&lt;/p>
+&lt;ul>
+&lt;li>Some of the blades are dying;&lt;/li>
+&lt;li>Old hardware - it takes from 4 to 7 hours per build;&lt;/li>
+&lt;li>All blades are always on even if no build is executed;&lt;/li>
+&lt;li>Even if it happened rarely, I had to drive to the DC to fix some
+systems.&lt;/li>
+&lt;/ul>
+&lt;h1 id="new-infrastructure">New infrastructure&lt;/h1>
+&lt;p>As part of the &lt;a href="https://openssf.org/">&lt;em>OpenSSF initiative&lt;/em>&lt;/a>, Google and
+the Linux foundation offered a budget to migrate this service on Google
+Cloud Platform (GCP).&lt;/p>
+&lt;p>As Jenkins has been working very well, I reused this approach and
+imported the previous configurations (available on
+&lt;a href="https://github.com/opencollab/llvm-jenkins.debian.net/tree/master/jobs">&lt;em>https://github.com/opencollab/llvm-jenkins.debian.net/tree/master/jobs&lt;/em>&lt;/a>).&lt;/p>
+&lt;p>I followed most of the tutorial provided on GCP, &lt;a href="https://cloud.google.com/architecture/using-jenkins-for-distributed-builds-on-compute-engine">&lt;em>Using Jenkins for
+distributed builds on Compute
+Engine&lt;/em>&lt;/a>.&lt;/p>
+&lt;p>The architecture is the following:&lt;/p>
+&lt;p>&lt;img src="https://blog.llvm.org/img/gcp/gcp-archi-infra.png" alt="The schema of the infra">&lt;/p>
+&lt;p>Similar to puppet or chef, Salt is the configuration management tool
+used to configure the various systems. A salt server configures both the
+Jenkins controller and the reference node. This node is a preconfigured
+VM with all the dependencies and tools to start the build. This node is
+halted most of the time and only started when the image needs to be
+updated.&lt;/p>
+&lt;p>For example, the list of Virtual Machines now usually looks like the
+following screenshot:&lt;/p>
+&lt;p>&lt;img src="https://blog.llvm.org/img/gcp/gcp-list-server.png" alt="GCP - list of servers">&lt;/p>
+&lt;ul>
+&lt;li>5 build VMs - off after 5 minutes without activity&lt;/li>
+&lt;li>The template VM (off as it is only started to update the image)&lt;/li>
+&lt;li>The jenkins orchestrator&lt;/li>
+&lt;/ul>
+&lt;h2 id="build-servers">Build servers&lt;/h2>
+&lt;p>The controller is always on and starts/ends the build nodes.&lt;/p>
+&lt;p>The reference node is configured and updated using this script, based on
+gcloud, the Google cloud CLI:&lt;/p>
+&lt;p>&lt;a href="https://github.com/opencollab/llvm-jenkins.debian.net/blob/master/image-update.sh">&lt;em>https://github.com/opencollab/llvm-jenkins.debian.net/blob/master/image-update.sh&lt;/em>&lt;/a>&lt;/p>
+&lt;p>This script performs the following steps:&lt;/p>
+&lt;ul>
+&lt;li>starts the reference node and then ssh into it.&lt;/li>
+&lt;li>Perform the needed changes (ex: new chroot for a new distro version,
+new build hooks, etc).&lt;/li>
+&lt;li>Once the changes are performed.&lt;/li>
+&lt;/ul>
+&lt;p>Usually:&lt;/p>
+&lt;ul>
+&lt;li>Salt update&lt;/li>
+&lt;li>Refresh the chroots&lt;/li>
+&lt;li>&lt;em>git pull&lt;/em> llvm-project&lt;/li>
+&lt;li>Stops the VM&lt;/li>
+&lt;li>Creates a new image.&lt;/li>
+&lt;li>Archives the old image.&lt;/li>
+&lt;li>This image will be used by Jenkins to start new VMs.&lt;/li>
+&lt;/ul>
+&lt;p>The node image contains the various i386 and amd64 chroot for supported
+Debian and Ubuntu installs. The LLVM repository is also checked out to
+avoid doing a long clone with many files on every VM startup.&lt;/p>
+&lt;p>Thanks to this, the jobs just need to perform a small &lt;em>git pull&lt;/em> instead
+of a full clone.&lt;/p>
+&lt;p>&lt;img src="https://blog.llvm.org/img/gcp/gcp-image-node.png" alt="GCP - image node">&lt;/p>
+&lt;p>The size of this image is 6.67gb. This approach saves about 10 minutes
+of the build pipeline (skipping the creation of the chroot + full
+clone).&lt;/p>
+&lt;p>This wasn&amp;rsquo;t easy. I had to iterate 25 times to have a proper image
+supporting all the use cases.&lt;/p>
+&lt;p>GCP provides a shared file system mechanism available as an NFS mountage
+called &lt;a href="https://cloud.google.com/filestore">&lt;em>Filestore&lt;/em>&lt;/a>. Each build
+node has access to it and will update the various repositories just like
+if it was a local file system.&lt;/p>
+&lt;h2 id="benefits-and-cost">Benefits and cost&lt;/h2>
+&lt;p>The first benefit is security. This is based on the Google cloud
+infrastructure, so it benefits from all their security work.&lt;/p>
+&lt;p>The fact that the VMs are always cycled and recreated from a clean image
+will also help. They are not directly accessible from the Internet (they
+leverage cloud NAT to be able to download packages from the Internet),
+so it will be harder to attack.&lt;/p>
+&lt;p>An amd64 build now runs in parallel takes **about 50 minutes **instead
+of almost 7 hours.&lt;/p>
+&lt;p>In terms of cost, depending on the activity, the daily cost varies from
+70 to 150 US$/day.&lt;/p>
+&lt;p>Now that the migration has been completed, it is now possible to
+consider some builds leveraging PGO and LTO for faster binaries.&lt;/p>
+&lt;h2 id="thanks">Thanks&lt;/h2>
+&lt;p>Thanks to Laurent Vaylet from the GCP team for the help and patience
+answering my newbie questions, and also thanks to Google and the Linux
+Foundation for the GCP credits and support.&lt;/p></description></item><item><title>Generating relocatable code for ARM processors</title><link>https://blog.llvm.org/posts/2021-10-01-generating-relocatable-code-for-arm-processors/</link><pubDate>Fri, 01 Oct 2021 00:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-10-01-generating-relocatable-code-for-arm-processors/</guid><description>&lt;h2 id="abstract">Abstract&lt;/h2>
 &lt;p>By upgrading the LLVM compiler, we solved the problem when neither LLVM nor the GCC could create the correct Position Independent Code for Cortex M controllers, with the code running in Flash memory rather than in RAM. Now the binary image of the program can be flashed to an arbitrary address and run from it, without being moved to another place.&lt;/p>
 &lt;p>Updating the microcontroller’s “firmware” is a dangerous process. Before, any hardware failure during the update could brick your device. Nowadays, devices usually have their own boot loader which lets you restart the update before your device’s functionality is lost. Until the update is not complete the device will not work. The fanciest way to update is to use two separate regions for the “firmware” – the main region and the reserve region. In the picture below, they are marked by red and blue accordingly. Initially, the red region is active, while the update will be loaded into the blue region. This way boot failure is not a big deal. The red region will still be running everything. And if the update is successful, the blue region will become active. The next update will be loaded into the red region, and so on. Each update will lead to this switch.&lt;/p>
 &lt;p>&lt;img src="https://habrastorage.org/webt/mg/po/wi/mgpowihvb5euptcm2vflo2nd-ua.png" alt="img1">&lt;/p>
