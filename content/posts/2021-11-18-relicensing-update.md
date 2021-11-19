@@ -6,7 +6,7 @@ title: LLVM relicensing update & call for help
 ---
 
 In this blog post, I'd like to summarize the main points I talked about in the
-relicensing update presentation at the 2021 LLVM developers meeting.
+relicensing update presentation at the 2021 LLVM Developer's meeting.
 
 The very short summary is that we are currently in the long tail phase of
 collecting relicensing agreements of past contributors. We already at the time
