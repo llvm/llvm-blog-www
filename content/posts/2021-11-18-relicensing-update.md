@@ -48,76 +48,8 @@ In that case, we have a number of options to get to the point where we can claim
 that all code in the LLVM project is covered by the new LLVM license. We call
 this phase of relicensing "the end game".
 
-<img>
-<svg width=700 height=120>
-  <line x1="0" y1="100" x2="700" y2="100" style="stroke:gray;stroke-width:2" />
-  <circle cx="50" cy="100" r="5" stroke-width="0" fill="gray"/>
-  <circle cx="100" cy="100" r="5" stroke-width="0" fill="gray"/>
-  <circle cx="150" cy="100" r="5" stroke-width="0" fill="gray"/>
-  <circle cx="200" cy="100" r="5" stroke-width="0" fill="gray"/>
-  <circle cx="250" cy="100" r="5" stroke-width="0" fill="gray"/>
-  <circle cx="300" cy="100" r="5" stroke-width="0" fill="gray"/>
-  <circle cx="350" cy="100" r="5" stroke-width="0" fill="gray"/>
-  <circle cx="400" cy="100" r="5" stroke-width="0" fill="gray"/>
-  <circle cx="450" cy="100" r="5" stroke-width="0" fill="gray"/>
-  <circle cx="500" cy="100" r="5" stroke-width="0" fill="gray"/>
-  <circle cx="550" cy="100" r="5" stroke-width="0" fill="gray"/>
-  <circle cx="600" cy="100" r="5" stroke-width="0" fill="gray"/>
-  <circle cx="650" cy="100" r="5" stroke-width="0" fill="gray"/>
-  <text x="50"  y="115" style="fill:gray;font-size: 12px;" text-anchor="middle">2011</text>
-  <text x="100" y="115" style="fill:gray;font-size: 12px;" text-anchor="middle">2012</text>
-  <text x="150" y="115" style="fill:gray;font-size: 12px;" text-anchor="middle">2013</text>
-  <text x="200" y="115" style="fill:gray;font-size: 12px;" text-anchor="middle">2014</text>
-  <text x="250" y="115" style="fill:gray;font-size: 12px;" text-anchor="middle">2015</text>
-  <text x="300" y="115" style="fill:gray;font-size: 12px;" text-anchor="middle">2016</text>
-  <text x="350" y="115" style="fill:gray;font-size: 12px;" text-anchor="middle">2017</text>
-  <text x="400" y="115" style="fill:gray;font-size: 12px;" text-anchor="middle">2018</text>
-  <text x="450" y="115" style="fill:gray;font-size: 12px;" text-anchor="middle">2019</text>
-  <text x="500" y="115" style="fill:gray;font-size: 12px;" text-anchor="middle">2020</text>
-  <text x="550" y="115" style="fill:gray;font-size: 12px;" text-anchor="middle">2021</text>
-  <text x="600" y="115" style="fill:gray;font-size: 12px;" text-anchor="middle">2022</text>
-  <text x="650" y="115" style="fill:gray;font-size: 12px;" text-anchor="middle">2023</text>
-  <defs>
-    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:rgb(166, 191, 255);stop-opacity:0" />
-      <stop offset="10%" style="stop-color:rgb(166, 191, 255);stop-opacity:1" />
-      <stop offset="90%" style="stop-color:rgb(166, 191, 255);stop-opacity:1" />
-      <stop offset="100%" style="stop-color:rgb(166, 191, 255);stop-opacity:0" />
-    </linearGradient>
-  </defs>
-  <g class="fragment">
-  <!-- First text block is 2011-2015-ish -->
-  <rect x="75" y="40" width="175" height="50" fill="url(#grad1)"/>
-  <!-- Middle of first text block is 2013 -->
-  <text x="150" y="60" style="fill:black;font-size: 16px;" text-anchor="middle">
-  <tspan x="160" dy="0em">Need for license</tspan>
-  <tspan x="160" dy="1em">change emerges</tspan>
-  </text>
-  </g>
-  <g class="fragment">
-  <rect x="255" y="40" width="100" height="50" fill="url(#grad1)"/>
-  <text x="325" y="60" style="fill:black;font-size: 16px;" text-anchor="middle">
-    <tspan x="310" dy="0em">Deciding new</tspan>
-    <tspan x="310" dy="1em">license</tspan>
-  </text>
-  </g>
-  <g class="fragment">
-  2018-now (2022?)〉 Get all code covered by new license.
-  <rect x="350" y="40" width="275" height="50" fill="url(#grad1)"/>
-  <text x="415" y="60" style="fill:black;font-size: 16px;" text-anchor="middle">
-    <tspan x="490" dy="0em">Get all code covered</tspan>
-    <tspan x="490" dy="1em"> by new license</tspan>
-  </text>
-  </g>
-  <g class="fragment">
-  <rect x="625" y="40" width="85" height="50" fill="url(#grad1)"/>
-  <text x="625" y="60" style="fill:black;font-size: 16px;" text-anchor="middle">
-    <tspan x="670" dy="0em">end</tspan>
-    <tspan x="670" dy="1em">game</tspan>
-  </text>
-  </g>
-</svg>
-</img>
+![timeline](/img/relicensing2021/timeline.png)
+
 
 # Why relicense?
 
@@ -176,58 +108,7 @@ The remaining task is to also get the earlier contributions covered by the new
 license. This consists of about 300k commits totaling about 32 million lines of
 contributed code.
 
-<img>
-<svg width=700 height=400 style="mix-blend-mode: difference;">
-  <rect x="0" y="200" width="350" height="50" style="fill:rgb(0, 183, 255);stroke-width:0" />
-  <rect x="350" y="200" width="350" height="50" style="fill:rgb(72, 255, 0);stroke-width:0" />
-  <rect x="347" y="200" width="6" height="50" style="fill:gray;stroke-width:0"/>
-  <text x="350" y="275" style="fill:rgb(255, 255, 255);font-size: 20px;"
-  text-anchor="middle">2019/01/19</text>
-  <text x="700" y="275" style="fill:rgb(255, 255, 255);font-size: 20px;"
-  text-anchor="end">Today</text>
-  <text x="0" y="275" style="fill:rgb(255, 255, 255);font-size: 20px;"
-  text-anchor="start">2001/06/06</text>
-
-  <g class="fragment">
-    <circle cx="390" cy="47" r="5" stroke-width="0" fill="gray"/>
-    <line x1="390" y1="47" x2="350" y2="200" style="stroke:gray;stroke-width:2" />
-    <circle cx="350" cy="200" r="5" stroke-width="0" fill="gray"/>
-    <foreignObject x="400" y="20" width="300" height="200">
-    <div xmlns="http://www.w3.org/1999/xhtml"
-    style="font-size:20px;text-align:left">
-    New license installed after<br/>
-    8.0 release branched.
-    </div>
-  </foreignObject>
-  </g>
-
-  <g class="fragment">
-    <circle cx="420" cy="290" r="5" stroke-width="0" fill="gray"/>
-    <line x1="420" y1="290" x2="420" y2="225" style="stroke:gray;stroke-width:2" />
-    <circle cx="420" cy="225" r="5" stroke-width="0" fill="gray"/>
-    <foreignObject x="400" y="300" width="300" height="200">
-    <div xmlns="http://www.w3.org/1999/xhtml"
-    style="font-size:20px;text-align:left">
-    All code since is covered.
-    (~100k commits so far)
-    </div>
-  </foreignObject>
-  </g>
-
-  <g class="fragment">
-    <circle cx="40" cy="47" r="5" stroke-width="0" fill="gray"/>
-    <line x1="40" y1="47" x2="40" y2="225" style="stroke:gray;stroke-width:2" />
-    <circle cx="40" cy="225" r="5" stroke-width="0" fill="gray"/>
-    <foreignObject x="50" y="20" width="300" height="200">
-    <div xmlns="http://www.w3.org/1999/xhtml"
-    style="font-size:20px;text-align:left">
-    Most code before needs agreement from copyright owners.
-    (~300k commits; ~32M LOC)
-    </div>
-  </foreignObject>
-  </g>
-</svg>
-</img>
+![Getting all code covered](/img/relicensing2021/getting_all_code_covered.png)
 
 What needs to be done to get those earlier contributions covered?
 
