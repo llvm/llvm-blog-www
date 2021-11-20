@@ -1,4 +1,177 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>release on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/release/</link><description>Recent content in release on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Wed, 14 Dec 2016 13:25:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/release/index.xml" rel="self" type="application/rss+xml"/><item><title>apt.llvm.org - moving from physical server to the cloud</title><link>https://blog.llvm.org/posts/2021-11-02-apt.llvm.org-moving-from-physical-server-to-the-cloud/</link><pubDate>Tue, 02 Nov 2021 00:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-11-02-apt.llvm.org-moving-from-physical-server-to-the-cloud/</guid><description>&lt;p>In this blog post, I would like to explain how I migrated
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>release on The LLVM Project Blog</title><link>https://blog.llvm.org/tags/release/</link><description>Recent content in release on The LLVM Project Blog</description><generator>Hugo -- gohugo.io</generator><copyright>llvm.org</copyright><lastBuildDate>Wed, 14 Dec 2016 13:25:00 +0000</lastBuildDate><atom:link href="https://blog.llvm.org/tags/release/index.xml" rel="self" type="application/rss+xml"/><item><title>LLVM relicensing update &amp; call for help</title><link>https://blog.llvm.org/posts/2021-11-18-relicensing-update/</link><pubDate>Thu, 18 Nov 2021 00:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-11-18-relicensing-update/</guid><description>&lt;p>In this blog post, I&amp;rsquo;d like to summarize the main points I talked about in the
+relicensing update presentation at the 2021 LLVM Developer&amp;rsquo;s meeting.&lt;/p>
+&lt;p>The very short summary is that we are currently in the long tail phase of
+collecting relicensing agreements of past contributors. We already at the time
+of this writing have more than 94% of older code relicensed. We hope to crowd
+source getting through the long tail to get as close to 100% as possible.&lt;/p>
+&lt;h1 id="call-for-help">Call for help&lt;/h1>
+&lt;p>You can help by looking through &lt;a href="https://docs.google.com/spreadsheets/d/18_0Hog_eSwES8lKwf7WJal3yBwwcYfvPu1yCfZnTcek/edit?usp=sharing">the list of remaining individuals and
+corporations we need to get agreements
+from&lt;/a>,
+and reaching out to them, or letting us know at &lt;a href="mailto:license-questions@llvm.org">license-questions@llvm.org&lt;/a> how
+we can reach out to them. Also, if you&amp;rsquo;d happen to have any other information that you think could help us, please do let us know at &lt;a href="mailto:license-questions@llvm.org">license-questions@llvm.org&lt;/a>.&lt;/p>
+&lt;p>More detailed guidance on how you can help are available at
+&lt;a href="https://foundation.llvm.org/docs/relicensing_long_tail">https://foundation.llvm.org/docs/relicensing_long_tail&lt;/a>.&lt;/p>
+&lt;p>In the rest of this blog post, I&amp;rsquo;m going to give a bit more historical
+background and describe the current status in more detail.&lt;/p>
+&lt;h1 id="the-llvm-relicensing-effort-phases-over-time">The LLVM relicensing effort: phases over time&lt;/h1>
+&lt;p>The relicensing effort started some time ago. Let me first very briefly describe
+the various phases before going in more detail. In the years leading up to 2015,
+it became clear that there were some issues with the license LLVM had at the
+time.&lt;/p>
+&lt;p>A different license was the answer to those issues. Between roughly 2015 and
+2017 the focus was on deciding what different license would be best suited.&lt;/p>
+&lt;p>Once it was decided what the new license was going to be, we started working on
+getting all code to be covered by this new license. That includes getting
+agreement from all copyright holders of existing code to share their past
+contributions under the new license. As you can see on the timeline, getting
+those agreements is the current focus of the relicensing effort.&lt;/p>
+&lt;p>Maybe we won&amp;rsquo;t be able to get an agreement for every single past contribution.
+In that case, we have a number of options to get to the point where we can claim
+that all code in the LLVM project is covered by the new LLVM license. We call
+this phase of relicensing &amp;ldquo;the end game&amp;rdquo;.&lt;/p>
+&lt;p>&lt;img src="https://blog.llvm.org/img/relicensing2021/timeline.png" alt="timeline">&lt;/p>
+&lt;h1 id="why-relicense">Why relicense?&lt;/h1>
+&lt;p>The old license consists of 3 components: the UIUC license that covered all the
+code, the MIT license that additionally covered the code in run-time libraries,
+and a few sentences on granting patent rights in the developer policy.&lt;/p>
+&lt;p>This caused
+&lt;a href="https://lists.llvm.org/pipermail/llvm-dev/2015-October/091536.html">the following 3 issues&lt;/a>:&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>Some were blocked from contributing because of the text in the patent section
+in the developer policy. The wording could be interpreted as requiring giving
+unnecessarily broad access to patent rights when contributing to LLVM. That
+made it impossible for some companies to contribute.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>The run time libraries were dual licensed under the UIUC and MIT license; the
+rest of the code only under the UIUC license. Therefore, we could not easily
+move code to run time libraries from other parts. The reason run time
+libraries were dual licensed was to enable linking to run time library
+binaries without requiring attribution to LLVM.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>The wording on patent rights in the developer policy was fuzzy and imprecise,
+leading to uncertainty over whether it did provide the intended protection.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h1 id="a-new-license">A new license&lt;/h1>
+&lt;p>After exploring a range of options, it was decided that the best solution to solve these issues was to have all code licensed under the &lt;a href="https://foundation.llvm.org/relicensing/LICENSE.txt">Apache-2.0 with LLVM exception&lt;/a> license:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>Apache-2.0 contains well-understood patent granting which addresses the first
+and third issue.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>The LLVM exception is there for 2 reasons:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>It removes a potential incompatibility with using LLVM code in combination
+with GPLv2 code.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>It removes the requirement for developers using LLVM tools to tell the users
+of the binaries they produce that those binaries may contain some code
+originating from LLVM. Such a situation can easily arise when parts of the
+LLVM run-time libraries are linked in as part of the normal compilation
+process.&lt;/p>
+&lt;p>The LLVM exception enables the run-time libraries to be covered by the exact
+same single license as the rest of the code base.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h1 id="getting-all-code-covered-by-the-new-license">Getting all code covered by the new license&lt;/h1>
+&lt;p>After a decision was made of what the new license should be, we started working
+on having all code covered by it.&lt;/p>
+&lt;p>As a first step, we made sure that all new contributions were covered by the new
+license. This happened after the 8.0 release branch was created. The 100k
+commits since are covered by the new license.&lt;/p>
+&lt;p>The remaining task is to also get the earlier contributions covered by the new
+license. This consists of about 300k commits totaling about 32 million lines of
+contributed code.&lt;/p>
+&lt;p>&lt;img src="https://blog.llvm.org/img/relicensing2021/getting_all_code_covered.png" alt="Getting all code covered">&lt;/p>
+&lt;p>What needs to be done to get those earlier contributions covered?&lt;/p>
+&lt;p>The reason we need a license in the first place is copyright. Most code
+contributions are covered by copyright. Which means that the person or company
+owning the copyright has a lot of decision power over what can legally be done
+with that code. By covering the code with a license, it becomes clear what
+others are permitted to do with that code. If there isn&amp;rsquo;t a license associated
+with copyrighted code there isn&amp;rsquo;t all that much useful that others can do with
+it.&lt;/p>
+&lt;p>Basically, to get existing code to be covered by a new license, we need to find
+who owns the copyright on it, and ask them to agree with offering their
+copyrighted work under the new license.&lt;/p>
+&lt;p>The copyright owner can be either an individual, for example the person who
+wrote the code originally; or a company, for example a company that employed the
+person who wrote the code.&lt;/p>
+&lt;h1 id="asking-agreement-from-copyright-owners">Asking agreement from copyright owners&lt;/h1>
+&lt;p>We started asking for their agreements. By examining the version control log of
+the 300k-ish commits we need to get agreements for, we found that about 2800
+different people or email addresses made a contribution.&lt;/p>
+&lt;p>We reached out to all of them and asked them two things. First, if any
+corporation may own the copyright on any of their contributions. Secondly, if
+they agree with relicensing the contributions they copyright own personally.&lt;/p>
+&lt;p>So far, we&amp;rsquo;ve heard of about 220 unique corporations potentially copyright
+owning some past contribution. We also started reaching out to those, but have
+not asked every single one just yet.&lt;/p>
+&lt;h1 id="status-as-of-november-2021">Status as of November 2021&lt;/h1>
+&lt;p>So after 2.5 years since we started asking &amp;ndash; where are we with getting
+agreements to relicense?&lt;/p>
+&lt;p>The chart below summarize the current status. It shows a treemap where each
+rectangle represents the contributions made by one person. The size of each
+rectangle represents how many lines of code the person contributed.&lt;/p>
+&lt;p>&lt;img src="https://blog.llvm.org/img/relicensing2021/relicensing-status-treemap.svg" alt="Treemap showing LLVM relicensing status">&lt;/p>
+&lt;p>When the rectangle is green, it means all their contributions are fully covered
+by relicensing agreements.&lt;/p>
+&lt;p>When the rectangle is orange, it means we have not yet received such an
+agreement. When the rectangle is orange with green stars, it means some
+contributions by that person are covered and others not. This can happen for
+example when the person has worked for multiple companies over time and only
+some of those companies have agreed with the relicensing so far.&lt;/p>
+&lt;p>We already have over 94% of all contributed lines of code between 2001 and 2019
+covered by a licensing agreement. We only have a good 5% of lines of code to go
+still.&lt;/p>
+&lt;p>As you can see, most of the missing agreements are with &amp;ldquo;long tail&amp;rdquo;
+contributors. By long tail contributors here we mean the many contributors who
+contributed relatively fewer lines of code. We focussed on reaching out to the
+bigger contributors first. To reach out well to the long tail of contributors,
+we&amp;rsquo;re hoping to get help from the wider LLVM community.&lt;/p>
+&lt;h1 id="help-wanted">Help wanted!&lt;/h1>
+&lt;p>Please do consider helping us with reaching any of the people or corporations in
+the long tail. Please have a look at &lt;a href="https://docs.google.com/spreadsheets/d/18_0Hog_eSwES8lKwf7WJal3yBwwcYfvPu1yCfZnTcek/edit?usp=sharing">the up-to-date list of people and
+corporations&lt;/a>
+we can use help with getting in touch with.&lt;/p>
+&lt;p>You can find more detailed guidance on how you can help on the &lt;a href="https://foundation.llvm.org/docs/relicensing_long_tail/">LLVM foundation
+website&amp;rsquo;s relicensing long tail
+page&lt;/a>.&lt;/p>
+&lt;p>If you do think you could help us with reaching out to someone on the list, or
+you may have some other information that could help us, please do let us know by
+emailing &lt;a href="mailto:license-questions@llvm.org">license-questions@llvm.org&lt;/a>.&lt;/p>
+&lt;h1 id="relicensing-end-game">Relicensing end game&lt;/h1>
+&lt;p>We are currently in the phase of getting as many relicensing agreements as
+possible. We do expect that we may not be able to get absolutely 100% of all
+past contributions covered by an agreement. What can we do to achieve current
+top-of-mainline to be fully covered by the new license?&lt;/p>
+&lt;p>We will need to decide on a contribution-by-contribution basis what the options
+available are to achieve that goal. We have at least the following options.&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>We can check if copyright even applies to the particular contribution. Very
+small contributions may not be covered by copyright, and hence may not need a
+license agreement.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>It may well be that code contributed a long time ago is no longer in the code
+base.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>If copyright does apply and the code is still in the code base, we can remove
+the contribution. Depending on whether current contributors and users still
+value the effect of that contribution, it may need to be reimplemented.&lt;/p>
+&lt;/li>
+&lt;/ul></description></item><item><title>apt.llvm.org - moving from physical server to the cloud</title><link>https://blog.llvm.org/posts/2021-11-02-apt.llvm.org-moving-from-physical-server-to-the-cloud/</link><pubDate>Tue, 02 Nov 2021 00:00:00 +0000</pubDate><guid>https://blog.llvm.org/posts/2021-11-02-apt.llvm.org-moving-from-physical-server-to-the-cloud/</guid><description>&lt;p>In this blog post, I would like to explain how I migrated
 &lt;a href="https://apt.llvm.org">apt.llvm.org&lt;/a> from physical hardware hosted in
 a datacenter to the Google cloud. This has resulted in better security
 and faster builds for LLVM Debian/Ubuntu nightly builds.&lt;/p>
