@@ -23,6 +23,7 @@ pygmentsCodeFences = true
     #instagram = "username"
     #stackoverflow = "username"
     #youtube = "user/username" # or channel/channelname
+    #devto = "username"
 
 [params]
     tagline = "A Hugo theme for creative and technical writing"
@@ -34,6 +35,10 @@ pygmentsCodeFences = true
     #utterancesIssueTerm = "pathname"
     #homepageLength = 10
     #commentAutoload = true  #This mean reader don't need click, disqus comment autoload
+    #mathjax = true #Enable display of mathematics using mathjax (LaTeX syntax)
+    #katex = true #Enable display of mathematics using katex (Faster LaTeX rendering)
+    #google_fonts = ["Staatliches"] # Adds additional google fonts
+    #disableDarkModeCSS = false # disables css style for users using dark-mode
 
 # uncomment to enable the Tags link on the main toolbar
 #  [[menu.main]]

@@ -14,11 +14,12 @@ It was originally developed by [b. avianto](https://github.com/avianto/hugo-kier
     - [git submodule method](#git-submodule-method)
     - [independent directory method](#independent-directory-method)
   - [Configuration](#configuration)
-    - [Main Menu](#main-menu)
+    - [Menus](#menus)
     - [Categories & Tags](#categories--tags)
     - [Images](#images)
     - [Code highlight](#code-highlight)
     - [Font Awesome icons](#font-awesome-icons)
+    - [Mathematics](#mathematics)
     - [Commenting](#static-commenting)
   - [Support and Pull Requests](#support-and-pull-requests)
 
@@ -31,11 +32,11 @@ It was originally developed by [b. avianto](https://github.com/avianto/hugo-kier
 - Utilize normalize.css for consistent styling (Cloudflare CDN).
 - Use Google Fonts: Ruda (serif) and Roboto Slab (sans-serif).
 - [Disqus](https://disqus.com) or [Utterances](https://utteranc.es) comments loaded on demand.
-
+- Supports downloading extra [Google Fonts](https://fonts.google.com/).
 
 ## Demo
 
-Live demo: [https://themes.gohugo.io/theme/hugo-kiera/](https://themes.gohugo.io/theme/hugo-kiera/)
+Live demo: [https://themes.gohugo.io/themes/hugo-kiera/](https://themes.gohugo.io/themes/hugo-kiera/)
 
 ## Installation
 
@@ -99,13 +100,15 @@ googleAnalytics = "" #Google Analytics ID
     twitter = ""        #Twitter username
     instagram = ""      #Instagram username
     stackoverflow = ""  #StackOverflow username
+    devto = ""          #Dev.to username 
 
 [params]
     tagline = "the tagline for this website"
     customCSS = []  #Optional Customised CSS
+    disableDarkModeCSS = false # disables css style for users using dark-mode
 ```
 
-### Main Menu
+### Menus
 
 To add non-posts related page (eq. About page) to the main menu, adding these lines to the page [front matter](https://gohugo.io/content-management/front-matter/):
 
@@ -135,7 +138,6 @@ menu = "main"
 weight = "10"
 ```
 
-
 YAML:
 
 ```yml
@@ -144,12 +146,43 @@ menu : "main"
 weight : "10"
 ```
 
+Following menus are available:
+
+* `main`, displayed in the navigation bar at the top of the page
+* `footer`, displayed on the lower right, in the footer 
+
 ### Categories & Tags
 
 Pages can include both, either, or neither *Categories* or *Tags*.
 To link to tags use the url `/tags/` (e.g. `https://example.com/tags/`) and `/categories/` for categories.
 
 ### Images
+
+#### Site header
+
+A side header can be added in `config.toml`.
+
+```
+site_logo = "/link/to/image"
+```
+
+It is possible to use full width image as well, using either `/link/to/image#full` (which will affect only this image and
+not the featured images for posts which may override the site header image) or `site_logo_classes = "full-image"` in `config.toml` (which
+will affect all header images, even if a featured image of a post overrides the site logo).
+
+#### Featured images for posts
+
+A featured image for a post which will be shown in list overviews and at the top of the post page can be added in the frontmatter.
+
+```
+images: ["/link/to/image"]
+```
+
+Here, too, it is possible to display the image in full width appending `#full` or `#float` to the URL (see below).
+
+Featured images can override the site logo on the post page, using `replace_site_logo: false` in the frontmatter.
+
+#### Images in text
 
 Kiera supports adding image as `img` tag with standard Markdown:
 
@@ -185,6 +218,10 @@ Using fenced code with Chroma support.
 
 For usage, refer to [Font Awesome](https://fontawesome.com/).
 
+### Mathematics
+
+Set `Params.mathjax` to true to enable support of mathematics display using [MathJax](https://mathjax.org/).  Math should be, by default, surrounded by dollar signs and produced using LaTeX syntax.  Options may be overriden using `static/js/mathjax-config.js`.
+
 ### Static Commenting
 
 [Disqus](https://disqus.com/) comments are loaded on demand, by clicking the <kbd>View Comments</kbd> button. Disqus comments can be automatically loaded and displayed by setting `CommentAutoload = true` in `config.toml`.
@@ -192,6 +229,10 @@ For usage, refer to [Font Awesome](https://fontawesome.com/).
 [Utterances](https://utteranc.es), a Git based comment system, is also available. Utterance comments are loaded and displayed by default.
 
 Comments can be disabled for a single page by setting `disableComments = true` in the page frontmatter.
+
+### Last Modified Date
+
+If the `lastmod` option is set on a page/post, either manually or because `enableGitInfo` is set to true, a line including the page's last modification will be shown after the post date.
 
 ## Support and Pull Requests
 
