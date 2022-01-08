@@ -1,0 +1,401 @@
+<!doctype html><html lang=en>
+<head>
+<title>Improving LLVM Infrastructure - Part 1: Mailing lists - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Tanya Lattner"><meta property="og:title" content="Improving LLVM Infrastructure - Part 1: Mailing lists">
+<meta property="og:description" content="When the LLVM Project was open sourced in 2003, it was a small project with a small community. The tools selected to support the project were chosen during a different time and a different situation.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/posts/2022-01-07-moving-to-discourse/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2022-01-07T00:00:00+00:00">
+<meta property="article:modified_time" content="2022-01-07T00:00:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Improving LLVM Infrastructure - Part 1: Mailing lists">
+<meta name=twitter:description content="When the LLVM Project was open sourced in 2003, it was a small project with a small community. The tools selected to support the project were chosen during a different time and a different situation.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>Improving LLVM Infrastructure - Part 1: Mailing lists</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2022-01-07T00:00:00Z>Jan 7, 2022</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/community>#community</a>
+,
+<a href=https://blog.llvm.org/tags/infrastructure>#infrastructure</a>
+,
+<a href=https://blog.llvm.org/tags/foundation>#foundation</a>
+</em>
+</li>
+<li>7 minute read</li>
+</ul>
+</aside>
+<p>When the LLVM Project was open sourced in 2003, it was a small project with a small community. The tools selected to support the project were chosen during a different time and a different situation.</p>
+<p>Now, almost 18 years later, the project has grown tremendously and those infrastructure choices are not necessarily the right choices today. According to a recent <a href="https://www.phoronix.com/scan.php?page=news_item&px=LLVM-Record-Growth-2021">article</a>, the LLVM community experienced record growth in 2021 with 1400 contributors to the LLVM Project. This is incredible growth! While there is a very real cost to change, it is clear that we need to invest in modernizing these tools to support the current and further growth of LLVM.</p>
+<p>Recently, the LLVM Project moved its source code repository and bug tracker to GitHub in an effort to grow the LLVM community and make contributing to the project easier. While these changes were neither quick or easy, the benefits to the project outweigh the time and efforts to make the move. The growth in contributors since the move to GitHub is just one metric showing the gains from the change.</p>
+<p>This year, the LLVM Foundation, which provides the majority of the LLVM Project infrastructure, will be spearheading the effort to evaluate and identify improvements for the remaining tools and software the project utilizes. We will be looking at mailing lists, chat servers, code review tools, and other parts of our infrastructure. This is part 1 in our blog post series describing the upcoming changes (if any) to LLVM infrastructure.</p>
+<p><strong>Project Communication - Mailing Lists</strong></p>
+<p>Mailman and IRC have been the primary means of communication for the LLVM Project for the last 18 years. As the project has grown, we added <a href=http://lists.llvm.org>mailing lists</a> for subprojects like Clang, but the main list (llvm-dev) has remained unchanged. This list is meant to cover all of LLVM which includes everything from mid-level optimizations, to back-end optimizations, to the numerous LLVM backends. It has been the catchall for any topic not covered by another list. Due to the growth in LLVM and the size of the project, this list is very high traffic and requires a lot of work to filter messages that one may be interested in. It is increasingly clear that a mailing list may not be the best form of communication in the lack of features to make it easy to filter, respond and track topics of interest.</p>
+<p>In 2019, LLVM started to experiment with <a href=https://www.discourse.org>Discourse</a> as an alternative to its mailing lists. Discourse is an open source discussion platform built with an amazing list of modern features, such as the following:</p>
+<ul>
+<li>Fully supported Email interface - Discourse supports the ability to interact through email if you do not like to use the web or app interfaces.</li>
+<li>Categories and subcategories - This breaks the LLVM project into smaller pieces and users can subscribe to topics that they care most about versus having to do their own filtering.</li>
+<li>Single Account Sign-On - Users can use their existing GitHub account to use Discourse and get access to all categories.</li>
+<li>Dynamic notifications - Immediately notifies users when they are tagged, get a new reply, or sends email when you are offline.</li>
+<li>Simple - Discourse uses a flat forum where replies are dynamically loaded and flow down the page in a line.</li>
+<li>Mobile support - App available for iOS and Android, but you can also just use the web interface.</li>
+<li>Better Moderation - The community has the ability to self moderate through flagging and spreads the work across a larger group of moderators.</li>
+<li>Enhanced spam blocking - Out of the box spam filtering that eliminates obvious spam before it gets to moderators.</li>
+<li>Safety - It has an enhanced trust system that allows the community to build natural immunity from trolls, bad actors, and spammers, and also reinforces positive behavior through likes and badges.</li>
+</ul>
+<p>The majority of the community was in favor of the move when the move to Discourse was discussed extensively on the LLVM mailing lists. This provides the features mentioned above in addition to a more modern communication. We did hear of one feature some would miss compared to Mailman: the ability to reply to someone directly through email. However, while it may not be ideal for some, we feel this is a worthwhile tradeoff to gain the other benefits, e.g. better safety for LLVM developers and users in general.</p>
+<p><strong>Moving to Discourse</strong></p>
+<p>As a consequence of the above discussion, we are planning to move most mailing lists to Discourse. We are excited that it will bring many new features to help improve communication for existing contributors and users, and also make the project more accessible to newcomers as most are familiar with using forums such as Discourse.</p>
+<p>However, while Discourse is a great solution for community discussions, it is not clear if it is a good place to host commit messages and post-commit review. Therefore, the commit lists won’t be part of the initial migration to Discourse - they will remain on mailing lists for now.</p>
+<p>The plan to move to Discourse will involve the following:</p>
+<ul>
+<li>January 7-9 - Re-configure the existing LLVM Discourse to the new category/subcategory structure (see below)</li>
+<li>January 10-20 (sometime during these 2 weeks) - The LLVM mailing list archives are migrated to Discourse and it is sanity checked by volunteers of the LLVM community. This sanity check can take a week or more.</li>
+<li>Feb 1 - The mailing lists (except commits) are put into read only mode and all users must migrate to use Discourse.</li>
+<li>Feb 1-4 (approx) - The final merge is done from Mailman to Discourse. <strong>We encourage all LLVM community members to start using Discourse on Jan 10th to minimize any disruption once the mailing lists become read only and the final messages are merged to Discourse.</strong> However, please be assured that all mail will be merged to Discourse and you will be able to continue any threads started there once that is completed.</li>
+</ul>
+<p>The mailman archives on the LLVM server may eventually be removed, but there is no final decision or deadline on this yet.</p>
+<p><strong>Mapping from Mailing Lists to Discourse Categories</strong></p>
+<p>The existing LLVM Discourse will be modified to have the following categories/subcategories:</p>
+<ul>
+<li>
+<p>Announcements</p>
+</li>
+<li>
+<p>Clang Frontend</p>
+<ul>
+<li>Using Clang</li>
+<li>Building Clang</li>
+<li>Static Analyzer</li>
+<li>clangd</li>
+</ul>
+</li>
+<li>
+<p>Subprojects</p>
+<ul>
+<li>LLD Linker</li>
+<li>Flang Fortran Frontend</li>
+<li>LLDB Debugger</li>
+</ul>
+</li>
+<li>
+<p>Code Generation</p>
+<ul>
+<li>Common Infrastructure</li>
+<li>AArch64</li>
+<li>ARM</li>
+<li>Mips</li>
+<li>PowerPC</li>
+<li>RISCV</li>
+<li>WebAssembly</li>
+<li>X86</li>
+<li>Other</li>
+</ul>
+</li>
+<li>
+<p>IR & Optimizations</p>
+<ul>
+<li>Loop Optimizations</li>
+</ul>
+</li>
+<li>
+<p>Community</p>
+<ul>
+<li>Women in Compilers and Tools</li>
+<li>Job Postings</li>
+<li>US Developer Meeting</li>
+<li>EuroLLVM</li>
+<li>Google Summer of Code</li>
+<li>Community.o</li>
+<li>LLVM Foundation</li>
+</ul>
+</li>
+<li>
+<p>Project Infrastructure</p>
+<ul>
+<li>Release Testers</li>
+<li>Website</li>
+<li>Documentation</li>
+<li>GitHub</li>
+<li>Code Review</li>
+<li>Discord</li>
+<li>Mailing Lists and Forums</li>
+<li>IRC</li>
+<li>Infrastructure Working Group</li>
+<li>Policies</li>
+<li>LLVM Dev List Archives</li>
+</ul>
+</li>
+<li>
+<p>Runtimes</p>
+<ul>
+<li>C</li>
+<li>C++</li>
+<li>OpenCL</li>
+<li>OpenMP</li>
+<li>Sanitizers</li>
+</ul>
+</li>
+<li>
+<p>Incubator</p>
+<ul>
+<li>CIRCT</li>
+<li>mlir-npcomp</li>
+</ul>
+</li>
+</ul>
+<p><strong>The Mailman archives will be mapped as follows:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Mailing lists</th>
+<th>category in Discourse</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>All-commits</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>Bugs-admin</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>cfe-commits</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>cfe-dev</td>
+<td>Clang Frontend</td>
+</tr>
+<tr>
+<td>cfe-users</td>
+<td>Clang Frontend/Using Clang</td>
+</tr>
+<tr>
+<td>clangd-dev</td>
+<td>Clang Frontend/clangd</td>
+</tr>
+<tr>
+<td>devmtg-organizers</td>
+<td>Obsolete</td>
+</tr>
+<tr>
+<td>Docs</td>
+<td>Obsolete</td>
+</tr>
+<tr>
+<td>eurollvm-organizers</td>
+<td>Obsolete</td>
+</tr>
+<tr>
+<td>flang-commits</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>flang-dev</td>
+<td>Subprojects/Flang Fortran Frontend</td>
+</tr>
+<tr>
+<td>gsoc</td>
+<td>Obsolete</td>
+</tr>
+<tr>
+<td>libc-commits</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>libc-dev</td>
+<td>Runtimes/C</td>
+</tr>
+<tr>
+<td>Libclc-dev</td>
+<td>Runtimes/OpenCL</td>
+</tr>
+<tr>
+<td>libcxx-bugs</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>libcxx-commits</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>libcxx-dev</td>
+<td>Runtimes/C++</td>
+</tr>
+<tr>
+<td>lldb-commits</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>lldb-dev</td>
+<td>Subprojects/lldb</td>
+</tr>
+<tr>
+<td>llvm-admin</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>llvm-announce</td>
+<td>Announce</td>
+</tr>
+<tr>
+<td>llvm-branch-commits</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>llvm-bugs</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>llvm-commits</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>llvm-dev</td>
+<td>Project Infrastructure/LLVM Dev List Archives</td>
+</tr>
+<tr>
+<td>llvm-devmeeting</td>
+<td>Community/US Developer Meeting</td>
+</tr>
+<tr>
+<td>llvm-foundation</td>
+<td>Community/LLVM Foundation</td>
+</tr>
+<tr>
+<td>Mlir-commits</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>Openmp-commits</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>Openmp-dev</td>
+<td>Runtimes/OpenMP</td>
+</tr>
+<tr>
+<td>Parallel_libs-commits</td>
+<td>no migration at the moment</td>
+</tr>
+<tr>
+<td>Parallel_libs-dev</td>
+<td>Runtimes/C++</td>
+</tr>
+<tr>
+<td>Release-testers</td>
+<td>Project Infrastructure/Release Testers</td>
+</tr>
+<tr>
+<td>Test-list</td>
+<td>Obsolete</td>
+</tr>
+<tr>
+<td>vmkit-commits</td>
+<td>Obsolete</td>
+</tr>
+<tr>
+<td>WiCT</td>
+<td>Community/Women in Compilers and Tools</td>
+</tr>
+<tr>
+<td>www-scripts</td>
+<td>Obsolete</td>
+</tr>
+</tbody>
+</table>
+<p>For help with migrating to Discourse, please see the <a href=https://llvm.org/docs/DiscourseMigrationGuide.html>User Guide</a> and discuss on the <a href=https://llvm.discourse.group>LLVM Discourse forums</a>.</p>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/posts/2021-11-18-relicensing-update/><i class="fa fa-chevron-circle-left"></i> LLVM relicensing update & call for help</a>
+</li>
+<li>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
+Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>
