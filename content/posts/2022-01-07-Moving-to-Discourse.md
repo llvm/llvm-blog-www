@@ -107,6 +107,12 @@ The existing LLVM Discourse will be modified to have the following categories/su
   * CIRCT
   * mlir-npcomp
 
+* MLIR
+  * Announcements
+  * Newsletter
+  * TCP-WG 
+  
+  
 **The Mailman archives will be mapped as follows:**
 
 | Mailing lists         | category in Discourse |
