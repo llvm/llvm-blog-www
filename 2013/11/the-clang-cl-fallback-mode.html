@@ -1,3 +1,111 @@
-<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Hans Wennborg"><meta property="og:title" content="The clang-cl /fallback mode"><meta property="og:description" content="There has been a lot of work lately towards bringing an LLVM toolchain to the Windows platform (see A path forward for an LLVM toolchain on Windows). One result of that work is a new driver mode for Clang: clang-cl."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.llvm.org/2013/11/the-clang-cl-fallback-mode.html"><meta property="article:published_time" content="2013-11-05T08:42:00+00:00"><meta property="article:modified_time" content="2013-11-05T08:42:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="The clang-cl /fallback mode"><meta name=twitter:description content="There has been a lot of work lately towards bringing an LLVM toolchain to the Windows platform (see A path forward for an LLVM toolchain on Windows). One result of that work is a new driver mode for Clang: clang-cl."><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>The clang-cl /fallback mode</h1><aside><ul><li><time class=post-date datetime=2013-11-05T08:42:00Z>Nov 5, 2013</time></li><li>Hans Wennborg</li><li>3 minutes read</li></ul></aside><p>There has been a lot of work lately towards bringing an LLVM toolchain to the Windows platform (see <a href=http://blog.llvm.org/2013/09/a-path-forward-for-llvm-toolchain-on.html>A path forward for an LLVM toolchain on Windows</a>). One result of that work is a new driver mode for Clang: <a href=http://clang.llvm.org/docs/UsersManual.html#clang-cl>clang-cl</a>. This mode makes Clang understand the same kind of command-line arguments as Visual Studio's compiler, cl.exe. For example, a typical command to compile a file into an executable with Clang might be "clang hello.cc -o hello", whereas with cl.exe, one would use "cl.exe hello.cc /Fehello". Now one can use the latter syntax with Clang by substituting "cl.exe" with "clang-cl". This makes it easy to use Clang for existing projects in Visual Studio.</p><p>For the most part, clang-cl accepts exactly the same arguments as cl.exe. However, it also accepts some Clang-specific options. One such option that was added recently is <a href=http://clang.llvm.org/docs/UsersManual.html#the-fallback-option>the /fallback flag</a>. The purpose of this flag is to make it easy to use clang-cl even in projects where Clang cannot yet compile all of the code. This post gives an example of how /fallback can be used.</p><a name=more></a><p>The way clang-cl works in /fallback mode is that it first tries to compile the code with Clang, and if that fails for some reason it falls back to compiling with cl.exe. Consider the following two files, where main.cpp can be compiled by Clang, but printer.cpp cannot:</p><pre style=text-indent:0><br>printer.cpp:<br><br>#include &lt;iostream&gt;<br>void print_hello(const char *s) {<br>  std::cout &lt;&lt; "Hello from " &lt;&lt; s &lt;&lt; "!" &lt;&lt; std::endl;<br>}<br></pre><pre style=text-indent:0><br>main.cpp:<br><br>extern void print_hello(const char*);<br>int main(int argc, char **argv) {<br>  print_hello(argv[0]);<br>  return 0;<br>}<br></pre><p>clang-cl cannot compile printer.cpp since it includes iostream which uses language features that are not completely supported yet (hopefully they will be soon). However, clang-cl can still compile the two files in fallback mode:</p><pre style=text-indent:0>clang-cl /fallback /Fehello main.cpp printer.cpp</pre><p>Clang will compile main.cpp successfully, print some error messages about the features it does not support for printer.cpp, and fall back to the cl.exe compiler for that file. The compiled files will be linked together into hello.exe.</p><p>Note that this is not fool proof: even if clang-cl thinks it has compiled a file successfully, there can be bugs in the generated code that cause failures at link- or run-time.</p><p>Currently, the fallback mode will cause clang-cl to fall back on any kind of error. Going forward, it will be changed to only fall back on certain kinds of internal errors, and as Clang's Windows support improves, the fallback mode will eventually become unnecessary and removed. It is still early days for clang-cl, but you can try it out for yourself by downloading the toolchain from the <a href=http://llvm.org/builds/>LLVM Snapshot Builds website</a>.</p></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/2013/10/openmp-project.html><i class="fa fa-chevron-circle-left"></i>OpenMP* project</a></li><li><a href=https://blog.llvm.org/2013/11/google-summer-of-code-c-modernizer.html>Google Summer of Code: C++ Modernizer Improvements <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><h6>llvm.org |
+<!doctype html><html lang=en>
+<head>
+<title>The clang-cl /fallback mode - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Hans Wennborg"><meta property="og:title" content="The clang-cl /fallback mode">
+<meta property="og:description" content="There has been a lot of work lately towards bringing an LLVM toolchain to the Windows platform (see A path forward for an LLVM toolchain on Windows). One result of that work is a new driver mode for Clang: clang-cl.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/2013/11/the-clang-cl-fallback-mode.html"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2013-11-05T08:42:00+00:00">
+<meta property="article:modified_time" content="2013-11-05T08:42:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="The clang-cl /fallback mode">
+<meta name=twitter:description content="There has been a lot of work lately towards bringing an LLVM toolchain to the Windows platform (see A path forward for an LLVM toolchain on Windows). One result of that work is a new driver mode for Clang: clang-cl.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>The clang-cl /fallback mode</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2013-11-05T08:42:00Z>Nov 5, 2013</time>
+</li>
+<li>3 minute read</li>
+</ul>
+</aside>
+<p>There has been a lot of work lately towards bringing an LLVM toolchain to the Windows platform (see <a href=http://blog.llvm.org/2013/09/a-path-forward-for-llvm-toolchain-on.html>A path forward for an LLVM toolchain on Windows</a>). One result of that work is a new driver mode for Clang: <a href=http://clang.llvm.org/docs/UsersManual.html#clang-cl>clang-cl</a>. This mode makes Clang understand the same kind of command-line arguments as Visual Studio's compiler, cl.exe. For example, a typical command to compile a file into an executable with Clang might be "clang hello.cc -o hello", whereas with cl.exe, one would use "cl.exe hello.cc /Fehello". Now one can use the latter syntax with Clang by substituting "cl.exe" with "clang-cl". This makes it easy to use Clang for existing projects in Visual Studio.</p> <p>For the most part, clang-cl accepts exactly the same arguments as cl.exe. However, it also accepts some Clang-specific options. One such option that was added recently is <a href=http://clang.llvm.org/docs/UsersManual.html#the-fallback-option>the /fallback flag</a>. The purpose of this flag is to make it easy to use clang-cl even in projects where Clang cannot yet compile all of the code. This post gives an example of how /fallback can be used.</p> <a name=more></a> <p>The way clang-cl works in /fallback mode is that it first tries to compile the code with Clang, and if that fails for some reason it falls back to compiling with cl.exe. Consider the following two files, where main.cpp can be compiled by Clang, but printer.cpp cannot:</p> <pre style=text-indent:0><br>printer.cpp:<br><br>#include &lt;iostream&gt;<br>void print_hello(const char *s) {<br>  std::cout &lt;&lt; "Hello from " &lt;&lt; s &lt;&lt; "!" &lt;&lt; std::endl;<br>}<br></pre> <pre style=text-indent:0><br>main.cpp:<br><br>extern void print_hello(const char*);<br>int main(int argc, char **argv) {<br>  print_hello(argv[0]);<br>  return 0;<br>}<br></pre> <p>clang-cl cannot compile printer.cpp since it includes iostream which uses language features that are not completely supported yet (hopefully they will be soon). However, clang-cl can still compile the two files in fallback mode:</p> <pre style=text-indent:0>clang-cl /fallback /Fehello main.cpp printer.cpp</pre> <p>Clang will compile main.cpp successfully, print some error messages about the features it does not support for printer.cpp, and fall back to the cl.exe compiler for that file. The compiled files will be linked together into hello.exe.</p> <p>Note that this is not fool proof: even if clang-cl thinks it has compiled a file successfully, there can be bugs in the generated code that cause failures at link- or run-time.</p> <p>Currently, the fallback mode will cause clang-cl to fall back on any kind of error. Going forward, it will be changed to only fall back on certain kinds of internal errors, and as Clang's Windows support improves, the fallback mode will eventually become unnecessary and removed. It is still early days for clang-cl, but you can try it out for yourself by downloading the toolchain from the <a href=http://llvm.org/builds/>LLVM Snapshot Builds website</a>.</p>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2013/10/openmp-project.html><i class="fa fa-chevron-circle-left"></i> OpenMP* project</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/2013/11/google-summer-of-code-c-modernizer.html>Google Summer of Code: C++ Modernizer Improvements <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>

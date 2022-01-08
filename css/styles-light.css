@@ -76,6 +76,10 @@ time {
   font-family: "Ruda", sans-serif;
 }
 
+#container nav a {
+  text-decoration: none;
+}
+
 #container nav ul {
   margin: 0;
   padding: 0;
@@ -146,6 +150,10 @@ time {
   font-size: 0.9em;
 }
 
+#container main section.post-nav ul li:last-child {
+  text-align: right;
+}
+
 #container main article > pre {
   background-color: #ffffcc;
   overflow-x: auto;
@@ -196,6 +204,26 @@ time {
 
 #container footer h6 {
   font-size: 0.8em;
+}
+
+#container footer ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  justify-content: flex-end;
+}
+
+#container footer ul li:first-child {
+  margin-right: auto;
+}
+
+#container footer ul li:not(:first-child) {
+  margin-left: 1em;
+}
+
+#container footer ul li a.active {
+  border-bottom: 0.2em solid #666666;
 }
 
 #container textarea, input {
@@ -264,7 +292,7 @@ width: 100%;
 
 a {
   color: #666666;
-  text-decoration: none;
+  /*text-decoration: none;*/
 }
 
 .image, figure img, img {
@@ -272,13 +300,20 @@ a {
   box-shadow: 0 3px 3px #bbbbbb;
 }
 
-.full-image, figure.full img, img[src*="full"] {
+/**
+:not(#home) and :not(#list) is avoiding full width image in list of posts, e.g. home and taxonomy pages
+ */
+header .full-image, header figure.full img, header img[src*="full"],
+article .full-image, article figure.full img, article img[src*="full"],
+section:not(#list):not(#home) .full-image, section:not(#list):not(#home) figure.full img, section:not(#list):not(#home) img[src*="full"] {
   width: 100%;
   box-shadow: 0 3px 3px #bbbbbb;
 }
 
 @supports (width: 100vw) {
-  .full-image, figure.full img, img[src*="full"] {
+  header .full-image, header figure.full img, header img[src*="full"],
+  article .full-image, article figure.full img, article img[src*="full"],
+  section:not(#list):not(#home) .full-image, section:not(#list):not(#home) figure.full img, section:not(#list):not(#home) img[src*="full"] {
     width: 100vw;
     position: relative;
     left: 50%;

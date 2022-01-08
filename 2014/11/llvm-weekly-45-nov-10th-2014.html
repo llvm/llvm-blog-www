@@ -1,3 +1,116 @@
-<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #45, Nov 10th 2014"><meta property="og:description" content="Welcome to the forty-fifth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.llvm.org/2014/11/llvm-weekly-45-nov-10th-2014.html"><meta property="article:published_time" content="2014-11-10T05:11:00+00:00"><meta property="article:modified_time" content="2014-11-10T05:11:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="LLVM Weekly - #45, Nov 10th 2014"><meta name=twitter:description content="Welcome to the forty-fifth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>LLVM Weekly - #45, Nov 10th 2014</h1><aside><ul><li><time class=post-date datetime=2014-11-10T05:11:00Z>Nov 10, 2014</time></li><li>Alex Bradbury</li><li><em><a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a></em></li><li>4 minutes read</li></ul></aside><p>Welcome to the forty-fifth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p><p>The canonical home for this issue <a href=http://llvmweekly.org/issue/45>can be found here at llvmweekly.org</a>.</p><a name=more></a><h3>News and articles from around the web</h3><p>Adrian Sampson has posted a <a href=http://homes.cs.washington.edu/~asampson/blog/quala-codegen.html>status update on his Quala project</a> to add custom type annotations to C and C++ in Clang/LLVM.</p><p>Bruce Mitchener has posted to the Dylan blog describing <a href=http://dylanfoundry.org/2014/11/05/integrating-with-llvm/>how Dylan integrates with LLVM</a>. Interestingly, Dylan doesn't link with the LLVM libraries and instead generates bitcode files directly.</p><p>The Numba project has released <a href=https://github.com/numba/llvmlite>llvmlite</a>, lightweight python bindings to LLVM for writing JIT compilers. This was developed based on experience using the old llvmpy bindings.</p><p>Obfuscator-LLVM <a href=https://twitter.com/ollvm/status/529687887529656321>has been updated to work with LLVM 3.5</a>.</p><h3>On the mailing lists</h3><ul><li><p>Arnaud A. de Grandmaison kicked off a discussion on <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/78544>the semantics of lifetime.start and lifetime.end intrinsics</a>. Right now, if lifetime intrinsics are enabled for smaller objects a self-hosted build is broken. The question is whether this is due to a misunderstanding of the lifetime spec or just a hidden bug. Reid Kleckner <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/78568>suggests different intrinsics for the simple case of stack allocated data</a>. He also clarifies what he means by <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/78619>stack colouring</a>. This is followed by some in-depth back-and-forth discussion on the validity of transformations involving lifetime.start/lifetime.end and whether new intrinsics are required.</p></li><li><p>James Molloy has been experimenting with the scheduling model on the Cortex-A57 and <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/78492>found some oddities</a>. I noted the MicroOpBufferSize is currently set to 128, and reducing it right down to 2 seems to have no effect. Andrew Trick responded with some suggetions on <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/78603>implementing a custom scheduling strategy</a>.</p></li><li><p>Volodymyr Kuznetsov and his collaborators are <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/78512>asking for feedback on their patchset to implement their recently published work on control flow hijacking protection</a>. The OSDI paper is <a href=http://dslab.epfl.ch/pubs/cpi.pdf>available here</a>. The current patchset covers the stack protection aspect of the paper, providing stronger protection than stack cookies at a lower overhead.</p></li><li><p>Frédéric Riss is interested in <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/78706>reimplementing Darwin's dsymutil as an lld helper</a>. dsymutil is a standalone DWARF linker which is used to load merge and optimize dwarf debug info and write it out to a .dSYM file.</p></li></ul><h3>LLVM commits</h3><ul><li><p>The PBQP register allocator has had its spill costs and coalescing benefits tweaked. This apparently results in a few percent improvement on benchmarks such as EEMBC and SPEC. <a href=http://reviews.llvm.org/rL221292>r221292</a>, <a href=http://reviews.llvm.org/rL221293>r221293</a>.</p></li><li><p>The new SymbolRewriter pass is an IR to IR transformation allowing adjustment of symbols during compilation. It is intended to be used for symbol interpositioning in sanitizers and performance analysis tools. <a href=http://reviews.llvm.org/rL221548>r221548</a>.</p></li><li><p>Hexagon gained a basic ELF object emitter. <a href=http://reviews.llvm.org/rL221465>r221465</a>.</p></li><li><p>llvm-vtabledump gained support for the Itanium ABI. <a href=http://reviews.llvm.org/rL221133>r221133</a>.</p></li><li><p>LLVM's CMake build system gained the <code>LLVM_BUILD_STATIC</code> option. <a href=http://reviews.llvm.org/rL221345>r221345</a>.</p></li><li><p>The usage of Inputs/ for extra test files has been documented. <a href=http://reviews.llvm.org/rL221406>r221406</a>.</p></li><li><p>The MIPS backend has reached a milestone in support for the N32/N64 ABI. This commit fixes all known bugs for this ABI and the first 10000 tests generated by ABITest.py pass. <a href=http://reviews.llvm.org/rL221534>r221534</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>clang-format gained various improvements for formatting Java code. <a href=http://reviews.llvm.org/rL221104>r221104</a>, <a href=http://reviews.llvm.org/rL221109>r221109</a>, and others.</p></li><li><p>Support was added for C++1z nested namespace definitions, u8 character literals, and attributes on namespaces or enumerators. <a href=http://reviews.llvm.org/rL221574>r221574</a>, <a href=http://reviews.llvm.org/rL221576>r221576</a>, <a href=http://reviews.llvm.org/rL221580>r221580</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>LLD learned how to parse most linker scripts. Before getting too excited, do note this is parsing only, semantic actions will come in the future. <a href=http://reviews.llvm.org/rL221126>r221126</a>.</p></li><li><p>The common Sanitizer code gained a generic stack frame renderer. This allows the user to control the format of stack frame output. <a href=http://reviews.llvm.org/rL221409>r221409</a>, <a href=http://reviews.llvm.org/rL221469>r221469</a>.</p></li><li><p>The basic framework for live debugging on Windows was added to LLDB. It will detect changes such as DLL loads and unloads etc, but these need to be propagated through LLDB properly. <a href=http://reviews.llvm.org/rL221207>r221207</a>.</p></li><li><p>lldb-gdbserver now supports the Android target. <a href=http://reviews.llvm.org/rL221570>r221570</a>.</p></li></ul></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/2014/11/llvm-weekly-44-nov-3rd-2014.html><i class="fa fa-chevron-circle-left"></i>LLVM Weekly - #44, Nov 3rd 2014</a></li><li><a href=https://blog.llvm.org/2014/11/llvm-weekly-46-nov-17th-2014.html>LLVM Weekly - #46, Nov 17th 2014 <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><h6>llvm.org |
+<!doctype html><html lang=en>
+<head>
+<title>LLVM Weekly - #45, Nov 10th 2014 - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #45, Nov 10th 2014">
+<meta property="og:description" content="Welcome to the forty-fifth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/2014/11/llvm-weekly-45-nov-10th-2014.html"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2014-11-10T05:11:00+00:00">
+<meta property="article:modified_time" content="2014-11-10T05:11:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="LLVM Weekly - #45, Nov 10th 2014">
+<meta name=twitter:description content="Welcome to the forty-fifth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>LLVM Weekly - #45, Nov 10th 2014</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2014-11-10T05:11:00Z>Nov 10, 2014</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a>
+</em>
+</li>
+<li>4 minute read</li>
+</ul>
+</aside>
+<p>Welcome to the forty-fifth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p> <p>The canonical home for this issue <a href=http://llvmweekly.org/issue/45>can be found here at llvmweekly.org</a>. </p> <a name=more></a> <h3>News and articles from around the web</h3><p>Adrian Sampson has posted a <a href=http://homes.cs.washington.edu/~asampson/blog/quala-codegen.html>status update on his Quala project</a> to add custom type annotations to C and C++ in Clang/LLVM.</p><p>Bruce Mitchener has posted to the Dylan blog describing <a href=http://dylanfoundry.org/2014/11/05/integrating-with-llvm/>how Dylan integrates with LLVM</a>. Interestingly, Dylan doesn't link with the LLVM libraries and instead generates bitcode files directly.</p><p>The Numba project has released <a href=https://github.com/numba/llvmlite>llvmlite</a>, lightweight python bindings to LLVM for writing JIT compilers. This was developed based on experience using the old llvmpy bindings.</p><p>Obfuscator-LLVM <a href=https://twitter.com/ollvm/status/529687887529656321>has been updated to work with LLVM 3.5</a>.</p><h3>On the mailing lists</h3><ul><li><p>Arnaud A. de Grandmaison kicked off a discussion on <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/78544>the semantics of lifetime.start and lifetime.end intrinsics</a>. Right now, if lifetime intrinsics are enabled for smaller objects a self-hosted build is broken. The question is whether this is due to a misunderstanding of the lifetime spec or just a hidden bug. Reid Kleckner <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/78568>suggests different intrinsics for the simple case of stack allocated data</a>. He also clarifies what he means by <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/78619>stack colouring</a>. This is followed by some in-depth back-and-forth discussion on the validity of transformations involving lifetime.start/lifetime.end and whether new intrinsics are required.</p></li><li><p>James Molloy has been experimenting with the scheduling model on the Cortex-A57 and <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/78492>found some oddities</a>. I noted the MicroOpBufferSize is currently set to 128, and reducing it right down to 2 seems to have no effect. Andrew Trick responded with some suggetions on <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/78603>implementing a custom scheduling strategy</a>.</p></li><li><p>Volodymyr Kuznetsov and his collaborators are <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/78512>asking for feedback on their patchset to implement their recently published work on control flow hijacking protection</a>. The OSDI paper is <a href=http://dslab.epfl.ch/pubs/cpi.pdf>available here</a>. The current patchset covers the stack protection aspect of the paper, providing stronger protection than stack cookies at a lower overhead.</p></li><li><p>Frédéric Riss is interested in <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/78706>reimplementing Darwin's dsymutil as an lld helper</a>. dsymutil is a standalone DWARF linker which is used to load merge and optimize dwarf debug info and write it out to a .dSYM file.</p></li></ul><h3>LLVM commits</h3><ul><li><p>The PBQP register allocator has had its spill costs and coalescing benefits tweaked. This apparently results in a few percent improvement on benchmarks such as EEMBC and SPEC. <a href=http://reviews.llvm.org/rL221292>r221292</a>, <a href=http://reviews.llvm.org/rL221293>r221293</a>.</p></li><li><p>The new SymbolRewriter pass is an IR to IR transformation allowing adjustment of symbols during compilation. It is intended to be used for symbol interpositioning in sanitizers and performance analysis tools. <a href=http://reviews.llvm.org/rL221548>r221548</a>.</p></li><li><p>Hexagon gained a basic ELF object emitter. <a href=http://reviews.llvm.org/rL221465>r221465</a>.</p></li><li><p>llvm-vtabledump gained support for the Itanium ABI. <a href=http://reviews.llvm.org/rL221133>r221133</a>.</p></li><li><p>LLVM's CMake build system gained the <code>LLVM_BUILD_STATIC</code> option. <a href=http://reviews.llvm.org/rL221345>r221345</a>.</p></li><li><p>The usage of Inputs/ for extra test files has been documented. <a href=http://reviews.llvm.org/rL221406>r221406</a>.</p></li><li><p>The MIPS backend has reached a milestone in support for the N32/N64 ABI. This commit fixes all known bugs for this ABI and the first 10000 tests generated by ABITest.py pass. <a href=http://reviews.llvm.org/rL221534>r221534</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>clang-format gained various improvements for formatting Java code. <a href=http://reviews.llvm.org/rL221104>r221104</a>, <a href=http://reviews.llvm.org/rL221109>r221109</a>, and others.</p></li><li><p>Support was added for C++1z nested namespace definitions, u8 character literals, and attributes on namespaces or enumerators. <a href=http://reviews.llvm.org/rL221574>r221574</a>, <a href=http://reviews.llvm.org/rL221576>r221576</a>, <a href=http://reviews.llvm.org/rL221580>r221580</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>LLD learned how to parse most linker scripts. Before getting too excited, do note this is parsing only, semantic actions will come in the future. <a href=http://reviews.llvm.org/rL221126>r221126</a>.</p></li><li><p>The common Sanitizer code gained a generic stack frame renderer. This allows the user to control the format of stack frame output. <a href=http://reviews.llvm.org/rL221409>r221409</a>, <a href=http://reviews.llvm.org/rL221469>r221469</a>.</p></li><li><p>The basic framework for live debugging on Windows was added to LLDB. It will detect changes such as DLL loads and unloads etc, but these need to be propagated through LLDB properly. <a href=http://reviews.llvm.org/rL221207>r221207</a>.</p></li><li><p>lldb-gdbserver now supports the Android target. <a href=http://reviews.llvm.org/rL221570>r221570</a>.</p></li></ul>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2014/11/llvm-weekly-44-nov-3rd-2014.html><i class="fa fa-chevron-circle-left"></i> LLVM Weekly - #44, Nov 3rd 2014</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/2014/11/llvm-weekly-46-nov-17th-2014.html>LLVM Weekly - #46, Nov 17th 2014 <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>

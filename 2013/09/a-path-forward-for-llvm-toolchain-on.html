@@ -1,5 +1,118 @@
-<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Chandler Carruth"><meta property="og:title" content="A path forward for an LLVM toolchain on Windows"><meta property="og:description" content="Over the past several months, contributors from Google and elsewhere in the community have begun actively working on bringing an LLVM toolchain to Windows in a way that would support and enhance a fully native development experience."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.llvm.org/2013/09/a-path-forward-for-llvm-toolchain-on.html"><meta property="article:published_time" content="2013-09-05T18:23:00+00:00"><meta property="article:modified_time" content="2013-09-05T18:23:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="A path forward for an LLVM toolchain on Windows"><meta name=twitter:description content="Over the past several months, contributors from Google and elsewhere in the community have begun actively working on bringing an LLVM toolchain to Windows in a way that would support and enhance a fully native development experience."><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>A path forward for an LLVM toolchain on Windows</h1><aside><ul><li><time class=post-date datetime=2013-09-05T18:23:00Z>Sep 5, 2013</time></li><li>Chandler Carruth</li><li><em><a href=https://blog.llvm.org/tags/c++>#C++</a>
+<!doctype html><html lang=en>
+<head>
+<title>A path forward for an LLVM toolchain on Windows - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Chandler Carruth"><meta property="og:title" content="A path forward for an LLVM toolchain on Windows">
+<meta property="og:description" content="Over the past several months, contributors from Google and elsewhere in the community have begun actively working on bringing an LLVM toolchain to Windows in a way that would support and enhance a fully native development experience.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/2013/09/a-path-forward-for-llvm-toolchain-on.html"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2013-09-05T18:23:00+00:00">
+<meta property="article:modified_time" content="2013-09-05T18:23:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="A path forward for an LLVM toolchain on Windows">
+<meta name=twitter:description content="Over the past several months, contributors from Google and elsewhere in the community have begun actively working on bringing an LLVM toolchain to Windows in a way that would support and enhance a fully native development experience.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>A path forward for an LLVM toolchain on Windows</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2013-09-05T18:23:00Z>Sep 5, 2013</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/c++>#C++</a>
 ,
-<a href=https://blog.llvm.org/tags/clang>#Clang</a></em></li><li>2 minutes read</li></ul></aside><p>Over the past several months, contributors from Google and elsewhere in the community have begun actively working on bringing an LLVM toolchain to Windows in a way that would support and enhance a fully native development experience. This toolchain works with Visual Studio and the Windows development process that Windows developers are already using, making LLVM tools and technologies available to them. We want to cross the streams (in the Ghostbuster proton-pack sense) of the Visual Studio IDE and the LLVM-based C++ tools to enable developers to build C++ software better.</p><p>To that end, we’ve been driving many of the efforts around compatibility with Visual Studio and native Windows C++ code in Clang and LLD (the LLVM linker). Today, as announced at <a href=http://channel9.msdn.com/Events/GoingNative/2013/The-Care-and-Feeding-of-C-s-Dragons>my GoingNative 2013 talk</a>, we are able to build a trivial C++ application that in turn links against native C++ libraries and uses them in real, interesting ways. This is a huge milestone for the project, and something we’re really excited to be talking more about. Lots of folks in the LLVM project came together to get the open source project here. Thanks to every single one of you.</p><p>Going forward, we would really like to see an increased level of involvement from Windows developers. We’re launching an <a href=http://llvm.org/builds>alpha-build website</a> as part of llvm.org where you can get fresh builds of Clang, various Clang-based-tools, LLD, and the rest of the LLVM toolchain for Windows on a regular basis. These installable packages should make it dramatically easier to test and experiment with this new set of tools in your development environment. Please feel free to try it out, <a href=http://llvm.org/bugs>file bugs</a>, and even <a href=http://llvm.org/docs/DeveloperPolicy.html#making-a-patch>submit patches</a> to help move the toolchain forward on this new platform. Keep in mind, we are following the tried-and-true open source release mantra of releasing early and frequently. These are alpha-quality releases intended at developers interested in helping us track down and understand bugs.</p><p>There is still a lot of exciting work left to make LLVM and the C++ toolchain built on top of LLVM fully support the Windows platform. Come join the fun, because this is one place where patches are truly welcome.</p>-Chandler Carruth</article><section class=post-nav><ul><li><a href=https://blog.llvm.org/2013/09/clang-warnings.html><i class="fa fa-chevron-circle-left"></i>Clang Warnings</a></li><li><a href=https://blog.llvm.org/2013/09/libc-and-c1y.html>libc++ and C++1Y <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><h6>llvm.org |
+<a href=https://blog.llvm.org/tags/clang>#Clang</a>
+</em>
+</li>
+<li>2 minute read</li>
+</ul>
+</aside>
+<p>Over the past several months, contributors from Google and elsewhere in the community have begun actively working on bringing an LLVM toolchain to Windows in a way that would support and enhance a fully native development experience. This toolchain works with Visual Studio and the Windows development process that Windows developers are already using, making LLVM tools and technologies available to them. We want to cross the streams (in the Ghostbuster proton-pack sense) of the Visual Studio IDE and the LLVM-based C++ tools to enable developers to build C++ software better.</p> <p>To that end, we’ve been driving many of the efforts around compatibility with Visual Studio and native Windows C++ code in Clang and LLD (the LLVM linker). Today, as announced at <a href=http://channel9.msdn.com/Events/GoingNative/2013/The-Care-and-Feeding-of-C-s-Dragons>my GoingNative 2013 talk</a>, we are able to build a trivial C++ application that in turn links against native C++ libraries and uses them in real, interesting ways. This is a huge milestone for the project, and something we’re really excited to be talking more about. Lots of folks in the LLVM project came together to get the open source project here. Thanks to every single one of you.</p> <p>Going forward, we would really like to see an increased level of involvement from Windows developers. We’re launching an <a href=http://llvm.org/builds>alpha-build website</a> as part of llvm.org where you can get fresh builds of Clang, various Clang-based-tools, LLD, and the rest of the LLVM toolchain for Windows on a regular basis. These installable packages should make it dramatically easier to test and experiment with this new set of tools in your development environment. Please feel free to try it out, <a href=http://llvm.org/bugs>file bugs</a>, and even <a href=http://llvm.org/docs/DeveloperPolicy.html#making-a-patch>submit patches</a> to help move the toolchain forward on this new platform. Keep in mind, we are following the tried-and-true open source release mantra of releasing early and frequently. These are alpha-quality releases intended at developers interested in helping us track down and understand bugs.</p> <p>There is still a lot of exciting work left to make LLVM and the C++ toolchain built on top of LLVM fully support the Windows platform. Come join the fun, because this is one place where patches are truly welcome.</p> -Chandler Carruth
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2013/09/clang-warnings.html><i class="fa fa-chevron-circle-left"></i> Clang Warnings</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/2013/09/libc-and-c1y.html>libc++ and C++1Y <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>

@@ -1,3 +1,116 @@
-<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #107, Jan 18th 2016"><meta property="og:description" content="Welcome to the one hundred and seventh issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.llvm.org/2016/01/llvm-weekly-107-jan-18th-2016.html"><meta property="article:published_time" content="2016-01-18T05:32:00+00:00"><meta property="article:modified_time" content="2016-01-18T05:32:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="LLVM Weekly - #107, Jan 18th 2016"><meta name=twitter:description content="Welcome to the one hundred and seventh issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>LLVM Weekly - #107, Jan 18th 2016</h1><aside><ul><li><time class=post-date datetime=2016-01-18T05:32:00Z>Jan 18, 2016</time></li><li>Alex Bradbury</li><li><em><a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a></em></li><li>4 minutes read</li></ul></aside><p>Welcome to the one hundred and seventh issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p><p>The canonical home for this issue <a href=http://llvmweekly.org/issue/107>can be found here at llvmweekly.org</a>.</p><a name=more></a><p>I have a very exciting piece of non-LLVM news to share this week. On Saturday I proposed to my partner Carrie Anne, and I'm delighted to report that <a href=https://twitter.com/MissPhilbin/status/688452374260744192>she said yes</a>. You may well question if this piece of personal news has any relevance to you, and in response I'd like to highlight just how important Carrie Anne is to this weekly newsletter. For over two years now, I've given up 2-3+ hours of my time every week without fail on evenings and weekends, time we could really be spending together as a couple. Without Carrie Anne's understanding and support LLVM Weekly couldn't exist. 2016 is going to be a very exciting year.</p><h3>News and articles from around the web</h3><p>Registration is <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/094106.html>now open</a> for EuroLLVM 2016. The conference will be held in Barcelona on March 17th-18th. The call for papers closes on January 25th.</p><p>Registration is <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093960.html>open</a> for the Clang/LLVM development sprint to be held on the weekend of Feb 6th/7th at Bloomberg's London and New York offices.</p><p>The next Cambridge LLVM social will be held <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093918.html>on Wednesday 20th January at 7.30pm</a>, and will be colocated with the FreeBSD social.</p><h3>On the mailing lists</h3><ul><li><p>Rui Ueyama has run <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/094132.html>benchmarks for every LLD commit</a>. He observes the linker in general is getting slightly slower over time as it gains more functionality, but that no commit seems to increase link time without a justifiable reason.</p></li><li><p>Chris Bieneman has posted an <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093875.html>RFC on removing autoconf from the trunk</a>. The proposal is to remove it from the repository on January 26th. There don't seem to be any objections to this timeline so far.</p></li><li><p>Krzystof Parzyszek has shared a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093891.html>description of the recently committed register data-flow framework</a>.</p></li><li><p>Discussion has been ongoing in the thread about global instruction selection, particularly surrounding the semantics of bitcasts on big-endian systems. James Molloy has <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093977.html>posted to clarify the current behaviour</a>.</p></li><li><p>JF Bastien has posted an <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093912.html>RFC on supporting non-temporal fencing in LLVM IR</a>.</p></li><li><p>Quentin Colombet is <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/094049.html>seeking feedback on the best way to map LLVM IR values to MachineInstr values</a> as part of his GlobalISel work.</p></li><li><p>The branch for LLVM 3.8 <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093932.html>has now been created</a>. The first release candidate should some soon.</p></li><li><p>John McCall has posted an RFC on <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/094012.html>enforcing pointer type alignment in Clang</a>. The RFC proposes the following "It is not undefined behavior to create a pointer that is less aligned than its pointee type. Instead, it is only undefined behavior to access memory through a pointer that is less aligned than its pointee type."</p></li><li><p>Philip Reames has posted a note for anyone using RewriteStatepointsForGC. There's been a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/094041.html>recent change in the handling of vectors of pointers</a>.</p></li><li><p>Derek Schuff has followed up to the previous discussion about allowing virtual registers after register allocation with <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093952.html>some more thoughts after some offline discussions</a>.</p></li><li><p>Hans de Goede is working on a backend for TGSI (Tungsten Graphics Shader Infrastruture, as used by Gallium) and has a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093829.html>number of questions</a>.</p></li></ul><h3>LLVM commits</h3><ul><li><p>The ORC JIT API now supports remote JITing over an RPC interface to a separate process. The LLI tool has been updated to use this interface. <a href=http://reviews.llvm.org/rL257305>r257305</a>, <a href=http://reviews.llvm.org/rL257343>r257343</a>.</p></li><li><p>The Hexagon backend gained a target-independent SSA-based data flow framework for representing data flow between physical registers and passes using this to implement register liveness analysis, dead code elimination, and copy propagation. <a href=http://reviews.llvm.org/rL257447>r257447</a>, <a href=http://reviews.llvm.org/rL257480>r257480</a>, <a href=http://reviews.llvm.org/rL257485>r257485</a>, <a href=http://reviews.llvm.org/rL257490>r257490</a>.</p></li><li><p>The documentation on committing code reviewed on Phabricator to trunk has been improved. <a href=http://reviews.llvm.org/rL257764>r257764</a>.</p></li><li><p>WebAssembly gained a prototype instruction encoder and disassembler based on a temporary binary format. <a href=http://reviews.llvm.org/rL257440>r257440</a>.</p></li><li><p>LLVM's MathExtras gained a SaturatingMultiplyAdd helper. <a href=http://reviews.llvm.org/rL257352>r257352</a>.</p></li><li><p>llvm-readobj has much-expanded support for dumping CodeView debug info. <a href=http://reviews.llvm.org/rL257658>r257658</a>.</p></li><li><p>The code that finds code sequences implementing bswap or bitreverse and emits the appropriate intrinsic has been rewritten. <a href=http://reviews.llvm.org/rL257875>r257875</a>.</p></li><li><p>The AMDGPU backend gained a new machine scheduler for the Southern Islands architecture. <a href=http://reviews.llvm.org/rL257609>r257609</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>A Python implementation of scan-build has been added. <a href=http://reviews.llvm.org/rL257533>r257533</a>.</p></li><li><p>The 'interrupt' attribute is now supported on x86. <a href=http://reviews.llvm.org/rL257867>r257867</a>.</p></li><li><p>Clang learned to respond to the <code>-fsanitize-stats</code> flag. It can currently only be used with control-flow integrity and allows statistics to be dumped. <a href=http://reviews.llvm.org/rL257971>r257971</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>The compiler-rt CMake buildsystem gained experimental support for tvOS and watchOS. <a href=http://reviews.llvm.org/rL257544>r257544</a>.</p></li><li><p>Initial support was added for PPC and the new ELF linker. <a href=http://reviews.llvm.org/rL257374>r257374</a>.</p></li><li><p>The CMake and Lit runners in the LLVM test-suite can now support the integer C and C++ tests from SPEC CPU2006. <a href=http://reviews.llvm.org/rL257370>r257370</a>.</p></li></ul></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/2016/01/llvm-weekly-106-jan-11th-2016.html><i class="fa fa-chevron-circle-left"></i>LLVM Weekly - #106, Jan 11th 2016</a></li><li><a href=https://blog.llvm.org/2016/01/llvm-weekly-108-jan-25th-2016.html>LLVM Weekly - #108, Jan 25th 2016 <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><h6>llvm.org |
+<!doctype html><html lang=en>
+<head>
+<title>LLVM Weekly - #107, Jan 18th 2016 - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #107, Jan 18th 2016">
+<meta property="og:description" content="Welcome to the one hundred and seventh issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/2016/01/llvm-weekly-107-jan-18th-2016.html"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2016-01-18T05:32:00+00:00">
+<meta property="article:modified_time" content="2016-01-18T05:32:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="LLVM Weekly - #107, Jan 18th 2016">
+<meta name=twitter:description content="Welcome to the one hundred and seventh issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>LLVM Weekly - #107, Jan 18th 2016</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2016-01-18T05:32:00Z>Jan 18, 2016</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a>
+</em>
+</li>
+<li>4 minute read</li>
+</ul>
+</aside>
+<p>Welcome to the one hundred and seventh issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p> <p>The canonical home for this issue <a href=http://llvmweekly.org/issue/107>can be found here at llvmweekly.org</a>. </p> <a name=more></a> <p>I have a very exciting piece of non-LLVM news to share this week. On Saturday I proposed to my partner Carrie Anne, and I'm delighted to report that <a href=https://twitter.com/MissPhilbin/status/688452374260744192>she said yes</a>. You may well question if this piece of personal news has any relevance to you, and in response I'd like to highlight just how important Carrie Anne is to this weekly newsletter. For over two years now, I've given up 2-3+ hours of my time every week without fail on evenings and weekends, time we could really be spending together as a couple. Without Carrie Anne's understanding and support LLVM Weekly couldn't exist. 2016 is going to be a very exciting year.</p><h3>News and articles from around the web</h3><p>Registration is <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/094106.html>now open</a> for EuroLLVM 2016. The conference will be held in Barcelona on March 17th-18th. The call for papers closes on January 25th.</p><p>Registration is <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093960.html>open</a> for the Clang/LLVM development sprint to be held on the weekend of Feb 6th/7th at Bloomberg's London and New York offices.</p><p>The next Cambridge LLVM social will be held <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093918.html>on Wednesday 20th January at 7.30pm</a>, and will be colocated with the FreeBSD social.</p><h3>On the mailing lists</h3><ul><li><p>Rui Ueyama has run <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/094132.html>benchmarks for every LLD commit</a>. He observes the linker in general is getting slightly slower over time as it gains more functionality, but that no commit seems to increase link time without a justifiable reason.</p></li><li><p>Chris Bieneman has posted an <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093875.html>RFC on removing autoconf from the trunk</a>. The proposal is to remove it from the repository on January 26th. There don't seem to be any objections to this timeline so far.</p></li><li><p>Krzystof Parzyszek has shared a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093891.html>description of the recently committed register data-flow framework</a>.</p></li><li><p>Discussion has been ongoing in the thread about global instruction selection, particularly surrounding the semantics of bitcasts on big-endian systems. James Molloy has <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093977.html>posted to clarify the current behaviour</a>.</p></li><li><p>JF Bastien has posted an <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093912.html>RFC on supporting non-temporal fencing in LLVM IR</a>.</p></li><li><p>Quentin Colombet is <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/094049.html>seeking feedback on the best way to map LLVM IR values to MachineInstr values</a> as part of his GlobalISel work.</p></li><li><p>The branch for LLVM 3.8 <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093932.html>has now been created</a>. The first release candidate should some soon.</p></li><li><p>John McCall has posted an RFC on <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/094012.html>enforcing pointer type alignment in Clang</a>. The RFC proposes the following "It is not undefined behavior to create a pointer that is less aligned than its pointee type. Instead, it is only undefined behavior to access memory through a pointer that is less aligned than its pointee type."</p></li><li><p>Philip Reames has posted a note for anyone using RewriteStatepointsForGC. There's been a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/094041.html>recent change in the handling of vectors of pointers</a>.</p></li><li><p>Derek Schuff has followed up to the previous discussion about allowing virtual registers after register allocation with <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093952.html>some more thoughts after some offline discussions</a>.</p></li><li><p>Hans de Goede is working on a backend for TGSI (Tungsten Graphics Shader Infrastruture, as used by Gallium) and has a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-January/093829.html>number of questions</a>.</p></li></ul><h3>LLVM commits</h3><ul><li><p>The ORC JIT API now supports remote JITing over an RPC interface to a separate process. The LLI tool has been updated to use this interface. <a href=http://reviews.llvm.org/rL257305>r257305</a>, <a href=http://reviews.llvm.org/rL257343>r257343</a>.</p></li><li><p>The Hexagon backend gained a target-independent SSA-based data flow framework for representing data flow between physical registers and passes using this to implement register liveness analysis, dead code elimination, and copy propagation. <a href=http://reviews.llvm.org/rL257447>r257447</a>, <a href=http://reviews.llvm.org/rL257480>r257480</a>, <a href=http://reviews.llvm.org/rL257485>r257485</a>, <a href=http://reviews.llvm.org/rL257490>r257490</a>.</p></li><li><p>The documentation on committing code reviewed on Phabricator to trunk has been improved. <a href=http://reviews.llvm.org/rL257764>r257764</a>.</p></li><li><p>WebAssembly gained a prototype instruction encoder and disassembler based on a temporary binary format. <a href=http://reviews.llvm.org/rL257440>r257440</a>.</p></li><li><p>LLVM's MathExtras gained a SaturatingMultiplyAdd helper. <a href=http://reviews.llvm.org/rL257352>r257352</a>.</p></li><li><p>llvm-readobj has much-expanded support for dumping CodeView debug info. <a href=http://reviews.llvm.org/rL257658>r257658</a>.</p></li><li><p>The code that finds code sequences implementing bswap or bitreverse and emits the appropriate intrinsic has been rewritten. <a href=http://reviews.llvm.org/rL257875>r257875</a>.</p></li><li><p>The AMDGPU backend gained a new machine scheduler for the Southern Islands architecture. <a href=http://reviews.llvm.org/rL257609>r257609</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>A Python implementation of scan-build has been added. <a href=http://reviews.llvm.org/rL257533>r257533</a>.</p></li><li><p>The 'interrupt' attribute is now supported on x86. <a href=http://reviews.llvm.org/rL257867>r257867</a>.</p></li><li><p>Clang learned to respond to the <code>-fsanitize-stats</code> flag. It can currently only be used with control-flow integrity and allows statistics to be dumped. <a href=http://reviews.llvm.org/rL257971>r257971</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>The compiler-rt CMake buildsystem gained experimental support for tvOS and watchOS. <a href=http://reviews.llvm.org/rL257544>r257544</a>.</p></li><li><p>Initial support was added for PPC and the new ELF linker. <a href=http://reviews.llvm.org/rL257374>r257374</a>.</p></li><li><p>The CMake and Lit runners in the LLVM test-suite can now support the integer C and C++ tests from SPEC CPU2006. <a href=http://reviews.llvm.org/rL257370>r257370</a>.</p></li></ul>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2016/01/llvm-weekly-106-jan-11th-2016.html><i class="fa fa-chevron-circle-left"></i> LLVM Weekly - #106, Jan 11th 2016</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/2016/01/llvm-weekly-108-jan-25th-2016.html>LLVM Weekly - #108, Jan 25th 2016 <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>

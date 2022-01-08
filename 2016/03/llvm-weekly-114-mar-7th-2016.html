@@ -1,3 +1,116 @@
-<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #114, Mar 7th 2016"><meta property="og:description" content="Welcome to the one hundred and fourteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.llvm.org/2016/03/llvm-weekly-114-mar-7th-2016.html"><meta property="article:published_time" content="2016-03-07T04:40:00+00:00"><meta property="article:modified_time" content="2016-03-07T04:40:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="LLVM Weekly - #114, Mar 7th 2016"><meta name=twitter:description content="Welcome to the one hundred and fourteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>LLVM Weekly - #114, Mar 7th 2016</h1><aside><ul><li><time class=post-date datetime=2016-03-07T04:40:00Z>Mar 7, 2016</time></li><li>Alex Bradbury</li><li><em><a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a></em></li><li>4 minutes read</li></ul></aside><p>Welcome to the one hundred and fourteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p><p>The canonical home for this issue <a href=http://llvmweekly.org/issue/114>can be found here at llvmweekly.org</a>.</p><a name=more></a><h3>News and articles from around the web</h3><p>LLVM has been <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/096138.html>accepted</a> as a mentoring organisation in Google Summer of Code 2016. See <a href=https://summerofcode.withgoogle.com/how-it-works/>here</a> for more about what that means. If you're a student who would like to get paid to work on LLVM over the summer, you should definitely consider applying. Also take a look at the full list of <a href=https://summerofcode.withgoogle.com/organizations/>organisations in GSoC 2016</a>. If you have an interest in open source hardware, in my (biased) opinion you should definitely look at <a href=http://www.lowrisc.org/docs/gsoc-2016-ideas/>lowRISC's listed project ideas</a>.</p><p>LLVM and Clang 3.8 'final' <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096319.html>has been tagged</a>. A release should be imminent.</p><p>There was a big C++ committee meeting last week. You can find summaries <a href=https://www.reddit.com/r/cpp/comments/48zp05/what_we_added_to_the_c17_working_draft/>here</a> and <a href=http://usingstdcpp.org/2016/03/05/trip-report-c-meeting-at-jacksonville/>here</a>. If you were hoping for modules, concepts, UFCS, ranges, or coroutines in C++17 I'm afraid you're in for disappointment. Many new features will be available in C++ Technical Specifications though.</p><p>llvmlite 0.9.0 has been <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096199.html>released</a>. llvmlite is a light-weight Python binding for LLVM. If you're wondering how to get started with llvmlite, then check out this recent blog post from Ian Bertolacci on <a href=https://ian-bertolacci.github.io/llvm/llvmlite/python/compilers/programming/2016/03/06/LLVMLite_fibonacci.html>writing fibonacci in LLVM with llvmlite</a>.</p><p>Andi McClure has written a really interesting blog post about <a href=http://msm.runhello.com/p/1003>writing software without a compiler</a>. In this case, generating LLVM IR from LuaJIT.</p><h3>On the mailing lists</h3><ul><li><p>John McCall has posted an RFC on <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096250.html>implementing the Swift calling convention in LLVM and Clang</a>. Feedback is generally positive and there's an interesting discussion on the handling of Swift's errors in the calling convention.</p></li><li><p>Roel Jordans has <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096205.html>posted some thoughts and questions in preparation for the EuroLLVM birds of a feather sessions on compilers in education</a>.</p></li><li><p>Peter Collingbourne has shared a new RFC on <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/096146.html>adding a new ABI for virtual calls</a>, termed the 'relative ABI'. He'd also like to change how virtual calls are represented in the IR.</p></li><li><p>Grigori Fursin from Dividiti <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096370.html>shared some recent work on crowdtuning compiler optimisation heuristics</a>.</p></li><li><p><a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096351.html>What is the current status of garbage collection with statepoints in LLVM?</a>. <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096360.html>Philip Reames</a> and <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096361.html>Sanjoy Das</a> have the answer!</p></li><li><p>Xinmin Tian has shared a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096291.html>proposal for function vectorisation and loop vectorisation with function calls</a>.</p></li><li><p>Akira Hatanaka is interested in comments to his <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096233.html>RFC on more precise lifetime.end metadata</a>. In the given example, three local variables have non-overlapping lifetimes and could potentially use the same stack slot, but this isn't currently done.</p></li></ul><h3>LLVM commits</h3><ul><li><p>MemorySSA has gained an initial update API. <a href=http://reviews.llvm.org/rL262362>r262362</a>.</p></li><li><p>TableGen can now check at compile time that a scheduling model is complete. <a href=http://reviews.llvm.org/rL262384>r262384</a>.</p></li><li><p>New comments in PassBuilder give a description of what trade-offs are expected for each optimisation level. <a href=http://reviews.llvm.org/rL262196>r262196</a>.</p></li><li><p>LoopLoadElimination is now enabled by default. <a href=http://reviews.llvm.org/rL262250>r262250</a>.</p></li><li><p>A new patch adding infrastructure for profile-guided optimisation enhancements in the inline has landed. <a href=http://reviews.llvm.org/rL262636>r262636</a>.</p></li><li><p>Experimental ValueTracking code which tried to infer more precise known bits using implied dominating conditions has been removed. Experiments didn't find it to be profitable enough, but it may still be useful to people wanting to experiment out of tree. <a href=http://reviews.llvm.org/rL262646>r262646</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>Clang's C API gained an option to demote fatal errors to non-fatal errors. This is likely to be useful for clients like IDEs. <a href=http://reviews.llvm.org/rL262318>r262318</a>.</p></li><li><p>clang-cl gained initial support for precompiled headers. <a href=http://reviews.llvm.org/rL262420>r262420</a>.</p></li><li><p>An <code>-fembed-bitcode</code> driver option has been introduced. <a href=http://reviews.llvm.org/rL262282>r262282</a>.</p></li><li><p>Semantic analysis for the swiftcall calling convention has landed. <a href=http://reviews.llvm.org/rL262587>r262587</a>.</p></li><li><p>Clang's TargetInfo will now store an actual DataLayout instance rather than a string. <a href=http://reviews.llvm.org/rL262737>r262737</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>LLDB can now read line tables from Microsoft's PDB debug info files. <a href=http://reviews.llvm.org/rL262528>r262528</a>.</p></li><li><p>The LLVM test-suite gained the ability to hash generated binaries and to skip tests if the hash didn't change since a previous run. <a href=http://reviews.llvm.org/rL262307>r262307</a>.</p></li><li><p>LLVM's OpenMP runtime now supports the new OpenMP 4.5 doacross loop nest and taskloop features. <a href=http://reviews.llvm.org/rL262532>r262532</a>, <a href=http://reviews.llvm.org/rL262535>r262535</a>.</p></li></ul></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/2016/02/llvm-weekly-113-feb-29th-2016.html><i class="fa fa-chevron-circle-left"></i>LLVM Weekly - #113, Feb 29th 2016</a></li><li><a href=https://blog.llvm.org/2016/03/llvm-weekly-115-mar-14th-2016.html>LLVM Weekly - #115, Mar 14th 2016 <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><h6>llvm.org |
+<!doctype html><html lang=en>
+<head>
+<title>LLVM Weekly - #114, Mar 7th 2016 - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #114, Mar 7th 2016">
+<meta property="og:description" content="Welcome to the one hundred and fourteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/2016/03/llvm-weekly-114-mar-7th-2016.html"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2016-03-07T04:40:00+00:00">
+<meta property="article:modified_time" content="2016-03-07T04:40:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="LLVM Weekly - #114, Mar 7th 2016">
+<meta name=twitter:description content="Welcome to the one hundred and fourteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>LLVM Weekly - #114, Mar 7th 2016</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2016-03-07T04:40:00Z>Mar 7, 2016</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a>
+</em>
+</li>
+<li>4 minute read</li>
+</ul>
+</aside>
+<p>Welcome to the one hundred and fourteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p> <p>The canonical home for this issue <a href=http://llvmweekly.org/issue/114>can be found here at llvmweekly.org</a>. </p> <a name=more></a> <h3>News and articles from around the web</h3><p>LLVM has been <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/096138.html>accepted</a> as a mentoring organisation in Google Summer of Code 2016. See <a href=https://summerofcode.withgoogle.com/how-it-works/>here</a> for more about what that means. If you're a student who would like to get paid to work on LLVM over the summer, you should definitely consider applying. Also take a look at the full list of <a href=https://summerofcode.withgoogle.com/organizations/>organisations in GSoC 2016</a>. If you have an interest in open source hardware, in my (biased) opinion you should definitely look at <a href=http://www.lowrisc.org/docs/gsoc-2016-ideas/>lowRISC's listed project ideas</a>.</p><p>LLVM and Clang 3.8 'final' <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096319.html>has been tagged</a>. A release should be imminent.</p><p>There was a big C++ committee meeting last week. You can find summaries <a href=https://www.reddit.com/r/cpp/comments/48zp05/what_we_added_to_the_c17_working_draft/>here</a> and <a href=http://usingstdcpp.org/2016/03/05/trip-report-c-meeting-at-jacksonville/>here</a>. If you were hoping for modules, concepts, UFCS, ranges, or coroutines in C++17 I'm afraid you're in for disappointment. Many new features will be available in C++ Technical Specifications though.</p><p>llvmlite 0.9.0 has been <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096199.html>released</a>. llvmlite is a light-weight Python binding for LLVM. If you're wondering how to get started with llvmlite, then check out this recent blog post from Ian Bertolacci on <a href=https://ian-bertolacci.github.io/llvm/llvmlite/python/compilers/programming/2016/03/06/LLVMLite_fibonacci.html>writing fibonacci in LLVM with llvmlite</a>.</p><p>Andi McClure has written a really interesting blog post about <a href=http://msm.runhello.com/p/1003>writing software without a compiler</a>. In this case, generating LLVM IR from LuaJIT.</p><h3>On the mailing lists</h3><ul><li><p>John McCall has posted an RFC on <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096250.html>implementing the Swift calling convention in LLVM and Clang</a>. Feedback is generally positive and there's an interesting discussion on the handling of Swift's errors in the calling convention.</p></li><li><p>Roel Jordans has <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096205.html>posted some thoughts and questions in preparation for the EuroLLVM birds of a feather sessions on compilers in education</a>.</p></li><li><p>Peter Collingbourne has shared a new RFC on <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/096146.html>adding a new ABI for virtual calls</a>, termed the 'relative ABI'. He'd also like to change how virtual calls are represented in the IR.</p></li><li><p>Grigori Fursin from Dividiti <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096370.html>shared some recent work on crowdtuning compiler optimisation heuristics</a>.</p></li><li><p><a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096351.html>What is the current status of garbage collection with statepoints in LLVM?</a>. <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096360.html>Philip Reames</a> and <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096361.html>Sanjoy Das</a> have the answer!</p></li><li><p>Xinmin Tian has shared a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096291.html>proposal for function vectorisation and loop vectorisation with function calls</a>.</p></li><li><p>Akira Hatanaka is interested in comments to his <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096233.html>RFC on more precise lifetime.end metadata</a>. In the given example, three local variables have non-overlapping lifetimes and could potentially use the same stack slot, but this isn't currently done.</p></li></ul><h3>LLVM commits</h3><ul><li><p>MemorySSA has gained an initial update API. <a href=http://reviews.llvm.org/rL262362>r262362</a>.</p></li><li><p>TableGen can now check at compile time that a scheduling model is complete. <a href=http://reviews.llvm.org/rL262384>r262384</a>.</p></li><li><p>New comments in PassBuilder give a description of what trade-offs are expected for each optimisation level. <a href=http://reviews.llvm.org/rL262196>r262196</a>.</p></li><li><p>LoopLoadElimination is now enabled by default. <a href=http://reviews.llvm.org/rL262250>r262250</a>.</p></li><li><p>A new patch adding infrastructure for profile-guided optimisation enhancements in the inline has landed. <a href=http://reviews.llvm.org/rL262636>r262636</a>.</p></li><li><p>Experimental ValueTracking code which tried to infer more precise known bits using implied dominating conditions has been removed. Experiments didn't find it to be profitable enough, but it may still be useful to people wanting to experiment out of tree. <a href=http://reviews.llvm.org/rL262646>r262646</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>Clang's C API gained an option to demote fatal errors to non-fatal errors. This is likely to be useful for clients like IDEs. <a href=http://reviews.llvm.org/rL262318>r262318</a>.</p></li><li><p>clang-cl gained initial support for precompiled headers. <a href=http://reviews.llvm.org/rL262420>r262420</a>.</p></li><li><p>An <code>-fembed-bitcode</code> driver option has been introduced. <a href=http://reviews.llvm.org/rL262282>r262282</a>.</p></li><li><p>Semantic analysis for the swiftcall calling convention has landed. <a href=http://reviews.llvm.org/rL262587>r262587</a>.</p></li><li><p>Clang's TargetInfo will now store an actual DataLayout instance rather than a string. <a href=http://reviews.llvm.org/rL262737>r262737</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>LLDB can now read line tables from Microsoft's PDB debug info files. <a href=http://reviews.llvm.org/rL262528>r262528</a>.</p></li><li><p>The LLVM test-suite gained the ability to hash generated binaries and to skip tests if the hash didn't change since a previous run. <a href=http://reviews.llvm.org/rL262307>r262307</a>.</p></li><li><p>LLVM's OpenMP runtime now supports the new OpenMP 4.5 doacross loop nest and taskloop features. <a href=http://reviews.llvm.org/rL262532>r262532</a>, <a href=http://reviews.llvm.org/rL262535>r262535</a>.</p></li></ul>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2016/02/llvm-weekly-113-feb-29th-2016.html><i class="fa fa-chevron-circle-left"></i> LLVM Weekly - #113, Feb 29th 2016</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/2016/03/llvm-weekly-115-mar-14th-2016.html>LLVM Weekly - #115, Mar 14th 2016 <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>

@@ -1,3 +1,116 @@
-<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #27, Jul 7th 2014"><meta property="og:description" content="Welcome to the twenty-seventh issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects.LLVM Weekly is brought to you by Alex Bradbury."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.llvm.org/2014/07/llvm-weekly-27-jul-7th-2014.html"><meta property="article:published_time" content="2014-07-07T07:35:00+00:00"><meta property="article:modified_time" content="2014-07-07T07:35:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="LLVM Weekly - #27, Jul 7th 2014"><meta name=twitter:description content="Welcome to the twenty-seventh issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects.LLVM Weekly is brought to you by Alex Bradbury."><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>LLVM Weekly - #27, Jul 7th 2014</h1><aside><ul><li><time class=post-date datetime=2014-07-07T07:35:00Z>Jul 7, 2014</time></li><li>Alex Bradbury</li><li><em><a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a></em></li><li>3 minutes read</li></ul></aside><p>Welcome to the twenty-seventh issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects.LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>.Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p><p>The canonical home for this issue <a href=http://llvmweekly.org/issue/27>can be found here at llvmweekly.org</a>.</p><a name=more></a><h3>News and articles from around the web</h3><p>An LLVM code generator has been <a href=https://github.com/MLton/mlton/commit/bf36a151a4b0cc366ba32b5ebea5d8ce25239a0b>merged</a> into the MLton whole-program optimizing compiler for Standard ML. This was written by Brian Leibig as part of his <a href=http://www.cs.rit.edu/~mtf/student-resources/20124_leibig_msproject.pdf>Master's thesis</a>, which contains more information on its performance and design.</p><p>Eli Bendersky has <a href=http://lists.cs.uiuc.edu/pipermail/cfe-dev/2014-July/037782.html>written a tool</a> which converts the output of Clang's <code>-ast-dump</code> to HTML. See <a href=https://dl.dropboxusercontent.com/u/15602400/template-insts-dump.html>here</a> for an example. The code is <a href=https://github.com/eliben/llvm-clang-samples/blob/master/tools/htmlize-ast-dump.py>available on Github</a>.</p><p>Clang's Microsoft Visual C++ <a href=http://clang.llvm.org/docs/MSVCCompatibility.html>compatibility page</a> has been updated to reflect the status of the current SVN trunk. As can be seen from the <a href=http://reviews.llvm.org/rL212193>relevant diff</a>, record layout has been marked complete along with RTTI. Lambdas are now marked mostly complete.</p><h3>On the mailing lists</h3><ul><li><p>Edwin Amsler is <a href=http://lists.cs.uiuc.edu/pipermail/llvmdev/2014-July/074472.html>interested in producing an LLVM backend for the 6502 processor</a>. He later starts a thread asking for <a href=http://lists.cs.uiuc.edu/pipermail/llvmdev/2014-July/074523.html>advice on targeting a CPU with no general purpos registers</a>. David Given <a href=http://lists.cs.uiuc.edu/pipermail/llvmdev/2014-July/074530.html>suggests</a> it might be worth viewing the 6502 as a machine with 256 byte-sized registers.</p></li><li><p>Pavel Chupin has written to the list on behalf of Intel to get feedback on <a href=http://lists.cs.uiuc.edu/pipermail/llvmdev/2014-July/074451.html>upstreaming support for the x32 ABI</a>. As you might expect, people are in favour of the idea. The NativeClient team are <a href=http://lists.cs.uiuc.edu/pipermail/llvmdev/2014-July/074457.html>also interested</a>, particularly as NaCl's x86-64 ABI is fairly similar to x32.</p></li><li><p>Sunil Srivastava has shared a <a href=http://lists.cs.uiuc.edu/pipermail/cfe-dev/2014-July/037812.html>proposal for an ABI test suite for Clang</a>. There is wide support for Sony submitting the implementation for code review. A later response clarifies that of the 400 test files, about 20% are hand-written and the rest come from the test case generator.</p></li><li><p>In a thread about using the Clang API to extract information about the memory layout of structs, Reid Kleckner <a href=http://lists.cs.uiuc.edu/pipermail/cfe-dev/2014-July/037778.html>points to the handy -fdump-record-layouts flag</a>.</p></li><li><p>There's a massive thread on <a href=http://lists.cs.uiuc.edu/pipermail/llvmdev/2014-July/074408.html>the usability of Phabricator review threads for non-Phabricator users</a>. There seem to be some issues with email reviews showing up on Phabricator and possibly vice-versa. There's more than I have time to summarize, so those interested are advised to read the thread.</p></li></ul><h3>LLVM commits</h3><ul><li><p>The X86 backend now expands atomics in IR instead of as MachineInstrs. Doing the expansions at the IR level results in shorter code and potentially there may be benefit from other IR passes being able to run on the expanded atomics. <a href=http://reviews.llvm.org/rL212119>r212119</a>.</p></li><li><p>The ARM backend learned the ISB memory barrier intrinsic. <a href=http://reviews.llvm.org/rL212276>r212276</a>.</p></li><li><p>The X86 backend gained support for <code>__builtin_ia32_rdpmc</code> which is used to read performance monitoring counters. <a href=http://reviews.llvm.org/rL212049>r212049</a>.</p></li><li><p>The peephole optimizer gained new code (currently disabled) to rewrite copies to avoid copies across register banks. <a href=http://reviews.llvm.org/rL212100>r212100</a>.</p></li><li><p>Control flow graph building code has been moved from MC to a new MCAnalysis library. <a href=http://reviews.llvm.org/rL212209>r212209</a>.</p></li><li><p>TableGen gained support for MSBuiltin, which allows for adding intrinsics for Microsoft compatibility. <a href=http://reviews.llvm.org/rL212350>r212350</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>MSVC RTTI (run-time type information) implementation has been completed. <a href=http://reviews.llvm.org/rL212125>r212125</a>.</p></li><li><p>The <code>__builin_arm_ldaex</code> and <code>__builtin_arm_stlex</code> intrinsics were added. <a href=http://reviews.llvm.org/rL212175>r212175</a>.</p></li><li><p>Nested blocks are now supported in Microsoft inline assembly. <a href=http://reviews.llvm.org/rL212389>r212389</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>lldb-gdbserver support has been merged for Linux x86-64. <a href=http://reviews.llvm.org/rL212069>r212069</a>.</p></li><li><p>AddressSanitizer gained support for i686-linux-android. <a href=http://reviews.llvm.org/rL212273>r212273</a>.</p></li><li><p>libcxxabi gained a CMake build system. <a href=http://reviews.llvm.org/rL212286>r212286</a>.</p></li><li><p>lld now supports parsing of x86 and ARM/Thumb relocations for MachO. <a href=http://reviews.llvm.org/rL212239>r212239</a>, <a href=http://reviews.llvm.org/rL212306>r212306</a>.</p></li></ul></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/2014/06/llvm-weekly-26-jun-30th-2014.html><i class="fa fa-chevron-circle-left"></i>LLVM Weekly - #26, Jun 30th 2014</a></li><li><a href=https://blog.llvm.org/2014/07/clangllvm-on-windows-update.html>Clang/LLVM on Windows Update <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><h6>llvm.org |
+<!doctype html><html lang=en>
+<head>
+<title>LLVM Weekly - #27, Jul 7th 2014 - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #27, Jul 7th 2014">
+<meta property="og:description" content="Welcome to the twenty-seventh issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects.LLVM Weekly is brought to you by Alex Bradbury.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/2014/07/llvm-weekly-27-jul-7th-2014.html"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2014-07-07T07:35:00+00:00">
+<meta property="article:modified_time" content="2014-07-07T07:35:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="LLVM Weekly - #27, Jul 7th 2014">
+<meta name=twitter:description content="Welcome to the twenty-seventh issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects.LLVM Weekly is brought to you by Alex Bradbury.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>LLVM Weekly - #27, Jul 7th 2014</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2014-07-07T07:35:00Z>Jul 7, 2014</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a>
+</em>
+</li>
+<li>3 minute read</li>
+</ul>
+</aside>
+<p>Welcome to the twenty-seventh issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects.LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>.Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p> <p>The canonical home for this issue <a href=http://llvmweekly.org/issue/27>can be found here at llvmweekly.org</a>. </p> <a name=more></a> <h3>News and articles from around the web</h3><p>An LLVM code generator has been <a href=https://github.com/MLton/mlton/commit/bf36a151a4b0cc366ba32b5ebea5d8ce25239a0b>merged</a> into the MLton whole-program optimizing compiler for Standard ML. This was written by Brian Leibig as part of his <a href=http://www.cs.rit.edu/~mtf/student-resources/20124_leibig_msproject.pdf>Master's thesis</a>, which contains more information on its performance and design.</p><p>Eli Bendersky has <a href=http://lists.cs.uiuc.edu/pipermail/cfe-dev/2014-July/037782.html>written a tool</a> which converts the output of Clang's <code>-ast-dump</code> to HTML. See <a href=https://dl.dropboxusercontent.com/u/15602400/template-insts-dump.html>here</a> for an example. The code is <a href=https://github.com/eliben/llvm-clang-samples/blob/master/tools/htmlize-ast-dump.py>available on Github</a>.</p><p>Clang's Microsoft Visual C++ <a href=http://clang.llvm.org/docs/MSVCCompatibility.html>compatibility page</a> has been updated to reflect the status of the current SVN trunk. As can be seen from the <a href=http://reviews.llvm.org/rL212193>relevant diff</a>, record layout has been marked complete along with RTTI. Lambdas are now marked mostly complete.</p><h3>On the mailing lists</h3><ul><li><p>Edwin Amsler is <a href=http://lists.cs.uiuc.edu/pipermail/llvmdev/2014-July/074472.html>interested in producing an LLVM backend for the 6502 processor</a>. He later starts a thread asking for <a href=http://lists.cs.uiuc.edu/pipermail/llvmdev/2014-July/074523.html>advice on targeting a CPU with no general purpos registers</a>. David Given <a href=http://lists.cs.uiuc.edu/pipermail/llvmdev/2014-July/074530.html>suggests</a> it might be worth viewing the 6502 as a machine with 256 byte-sized registers.</p></li><li><p>Pavel Chupin has written to the list on behalf of Intel to get feedback on <a href=http://lists.cs.uiuc.edu/pipermail/llvmdev/2014-July/074451.html>upstreaming support for the x32 ABI</a>. As you might expect, people are in favour of the idea. The NativeClient team are <a href=http://lists.cs.uiuc.edu/pipermail/llvmdev/2014-July/074457.html>also interested</a>, particularly as NaCl's x86-64 ABI is fairly similar to x32.</p></li><li><p>Sunil Srivastava has shared a <a href=http://lists.cs.uiuc.edu/pipermail/cfe-dev/2014-July/037812.html>proposal for an ABI test suite for Clang</a>. There is wide support for Sony submitting the implementation for code review. A later response clarifies that of the 400 test files, about 20% are hand-written and the rest come from the test case generator.</p></li><li><p>In a thread about using the Clang API to extract information about the memory layout of structs, Reid Kleckner <a href=http://lists.cs.uiuc.edu/pipermail/cfe-dev/2014-July/037778.html>points to the handy -fdump-record-layouts flag</a>.</p></li><li><p>There's a massive thread on <a href=http://lists.cs.uiuc.edu/pipermail/llvmdev/2014-July/074408.html>the usability of Phabricator review threads for non-Phabricator users</a>. There seem to be some issues with email reviews showing up on Phabricator and possibly vice-versa. There's more than I have time to summarize, so those interested are advised to read the thread.</p></li></ul><h3>LLVM commits</h3><ul><li><p>The X86 backend now expands atomics in IR instead of as MachineInstrs. Doing the expansions at the IR level results in shorter code and potentially there may be benefit from other IR passes being able to run on the expanded atomics. <a href=http://reviews.llvm.org/rL212119>r212119</a>.</p></li><li><p>The ARM backend learned the ISB memory barrier intrinsic. <a href=http://reviews.llvm.org/rL212276>r212276</a>.</p></li><li><p>The X86 backend gained support for <code>__builtin_ia32_rdpmc</code> which is used to read performance monitoring counters. <a href=http://reviews.llvm.org/rL212049>r212049</a>.</p></li><li><p>The peephole optimizer gained new code (currently disabled) to rewrite copies to avoid copies across register banks. <a href=http://reviews.llvm.org/rL212100>r212100</a>.</p></li><li><p>Control flow graph building code has been moved from MC to a new MCAnalysis library. <a href=http://reviews.llvm.org/rL212209>r212209</a>.</p></li><li><p>TableGen gained support for MSBuiltin, which allows for adding intrinsics for Microsoft compatibility. <a href=http://reviews.llvm.org/rL212350>r212350</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>MSVC RTTI (run-time type information) implementation has been completed. <a href=http://reviews.llvm.org/rL212125>r212125</a>.</p></li><li><p>The <code>__builin_arm_ldaex</code> and <code>__builtin_arm_stlex</code> intrinsics were added. <a href=http://reviews.llvm.org/rL212175>r212175</a>.</p></li><li><p>Nested blocks are now supported in Microsoft inline assembly. <a href=http://reviews.llvm.org/rL212389>r212389</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>lldb-gdbserver support has been merged for Linux x86-64. <a href=http://reviews.llvm.org/rL212069>r212069</a>.</p></li><li><p>AddressSanitizer gained support for i686-linux-android. <a href=http://reviews.llvm.org/rL212273>r212273</a>.</p></li><li><p>libcxxabi gained a CMake build system. <a href=http://reviews.llvm.org/rL212286>r212286</a>.</p></li><li><p>lld now supports parsing of x86 and ARM/Thumb relocations for MachO. <a href=http://reviews.llvm.org/rL212239>r212239</a>, <a href=http://reviews.llvm.org/rL212306>r212306</a>.</p></li></ul>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2014/06/llvm-weekly-26-jun-30th-2014.html><i class="fa fa-chevron-circle-left"></i> LLVM Weekly - #26, Jun 30th 2014</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/2014/07/clangllvm-on-windows-update.html>Clang/LLVM on Windows Update <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>

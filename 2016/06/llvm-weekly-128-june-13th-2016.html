@@ -1,3 +1,116 @@
-<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #128, June 13th 2016"><meta property="og:description" content="Welcome to the one hundred and twenty-eighth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.llvm.org/2016/06/llvm-weekly-128-june-13th-2016.html"><meta property="article:published_time" content="2016-06-13T05:08:00+00:00"><meta property="article:modified_time" content="2016-06-13T05:08:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="LLVM Weekly - #128, June 13th 2016"><meta name=twitter:description content="Welcome to the one hundred and twenty-eighth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>LLVM Weekly - #128, June 13th 2016</h1><aside><ul><li><time class=post-date datetime=2016-06-13T05:08:00Z>Jun 13, 2016</time></li><li>Alex Bradbury</li><li><em><a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a></em></li><li>4 minutes read</li></ul></aside><p>Welcome to the one hundred and twenty-eighth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p><p>The canonical home for this issue <a href=http://llvmweekly.org/issue/128>can be found here at llvmweekly.org</a>.</p><a name=more></a><h3>News and articles from around the web</h3><p>LDC, a compiler for the D programming language with an LLVM backends has a <a href=http://forum.dlang.org/post/lwsnqbravjqbnnryvjkx@forum.dlang.org>major release with 1.0.0</a>. The big news with this release is that the frontend is now completely written in D. Congratulations to everyone involved in this release. See <a href=http://dlang.org/>the D website</a> for more information about the D programming language.</p><p>The minor release LLVM 3.8.1-rc1 <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100787.html>has been tagged</a>.</p><h3>On the mailing lists</h3><ul><li><p>Gor Nishanov has shared an RFC on <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100838.html>adding support for coroutines to LLVM IR</a>.</p></li><li><p>Hans Wennborg has shared the <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100913.html>release plan for the 3.9 release</a>. This plan would see the release branch created on the 18th of July and the final shipping on the 22nd of August. Hans wonders whether, as with 2.9 and 1.9 the base version number will be incremented (making release 4.0). He'd also like to make LLVM's current release cadence "official" on the website and publicly list people who are currently committed to testing releases.</p></li><li><p>Chris Bieneman is <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100859.html>proposing some changes to the LLVM directory structure</a>. Specifically, adding a 'runtimes' subdirectory and removing the 'projects' subdirectory. Chris has helpfully <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100904.html>summarised some of the key feedback</a> and proposed how to move forwards.</p></li><li><p>Sebastian Pop is trying to get a feel for <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100942.html>how many LLVM developers are attending HPCA/PPoPP/CGO in February 2017</a> in order to estimate potential numbers for an LLVM gathering.</p></li><li><p>In answer to a question, Krzysztof Parzyszek explains <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100885.html>how to use glue values</a>.</p></li><li><p>Philip Reames provides a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100781.html>handy explanation</a> of what is means for allocations to "escape", be "captured" or be "thread local".</p></li><li><p>Simon Brand is seeking feedback on how to <a href=http://lists.llvm.org/pipermail/lldb-dev/2016-June/010453.html>enhance LLDB to better support HSA applications</a>.</p></li><li><p>Simon Cook describes how he has <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100899.html>set up pseudo-registers representing register locations on a very register-poor architecture</a>.</p></li><li><p>Vikram TV has shared a proposal on <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100789.html>adding a pass that calculates loop cost based on cache data</a>. The prototype patch analyses references to determine which would be in the same cache line. This knowledge can then be used to calculate a more accurate loop cost and. A drawback of the current implementation is it uses a static cache line size.</p></li><li><p>Sean Silva has kicked off a thread about the <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100792.html>intended behaviour of the CGSCC pass manager</a>. This manages passes over strongly connected components of the callgraph.</p></li></ul><h3>LLVM commits</h3><ul><li><p>Some of the work from the GSoC project on interprocedural register allocation has started to land. A RegUsageInfoCollector analysis was added that collects the list of clobbered registers for a MachineFunction. A new transformation pass was committed which scans the body of a function to find calls and updates the register mask with the one saved by RegUsageInfoCollector. <a href=http://reviews.llvm.org/rL272403>r272403</a>, <a href=http://reviews.llvm.org/rL272414>r272414</a>.</p></li><li><p>Chapter 2 of the tutorial on building a JIT with ORC has been fleshed out with a rough draft of the text. <a href=http://reviews.llvm.org/rL271885>r271885</a>.</p></li><li><p>The host CPU detection code for x86 has seen a large refactoring. <a href=http://reviews.llvm.org/rL271921>r271921</a>.</p></li><li><p>More documentation has been added about LLVM's CodeView support. <a href=http://reviews.llvm.org/rL272057>r272057</a>.</p></li><li><p>llvm-symbolizer will now be searched for in the same directory as the LLVM or Clang tool being executed. This increases the chance of being able to print pretty backtraces for systems where LLVM tools aren't installed in the $PATH. <a href=http://reviews.llvm.org/rL272232>r272232</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>Clang analyzer gained a checker for correct usage of the MPI API in C and C++. <a href=http://reviews.llvm.org/rL271907>r271907</a>.</p></li><li><p>Documentation was added on avoiding static initializers when using profiling. <a href=http://reviews.llvm.org/rL272067>r272067</a>, <a href=http://reviews.llvm.org/rL272214>r272214</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>A hardened allocator, 'scudo' was added to compiler-rt. It attempts to mitigate some common heap-based vulnerabilities. <a href=http://reviews.llvm.org/rL271968>r271968</a>.</p></li><li><p>Initial support for ARM has landed in LLD. This is just enough to link a hello world on ARM Linux. <a href=http://reviews.llvm.org/rL271993>r271993</a>.</p></li><li><p>Initial support for AddressSanitizer on Win64 was added. <a href=http://reviews.llvm.org/rL271915>r271915</a>.</p></li></ul></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/2016/06/llvm-weekly-127-june-6th-2016.html><i class="fa fa-chevron-circle-left"></i>LLVM Weekly - #127, June 6th 2016</a></li><li><a href=https://blog.llvm.org/2016/06/using-lnt-to-track-performance.html>Using LNT to Track Performance <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><h6>llvm.org |
+<!doctype html><html lang=en>
+<head>
+<title>LLVM Weekly - #128, June 13th 2016 - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #128, June 13th 2016">
+<meta property="og:description" content="Welcome to the one hundred and twenty-eighth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/2016/06/llvm-weekly-128-june-13th-2016.html"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2016-06-13T05:08:00+00:00">
+<meta property="article:modified_time" content="2016-06-13T05:08:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="LLVM Weekly - #128, June 13th 2016">
+<meta name=twitter:description content="Welcome to the one hundred and twenty-eighth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>LLVM Weekly - #128, June 13th 2016</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2016-06-13T05:08:00Z>Jun 13, 2016</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a>
+</em>
+</li>
+<li>4 minute read</li>
+</ul>
+</aside>
+<p>Welcome to the one hundred and twenty-eighth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p> <p>The canonical home for this issue <a href=http://llvmweekly.org/issue/128>can be found here at llvmweekly.org</a>. </p> <a name=more></a> <h3>News and articles from around the web</h3><p>LDC, a compiler for the D programming language with an LLVM backends has a <a href=http://forum.dlang.org/post/lwsnqbravjqbnnryvjkx@forum.dlang.org>major release with 1.0.0</a>. The big news with this release is that the frontend is now completely written in D. Congratulations to everyone involved in this release. See <a href=http://dlang.org/>the D website</a> for more information about the D programming language.</p><p>The minor release LLVM 3.8.1-rc1 <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100787.html>has been tagged</a>.</p><h3>On the mailing lists</h3><ul><li><p>Gor Nishanov has shared an RFC on <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100838.html>adding support for coroutines to LLVM IR</a>.</p></li><li><p>Hans Wennborg has shared the <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100913.html>release plan for the 3.9 release</a>. This plan would see the release branch created on the 18th of July and the final shipping on the 22nd of August. Hans wonders whether, as with 2.9 and 1.9 the base version number will be incremented (making release 4.0). He'd also like to make LLVM's current release cadence "official" on the website and publicly list people who are currently committed to testing releases.</p></li><li><p>Chris Bieneman is <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100859.html>proposing some changes to the LLVM directory structure</a>. Specifically, adding a 'runtimes' subdirectory and removing the 'projects' subdirectory. Chris has helpfully <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100904.html>summarised some of the key feedback</a> and proposed how to move forwards.</p></li><li><p>Sebastian Pop is trying to get a feel for <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100942.html>how many LLVM developers are attending HPCA/PPoPP/CGO in February 2017</a> in order to estimate potential numbers for an LLVM gathering.</p></li><li><p>In answer to a question, Krzysztof Parzyszek explains <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100885.html>how to use glue values</a>.</p></li><li><p>Philip Reames provides a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100781.html>handy explanation</a> of what is means for allocations to "escape", be "captured" or be "thread local".</p></li><li><p>Simon Brand is seeking feedback on how to <a href=http://lists.llvm.org/pipermail/lldb-dev/2016-June/010453.html>enhance LLDB to better support HSA applications</a>.</p></li><li><p>Simon Cook describes how he has <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100899.html>set up pseudo-registers representing register locations on a very register-poor architecture</a>.</p></li><li><p>Vikram TV has shared a proposal on <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100789.html>adding a pass that calculates loop cost based on cache data</a>. The prototype patch analyses references to determine which would be in the same cache line. This knowledge can then be used to calculate a more accurate loop cost and. A drawback of the current implementation is it uses a static cache line size.</p></li><li><p>Sean Silva has kicked off a thread about the <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-June/100792.html>intended behaviour of the CGSCC pass manager</a>. This manages passes over strongly connected components of the callgraph.</p></li></ul><h3>LLVM commits</h3><ul><li><p>Some of the work from the GSoC project on interprocedural register allocation has started to land. A RegUsageInfoCollector analysis was added that collects the list of clobbered registers for a MachineFunction. A new transformation pass was committed which scans the body of a function to find calls and updates the register mask with the one saved by RegUsageInfoCollector. <a href=http://reviews.llvm.org/rL272403>r272403</a>, <a href=http://reviews.llvm.org/rL272414>r272414</a>.</p></li><li><p>Chapter 2 of the tutorial on building a JIT with ORC has been fleshed out with a rough draft of the text. <a href=http://reviews.llvm.org/rL271885>r271885</a>.</p></li><li><p>The host CPU detection code for x86 has seen a large refactoring. <a href=http://reviews.llvm.org/rL271921>r271921</a>.</p></li><li><p>More documentation has been added about LLVM's CodeView support. <a href=http://reviews.llvm.org/rL272057>r272057</a>.</p></li><li><p>llvm-symbolizer will now be searched for in the same directory as the LLVM or Clang tool being executed. This increases the chance of being able to print pretty backtraces for systems where LLVM tools aren't installed in the $PATH. <a href=http://reviews.llvm.org/rL272232>r272232</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>Clang analyzer gained a checker for correct usage of the MPI API in C and C++. <a href=http://reviews.llvm.org/rL271907>r271907</a>.</p></li><li><p>Documentation was added on avoiding static initializers when using profiling. <a href=http://reviews.llvm.org/rL272067>r272067</a>, <a href=http://reviews.llvm.org/rL272214>r272214</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>A hardened allocator, 'scudo' was added to compiler-rt. It attempts to mitigate some common heap-based vulnerabilities. <a href=http://reviews.llvm.org/rL271968>r271968</a>.</p></li><li><p>Initial support for ARM has landed in LLD. This is just enough to link a hello world on ARM Linux. <a href=http://reviews.llvm.org/rL271993>r271993</a>.</p></li><li><p>Initial support for AddressSanitizer on Win64 was added. <a href=http://reviews.llvm.org/rL271915>r271915</a>.</p></li></ul>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2016/06/llvm-weekly-127-june-6th-2016.html><i class="fa fa-chevron-circle-left"></i> LLVM Weekly - #127, June 6th 2016</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/2016/06/using-lnt-to-track-performance.html>Using LNT to Track Performance <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>

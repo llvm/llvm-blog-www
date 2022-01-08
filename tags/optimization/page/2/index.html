@@ -1,8 +1,139 @@
-<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="LLVM Project"><link rel=alternate type=application/rss+xml+xml href=https://blog.llvm.org/tags/optimization/index.xml title="The LLVM Project Blog"><meta property="og:title" content="optimization"><meta property="og:description" content="LLVM Project News and Details from the Trenches"><meta property="og:type" content="website"><meta property="og:url" content="https://blog.llvm.org/tags/optimization/"><meta property="og:updated_time" content="2016-06-21T06:01:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="optimization"><meta name=twitter:description content="LLVM Project News and Details from the Trenches"><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><section id=list><h2>#optimization</h2><h3>2011</h3><ul><li><a href=https://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html>What Every C Programmer Should Know About Undefined Behavior #1/3</a>
-<time class=date-meta>May 13</time></li></ul><h3>2010</h3><ul><li><a href=https://blog.llvm.org/2010/04/extensible-metadata-in-llvm-ir.html>Extensible Metadata in LLVM IR</a>
-<time class=date-meta>Apr 14</time></li><li><a href=https://blog.llvm.org/2010/01/address-of-label-and-indirect-branches.html>Address of Label and Indirect Branches in LLVM IR</a>
-<time class=date-meta>Jan 3</time></li></ul><h3>2009</h3><ul><li><a href=https://blog.llvm.org/2009/12/advanced-topics-in-redundant-load.html>Advanced Topics in Redundant Load Elimination with a Focus on PHI Translation</a>
-<time class=date-meta>Dec 19</time></li><li><a href=https://blog.llvm.org/2009/12/introduction-to-load-elimination-in-gvn.html>Introduction to load elimination in the GVN pass</a>
-<time class=date-meta>Dec 17</time></li></ul></section><ul class=pagination><li class=page-item><a href=https://blog.llvm.org/tags/optimization/ class=page-link aria-label=First><span aria-hidden=true>&#171;&#171;</span></a></li><li class=page-item><a href=https://blog.llvm.org/tags/optimization/ class=page-link aria-label=Previous><span aria-hidden=true>&#171;</span></a></li><li class=page-item><a class=page-link href=https://blog.llvm.org/tags/optimization/>1</a></li><li class="page-item active"><a class=page-link href=https://blog.llvm.org/tags/optimization/page/2/>2</a></li><li class="page-item disabled"><a class=page-link aria-label=Next><span aria-hidden=true>&#187;</span></a></li><li class=page-item><a href=https://blog.llvm.org/tags/optimization/page/2/ class=page-link aria-label=Last><span aria-hidden=true>&#187;&#187;</span></a></li></ul></main><footer><h6>llvm.org |
+<!doctype html><html lang=en>
+<head>
+<title>optimization - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="LLVM Project"><link rel=alternate type=application/rss+xml href=https://blog.llvm.org/tags/optimization/index.xml title="The LLVM Project Blog"><meta property="og:title" content="optimization">
+<meta property="og:description" content="LLVM Project News and Details from the Trenches">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://blog.llvm.org/tags/optimization/">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="optimization">
+<meta name=twitter:description content="LLVM Project News and Details from the Trenches">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<section id=list>
+<h2>#optimization</h2>
+<h3>2011</h3>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html>What Every C Programmer Should Know About Undefined Behavior #1/3</a>
+<time class=date-meta>May 13</time>
+</li>
+</ul>
+<h3>2010</h3>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2010/04/extensible-metadata-in-llvm-ir.html>Extensible Metadata in LLVM IR</a>
+<time class=date-meta>Apr 14</time>
+</li>
+<li>
+<a href=https://blog.llvm.org/2010/01/address-of-label-and-indirect-branches.html>Address of Label and Indirect Branches in LLVM IR</a>
+<time class=date-meta>Jan 3</time>
+</li>
+</ul>
+<h3>2009</h3>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2009/12/advanced-topics-in-redundant-load.html>Advanced Topics in Redundant Load Elimination with a Focus on PHI Translation</a>
+<time class=date-meta>Dec 19</time>
+</li>
+<li>
+<a href=https://blog.llvm.org/2009/12/introduction-to-load-elimination-in-gvn.html>Introduction to load elimination in the GVN pass</a>
+<time class=date-meta>Dec 17</time>
+</li>
+</ul>
+</section>
+<ul class="pagination pagination-default">
+<li class=page-item>
+<a href=https://blog.llvm.org/tags/optimization/ aria-label=First class=page-link role=button><span aria-hidden=true>&#171;&#171;</span></a>
+</li>
+<li class=page-item>
+<a href=https://blog.llvm.org/tags/optimization/ aria-label=Previous class=page-link role=button><span aria-hidden=true>&#171;</span></a>
+</li>
+<li class=page-item>
+<a href=https://blog.llvm.org/tags/optimization/ aria-label="Page 1" class=page-link role=button>1</a>
+</li>
+<li class="page-item active">
+<a href=# aria-current=page aria-label="Page 2" class=page-link role=button>2</a>
+</li>
+<li class="page-item disabled">
+<a href=# aria-disabled=true aria-label=Next class=page-link role=button tabindex=-1><span aria-hidden=true>&#187;</span></a>
+</li>
+<li class="page-item disabled">
+<a href=# aria-disabled=true aria-label=Last class=page-link role=button tabindex=-1><span aria-hidden=true>&#187;&#187;</span></a>
+</li>
+</ul>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>

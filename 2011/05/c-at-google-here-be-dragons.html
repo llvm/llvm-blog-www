@@ -1,5 +1,118 @@
-<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Chandler Carruth"><meta property="og:title" content="C++ at Google: Here Be Dragons"><meta property="og:description" content="Google has one of the largest monolithic C++ codebases in the world. We have thousands of engineers working on millions of lines of C++ code every day. To help keep the entire thing running and all these engineers fast and productive we have had to build some unique C++ tools, centering around the Clang C++ compiler."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.llvm.org/2011/05/c-at-google-here-be-dragons.html"><meta property="article:published_time" content="2011-05-23T13:00:00+00:00"><meta property="article:modified_time" content="2011-05-23T13:00:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="C++ at Google: Here Be Dragons"><meta name=twitter:description content="Google has one of the largest monolithic C++ codebases in the world. We have thousands of engineers working on millions of lines of C++ code every day. To help keep the entire thing running and all these engineers fast and productive we have had to build some unique C++ tools, centering around the Clang C++ compiler."><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>C++ at Google: Here Be Dragons</h1><aside><ul><li><time class=post-date datetime=2011-05-23T13:00:00Z>May 23, 2011</time></li><li>Chandler Carruth</li><li><em><a href=https://blog.llvm.org/tags/c++>#C++</a>
+<!doctype html><html lang=en>
+<head>
+<title>C++ at Google: Here Be Dragons - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Chandler Carruth"><meta property="og:title" content="C++ at Google: Here Be Dragons">
+<meta property="og:description" content="Google has one of the largest monolithic C++ codebases in the world. We have thousands of engineers working on millions of lines of C++ code every day. To help keep the entire thing running and all these engineers fast and productive we have had to build some unique C++ tools, centering around the Clang C++ compiler.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/2011/05/c-at-google-here-be-dragons.html"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2011-05-23T13:00:00+00:00">
+<meta property="article:modified_time" content="2011-05-23T13:00:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="C++ at Google: Here Be Dragons">
+<meta name=twitter:description content="Google has one of the largest monolithic C++ codebases in the world. We have thousands of engineers working on millions of lines of C++ code every day. To help keep the entire thing running and all these engineers fast and productive we have had to build some unique C++ tools, centering around the Clang C++ compiler.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>C++ at Google: Here Be Dragons</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2011-05-23T13:00:00Z>May 23, 2011</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/c++>#C++</a>
 ,
-<a href=https://blog.llvm.org/tags/clang>#Clang</a></em></li><li>6 minutes read</li></ul></aside>Google has one of the largest monolithic C++ codebases in the world. We have thousands of engineers working on millions of lines of C++ code every day. To help keep the entire thing running and all these engineers fast and productive we have had to build some unique C++ tools, centering around the Clang C++ compiler. These help engineers understand their code and prevent bugs before they get to our production systems.<br><br><a name=more></a><i>(Cross-posted on the <a href=http://google-engtools.blogspot.com/2011/05/c-at-google-here-be-dragons.html>Google Engineering Tools Blog</a>)</i><br><br>Of course, improving the speed of Google engineers—their productivity—doesn’t always correlate to <i>speed</i> in the traditional sense. It requires the holistic acceleration of Google’s engineering efforts. Making any one tool faster just doesn’t cut it; the entire process has to be improved from end to end.<br><br>As a performance junkie, I like to think of this in familiar terms. It’s analogous to an <b>algorithmic</b> performance improvement. You get “algorithmic” improvements in productivity when you reduce the total work required for an engineer to get the job done, or fundamentally shift the time scale that the work requires. However, improving the time a single task requires often runs afoul of all the adages about performance tuning, 80/20 rules, and the pitfalls of over-optimizing.<br><br>One of the best ways to get these algorithmic improvements to productivity is to completely remove a set of tasks. Let’s take the task of triaging and debugging serious production bugs. If you’ve worked on a large software project, you’ve probably seen bugs which are somehow missed during code review, testing, and QA. When these bugs make it to production they cause a massive drain on developer productivity as the engineers cope with outages, data loss, and user complaints.<br><br>What if we could build a tool that would find these exact kinds of bugs in software automatically? What if we could prevent them from ever bringing down a server, reaching a user’s data, or causing a pager to go off? Many of these bugs boil down to simple C++ programming errors. Consider this snippet of code:<br><pre><br>Response ProcessRequest(Widget foo, Whatsit bar, bool *charge_acct) {<br>  // Do some fancy stuff...<br>  if (/* Detect a subscription user */) {<br>    charge_acct = false;<br>  }<br>  // Lots more fancy stuff...<br>}</pre><br><br>Do you see the bug? Careful testing and code reviews catch these and other bugs constantly, but inevitably one will sneak through, because the code <b>looks fine</b>. It says that it shouldn’t charge the account right there, plain as day. Unfortunately, C++ insists that ‘false’ is the same as ‘0’ which can be a pointer just as easily as it can be a boolean flag. This code sets the pointer to NULL, and never touches the flag.<br><br>Humans aren’t good at spotting this type of devious typo, any more than humans are good at translating C++ code into machine instructions. We have tools to do that, and the tool of choice in this case is the compiler. Not just any compiler will do, because while the code above is <em>one</em> example of a bug, we need to teach our compiler to find lots of other examples. We also have to be careful to make certain that developers will act upon the information these tools provide. Within Google’s C++ codebase, that means we break the build for every compiler diagnostic, even warnings. We continually need to enhance our tools to find new bugs in new code based on new patterns, all while maintaining enough precision to immediately break the build and have high confidence that the code is wrong.<br><br>To address these issues we started a project at Google which is working with the <a href=http://llvm.org/>LLVM Project</a> to develop the <a href=http://clang.llvm.org/>Clang</a> C++ compiler. We can rapidly add warnings to Clang and customize them to emit precise diagnostics about dangerous and potentially buggy constructs. Clang is designed as a collection of libraries with the express goal of supporting diverse tools and application uses. These libraries can be directly integrated into IDEs and commandline tools while still forming the core of the compiler itself.<br><br>We’ve been working on Clang for over a year now so that it can understand and reason about all of the C++ code at Google. But building the tools and technology to catch these bugs is only half the battle; we have to get engineers to <em>use</em> them as well. When other teams at Google respond to production bugs, our team will often begin working to enable any Clang diagnostics that might have caught the bug. Within one week of production issues, we can sweep the entire code base using these diagnostics to fix any latent bugs.<br><br>Recently we enabled the Clang C++ compiler for every C++ build at Google in order to provide accurate and helpful warnings and diagnostics to engineers. Some examples of how Clang can help developers with bad code are discussed on <a href=http://blog.llvm.org/2010/04/amazing-feats-of-clang-error-recovery.html>this post</a> to the LLVM blog. Beyond that, once we have swept the codebase with a bug-finding diagnostic, we can enable it for all our engineers to catch future bugs before they’re committed. These diagnostics break the entire build of that piece of software to ensure that they aren’t ignored and are acted on immediately. For the code sample above, the user gets an error message:<br><pre><br><b>example1.cc:4:17: error: initialization of pointer of type 'bool *' from literal 'false' [-Werror,-Wbool-conversions]</b><br>    charge_acct = false;<br>                  <b>^</b></pre><br><br>Here are two other classes of bugs we’ve found::<br><pre><br>long kMaxDiskSpace = 10 &lt;&lt; 30;  // Ten gigs ought to be enough for anybody.<br><br>void SomeService() {<br>  // Setup task using external resource...<br>  while (/* Check if resource is available yet ... */) {<br>    sleep(0.5);  // Yield the CPU<br>  }<br>}</pre><br><br>Which now trigger the following errors:<br><pre><br><b>example2.cc:12:25: error: shift result (10737418240) requires 35 bits to represent, but 'int' only has 32 bits [-Werror,-Wshift-overflow]</b><br>long kMaxDiskSpace = 10 &lt;&lt; 30;<br>                     <b>~~ ^  ~~</b><br><b>example2.cc:16:11: error: implicit conversion turns literal floating-point number into integer: 'double' to 'unsigned int' [-Werror,-Wliteral-conversion]</b><br>    sleep(0.5);<br>    <b>~~~~~ ^~~</b></pre><br><br>All of these represent real bugs that we have found in our code, and that we are catching and fixing with the help of Clang today.<br><br>Clang and its diagnostics don’t in any way obviate the need for careful code review and thorough testing. Rather, they complement these practices, combining to help reduce the number of bugs in our code. This is the platform on which we are developing new and better diagnostics for engineers going forward. This is how we are providing an algorithmic improvement to their productivity, and accelerating Google.<br><br>Stay tuned for more posts about how we rolled Clang out to Google engineers, how we have enhanced Clang to make it even more relevant for our code and our developers’ needs, and some of the exciting tools we’re building on top of this platform.</article><section class=post-nav><ul><li><a href=https://blog.llvm.org/2011/05/what-every-c-programmer-should-know_21.html><i class="fa fa-chevron-circle-left"></i>What Every C Programmer Should Know About Undefined Behavior #3/3</a></li><li><a href=https://blog.llvm.org/2011/05/llvm-architecture-of-open-source.html>LLVM @ "The Architecture of Open Source Applications" <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><h6>llvm.org |
+<a href=https://blog.llvm.org/tags/clang>#Clang</a>
+</em>
+</li>
+<li>6 minute read</li>
+</ul>
+</aside>
+Google has one of the largest monolithic C++ codebases in the world. We have thousands of engineers working on millions of lines of C++ code every day. To help keep the entire thing running and all these engineers fast and productive we have had to build some unique C++ tools, centering around the Clang C++ compiler. These help engineers understand their code and prevent bugs before they get to our production systems.<br><br><a name=more></a><i>(Cross-posted on the <a href=http://google-engtools.blogspot.com/2011/05/c-at-google-here-be-dragons.html>Google Engineering Tools Blog</a>)</i><br><br>Of course, improving the speed of Google engineers—their productivity—doesn’t always correlate to <i>speed</i> in the traditional sense. It requires the holistic acceleration of Google’s engineering efforts. Making any one tool faster just doesn’t cut it; the entire process has to be improved from end to end.<br><br>As a performance junkie, I like to think of this in familiar terms. It’s analogous to an <b>algorithmic</b> performance improvement. You get “algorithmic” improvements in productivity when you reduce the total work required for an engineer to get the job done, or fundamentally shift the time scale that the work requires. However, improving the time a single task requires often runs afoul of all the adages about performance tuning, 80/20 rules, and the pitfalls of over-optimizing.<br><br>One of the best ways to get these algorithmic improvements to productivity is to completely remove a set of tasks. Let’s take the task of triaging and debugging serious production bugs. If you’ve worked on a large software project, you’ve probably seen bugs which are somehow missed during code review, testing, and QA. When these bugs make it to production they cause a massive drain on developer productivity as the engineers cope with outages, data loss, and user complaints.<br><br>What if we could build a tool that would find these exact kinds of bugs in software automatically? What if we could prevent them from ever bringing down a server, reaching a user’s data, or causing a pager to go off? Many of these bugs boil down to simple C++ programming errors. Consider this snippet of code:<br><pre><br>Response ProcessRequest(Widget foo, Whatsit bar, bool *charge_acct) {<br>  // Do some fancy stuff...<br>  if (/* Detect a subscription user */) {<br>    charge_acct = false;<br>  }<br>  // Lots more fancy stuff...<br>}</pre><br><br>Do you see the bug? Careful testing and code reviews catch these and other bugs constantly, but inevitably one will sneak through, because the code <b>looks fine</b>. It says that it shouldn’t charge the account right there, plain as day. Unfortunately, C++ insists that ‘false’ is the same as ‘0’ which can be a pointer just as easily as it can be a boolean flag. This code sets the pointer to NULL, and never touches the flag.<br><br>Humans aren’t good at spotting this type of devious typo, any more than humans are good at translating C++ code into machine instructions. We have tools to do that, and the tool of choice in this case is the compiler. Not just any compiler will do, because while the code above is <em>one</em> example of a bug, we need to teach our compiler to find lots of other examples. We also have to be careful to make certain that developers will act upon the information these tools provide. Within Google’s C++ codebase, that means we break the build for every compiler diagnostic, even warnings. We continually need to enhance our tools to find new bugs in new code based on new patterns, all while maintaining enough precision to immediately break the build and have high confidence that the code is wrong.<br><br>To address these issues we started a project at Google which is working with the <a href=http://llvm.org/>LLVM Project</a> to develop the <a href=http://clang.llvm.org/>Clang</a> C++ compiler. We can rapidly add warnings to Clang and customize them to emit precise diagnostics about dangerous and potentially buggy constructs. Clang is designed as a collection of libraries with the express goal of supporting diverse tools and application uses. These libraries can be directly integrated into IDEs and commandline tools while still forming the core of the compiler itself.<br><br>We’ve been working on Clang for over a year now so that it can understand and reason about all of the C++ code at Google. But building the tools and technology to catch these bugs is only half the battle; we have to get engineers to <em>use</em> them as well. When other teams at Google respond to production bugs, our team will often begin working to enable any Clang diagnostics that might have caught the bug. Within one week of production issues, we can sweep the entire code base using these diagnostics to fix any latent bugs.<br><br>Recently we enabled the Clang C++ compiler for every C++ build at Google in order to provide accurate and helpful warnings and diagnostics to engineers. Some examples of how Clang can help developers with bad code are discussed on <a href=http://blog.llvm.org/2010/04/amazing-feats-of-clang-error-recovery.html> this post</a> to the LLVM blog. Beyond that, once we have swept the codebase with a bug-finding diagnostic, we can enable it for all our engineers to catch future bugs before they’re committed. These diagnostics break the entire build of that piece of software to ensure that they aren’t ignored and are acted on immediately. For the code sample above, the user gets an error message:<br><pre><br><b>example1.cc:4:17: error: initialization of pointer of type 'bool *' from literal 'false' [-Werror,-Wbool-conversions]</b><br>    charge_acct = false;<br>                  <b>^</b></pre><br><br>Here are two other classes of bugs we’ve found::<br><pre><br>long kMaxDiskSpace = 10 &lt;&lt; 30;  // Ten gigs ought to be enough for anybody.<br><br>void SomeService() {<br>  // Setup task using external resource...<br>  while (/* Check if resource is available yet ... */) {<br>    sleep(0.5);  // Yield the CPU<br>  }<br>}</pre><br><br>Which now trigger the following errors:<br><pre><br><b>example2.cc:12:25: error: shift result (10737418240) requires 35 bits to represent, but 'int' only has 32 bits [-Werror,-Wshift-overflow]</b><br>long kMaxDiskSpace = 10 &lt;&lt; 30;<br>                     <b>~~ ^  ~~</b><br><b>example2.cc:16:11: error: implicit conversion turns literal floating-point number into integer: 'double' to 'unsigned int' [-Werror,-Wliteral-conversion]</b><br>    sleep(0.5);<br>    <b>~~~~~ ^~~</b></pre><br><br>All of these represent real bugs that we have found in our code, and that we are catching and fixing with the help of Clang today.<br><br>Clang and its diagnostics don’t in any way obviate the need for careful code review and thorough testing. Rather, they complement these practices, combining to help reduce the number of bugs in our code. This is the platform on which we are developing new and better diagnostics for engineers going forward. This is how we are providing an algorithmic improvement to their productivity, and accelerating Google.<br><br>Stay tuned for more posts about how we rolled Clang out to Google engineers, how we have enhanced Clang to make it even more relevant for our code and our developers’ needs, and some of the exciting tools we’re building on top of this platform.
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2011/05/what-every-c-programmer-should-know_21.html><i class="fa fa-chevron-circle-left"></i> What Every C Programmer Should Know About Undefined Behavior #3/3</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/2011/05/llvm-architecture-of-open-source.html>LLVM @ "The Architecture of Open Source Applications" <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>

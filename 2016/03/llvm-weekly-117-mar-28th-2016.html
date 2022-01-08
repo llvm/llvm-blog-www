@@ -1,3 +1,116 @@
-<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #117, Mar 28th 2016"><meta property="og:description" content="Welcome to the one hundred and seventeenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.llvm.org/2016/03/llvm-weekly-117-mar-28th-2016.html"><meta property="article:published_time" content="2016-03-28T06:22:00+00:00"><meta property="article:modified_time" content="2016-03-28T06:22:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="LLVM Weekly - #117, Mar 28th 2016"><meta name=twitter:description content="Welcome to the one hundred and seventeenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>LLVM Weekly - #117, Mar 28th 2016</h1><aside><ul><li><time class=post-date datetime=2016-03-28T06:22:00Z>Mar 28, 2016</time></li><li>Alex Bradbury</li><li><em><a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a></em></li><li>3 minutes read</li></ul></aside><p>Welcome to the one hundred and seventeenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p><p>The canonical home for this issue <a href=http://llvmweekly.org/issue/117>can be found here at llvmweekly.org</a>.</p><a name=more></a><h3>News and articles from around the web</h3><p>Google Summer of Code applications are now closed. Applicants and interested third-parties can look forward to finding out which projects were selected <a href=https://summerofcode.withgoogle.com/how-it-works/>on April 22nd</a>.</p><p>Ramkumar Ramachandra has written a blog post giving a <a href=http://artagnon.com/inside-a-register-allocator/>whirlwind tour of the internals of LLVM's fast register allocator</a> (FastRegAlloc.cpp).</p><p>Alex Denisov has blogged about <a href=http://lowlevelbits.org/system-under-test-llvm/>the various test suites used within the LLVM project</a>.</p><p>Version 1.13 of the TTA-based Co-design Environment (TCE) has <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097139.html>been released</a>. This adds support for LLVM 3.8.</p><h3>On the mailing lists</h3><ul><li><p>Last week, Jia Chen's thread about <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096851.html>pointer analysis in LLVM</a> had yet to receive replies. It's now received some extensive discussion. Daniel Berlin argues there is <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097152.html>lower hanging fruit than improving AA</a>. It does seem there's <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097372.html>interest in getting in getting cfl-aa turned on by default</a>, which will require some careful bug fixing.</p></li><li><p>The issue of LLD and fatal errors has again surfaced on the mailing list. The more productive line of discussion focused around what should be expected of LLD when given maliciously corrupted inputs. Rui Ueyama is suggesting <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097445.html>adding a verifier pass</a> which could be optionally enabled or disabled.</p></li><li><p>Andrew Kaylor has shared an <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097617.html>RFC on adding new support to help triage optimisation-related failures</a>. Optimisation passes are assigned numbers which can be used to help bisect a failure. Michael Gottesman reports <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097637.html>a similar approach used in Swift</a>.</p></li><li><p>Samuel F Antao has <a href=http://lists.llvm.org/pipermail/cfe-dev/2016-March/048087.html>summarised recent discussion on unified offloading support in Clang</a>.</p></li><li><p>Duncan P. N. Exon Smith has proposed an <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097419.html>RFC on lazy-loading of debug info metadata</a>.</p></li><li><p>What does it mean for a platform to support a type but not support a particular operation? Krzysztof Parzyszek is kind enough to provide a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097489.html>clear and straight-forward answer</a>.</p></li><li><p>Applications for Google Summer of Code have closed, but the <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097380.html>list of new project ideas</a> from Philip Reames is a good starting point for anybody looking for a way to get stuck in to making impactful contributions to LLVM.</p></li></ul><h3>LLVM commits</h3><ul><li><p>A new utility, <code>update_test_checks.py</code> was added to update opt or llc test cases with new FileCheck patterns. <a href=http://reviews.llvm.org/rL264357>r264357</a>.</p></li><li><p>Non-power-of-2 loop unroll count pragmas are now supported. <a href=http://reviews.llvm.org/rL264407>r264407</a>.</p></li><li><p>The NVPTX backend gained a new address space inference pass. <a href=http://reviews.llvm.org/rL263916>r263916</a>.</p></li><li><p>Instances of Error are now convertible to <code>std::error_code</code>. Conversions are also available between <code>Expected&lt;T></code> and <code>ErrorOr&lt;T></code>. <a href=http://reviews.llvm.org/rL264221>r264221</a>, <a href=http://reviews.llvm.org/rL264238>r264238</a>.</p></li><li><p>Hexagon gained supported for run-time stack overflow checking. <a href=http://reviews.llvm.org/rL264328>r264328</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>Clang now supports lambda capture of <code>*this</code> by value. <a href=http://reviews.llvm.org/rL263921>r263921</a>.</p></li><li><p>The bitreverse builtins are now documented. <a href=http://reviews.llvm.org/rL264203>r264203</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>LLDB will fix inputted expressions with 'trivial' mistakes automatically. <a href=http://reviews.llvm.org/rL264379>r264379</a>.</p></li><li><p>ThreadSanitizer debugging support was added to LLDB. <a href=http://reviews.llvm.org/rL264162>r264162</a>.</p></li><li><p>Polly gained documentation to describe how it fits in to the LLVM pass pipeline. <a href=http://reviews.llvm.org/rL264446>r264446</a>.</p></li><li><p>LLDB has been updated to handle the UTF-16 APIs on Windows. <a href=http://reviews.llvm.org/rL264074>r264074</a>.</p></li></ul></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/2016/03/llvm-weekly-116-mar-21st-2016.html><i class="fa fa-chevron-circle-left"></i>LLVM Weekly - #116, Mar 21st 2016</a></li><li><a href=https://blog.llvm.org/2016/04/undefined-behavior-is-magic.html>My Little LLVM: Undefined Behavior is Magic! <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><h6>llvm.org |
+<!doctype html><html lang=en>
+<head>
+<title>LLVM Weekly - #117, Mar 28th 2016 - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #117, Mar 28th 2016">
+<meta property="og:description" content="Welcome to the one hundred and seventeenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/2016/03/llvm-weekly-117-mar-28th-2016.html"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2016-03-28T06:22:00+00:00">
+<meta property="article:modified_time" content="2016-03-28T06:22:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="LLVM Weekly - #117, Mar 28th 2016">
+<meta name=twitter:description content="Welcome to the one hundred and seventeenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>LLVM Weekly - #117, Mar 28th 2016</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2016-03-28T06:22:00Z>Mar 28, 2016</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a>
+</em>
+</li>
+<li>3 minute read</li>
+</ul>
+</aside>
+<p>Welcome to the one hundred and seventeenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p> <p>The canonical home for this issue <a href=http://llvmweekly.org/issue/117>can be found here at llvmweekly.org</a>. </p> <a name=more></a> <h3>News and articles from around the web</h3><p>Google Summer of Code applications are now closed. Applicants and interested third-parties can look forward to finding out which projects were selected <a href=https://summerofcode.withgoogle.com/how-it-works/>on April 22nd</a>.</p><p>Ramkumar Ramachandra has written a blog post giving a <a href=http://artagnon.com/inside-a-register-allocator/>whirlwind tour of the internals of LLVM's fast register allocator</a> (FastRegAlloc.cpp).</p><p>Alex Denisov has blogged about <a href=http://lowlevelbits.org/system-under-test-llvm/>the various test suites used within the LLVM project</a>.</p><p>Version 1.13 of the TTA-based Co-design Environment (TCE) has <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097139.html>been released</a>. This adds support for LLVM 3.8.</p><h3>On the mailing lists</h3><ul><li><p>Last week, Jia Chen's thread about <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/096851.html>pointer analysis in LLVM</a> had yet to receive replies. It's now received some extensive discussion. Daniel Berlin argues there is <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097152.html>lower hanging fruit than improving AA</a>. It does seem there's <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097372.html>interest in getting in getting cfl-aa turned on by default</a>, which will require some careful bug fixing.</p></li><li><p>The issue of LLD and fatal errors has again surfaced on the mailing list. The more productive line of discussion focused around what should be expected of LLD when given maliciously corrupted inputs. Rui Ueyama is suggesting <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097445.html>adding a verifier pass</a> which could be optionally enabled or disabled.</p></li><li><p>Andrew Kaylor has shared an <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097617.html>RFC on adding new support to help triage optimisation-related failures</a>. Optimisation passes are assigned numbers which can be used to help bisect a failure. Michael Gottesman reports <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097637.html>a similar approach used in Swift</a>.</p></li><li><p>Samuel F Antao has <a href=http://lists.llvm.org/pipermail/cfe-dev/2016-March/048087.html>summarised recent discussion on unified offloading support in Clang</a>.</p></li><li><p>Duncan P. N. Exon Smith has proposed an <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097419.html>RFC on lazy-loading of debug info metadata</a>.</p></li><li><p>What does it mean for a platform to support a type but not support a particular operation? Krzysztof Parzyszek is kind enough to provide a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097489.html>clear and straight-forward answer</a>.</p></li><li><p>Applications for Google Summer of Code have closed, but the <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-March/097380.html>list of new project ideas</a> from Philip Reames is a good starting point for anybody looking for a way to get stuck in to making impactful contributions to LLVM.</p></li></ul><h3>LLVM commits</h3><ul><li><p>A new utility, <code>update_test_checks.py</code> was added to update opt or llc test cases with new FileCheck patterns. <a href=http://reviews.llvm.org/rL264357>r264357</a>.</p></li><li><p>Non-power-of-2 loop unroll count pragmas are now supported. <a href=http://reviews.llvm.org/rL264407>r264407</a>.</p></li><li><p>The NVPTX backend gained a new address space inference pass. <a href=http://reviews.llvm.org/rL263916>r263916</a>.</p></li><li><p>Instances of Error are now convertible to <code>std::error_code</code>. Conversions are also available between <code>Expected&lt;T></code> and <code>ErrorOr&lt;T></code>. <a href=http://reviews.llvm.org/rL264221>r264221</a>, <a href=http://reviews.llvm.org/rL264238>r264238</a>.</p></li><li><p>Hexagon gained supported for run-time stack overflow checking. <a href=http://reviews.llvm.org/rL264328>r264328</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>Clang now supports lambda capture of <code>*this</code> by value. <a href=http://reviews.llvm.org/rL263921>r263921</a>.</p></li><li><p>The bitreverse builtins are now documented. <a href=http://reviews.llvm.org/rL264203>r264203</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>LLDB will fix inputted expressions with 'trivial' mistakes automatically. <a href=http://reviews.llvm.org/rL264379>r264379</a>.</p></li><li><p>ThreadSanitizer debugging support was added to LLDB. <a href=http://reviews.llvm.org/rL264162>r264162</a>.</p></li><li><p>Polly gained documentation to describe how it fits in to the LLVM pass pipeline. <a href=http://reviews.llvm.org/rL264446>r264446</a>.</p></li><li><p>LLDB has been updated to handle the UTF-16 APIs on Windows. <a href=http://reviews.llvm.org/rL264074>r264074</a>.</p></li></ul>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2016/03/llvm-weekly-116-mar-21st-2016.html><i class="fa fa-chevron-circle-left"></i> LLVM Weekly - #116, Mar 21st 2016</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/2016/04/undefined-behavior-is-magic.html>My Little LLVM: Undefined Behavior is Magic! <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>

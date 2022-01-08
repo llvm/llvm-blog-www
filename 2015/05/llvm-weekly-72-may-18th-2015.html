@@ -1,3 +1,116 @@
-<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #72, May 18th 2015"><meta property="og:description" content="Welcome to the seventy-second issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.llvm.org/2015/05/llvm-weekly-72-may-18th-2015.html"><meta property="article:published_time" content="2015-05-18T05:56:00+00:00"><meta property="article:modified_time" content="2015-05-18T05:56:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="LLVM Weekly - #72, May 18th 2015"><meta name=twitter:description content="Welcome to the seventy-second issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>LLVM Weekly - #72, May 18th 2015</h1><aside><ul><li><time class=post-date datetime=2015-05-18T05:56:00Z>May 18, 2015</time></li><li>Alex Bradbury</li><li><em><a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a></em></li><li>3 minutes read</li></ul></aside><p>Welcome to the seventy-second issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p><p>Some of you may be interested that over at the lowRISC project, we've announced the <a href=http://www.lowrisc.org/blog/2015/05/summer-of-code-students-for-lowrisc/>full set of summer student projects</a> we're supporting.</p><p>The canonical home for this issue <a href=http://llvmweekly.org/issue/72>can be found here at llvmweekly.org</a>.</p><a name=more></a><h3>News and articles from around the web</h3><p>The Rust programming language, which of course uses LLVM as its compiler backend, has just <a href=http://blog.rust-lang.org/2015/05/15/Rust-1.0.html>released version 1.0</a>.</p><p>The next Cambridge LLVM Social will <a href=http://article.gmane.org/gmane.comp.compilers.clang.devel/42786>take place on Wednesday 20th May</a> at the Cambridge Beer Festival.</p><h3>On the mailing lists</h3><ul><li><p>Teresa Johnson has posted an <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/85628>RFC on her ThinLTO implementation plan</a>. It's seen a lot of feedback, too much for me to hope to summarise, though much of it was around emitting bitcode wrapped in ELF.</p></li><li><p>Yaxun Liu is <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/85609>looking to upstream the Khronos Group LLM to SPIR-V converter</a>. There was some discussion as to whether SPIR-V makes most sense as a backend or as serialisation format alongside the LLVM bitcode output.</p></li><li><p>Reid Kleckner has written up an RFC on a <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/85783>new exception handling representation for MSVC</a>, given that the Itanium EH representation has been found insufficient.</p></li><li><p>Chris Matthews proposes <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/85775>changing LNT's regression detection algorithm</a>, with the aim being to reduce the number of false positives to the extent that people will be motivated to investigate reported regressions.</p></li><li><p>Matt Arsenault is proposing <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/85616>upstreaming an LLVM backend for HSAIL</a>. HSAIL presents a virtual target machine (in a way similar to NVPTX), and is defined by the HSA Foundation.</p></li><li><p>Owen Anderson proposes a new <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/85633>convergent attribute</a> aiming to make LLVM more suitable for SPMD/SIMT programming models. So far, all feedback has been very positive.</p></li></ul><h3>LLVM commits</h3><ul><li><p>The ARM backend has been updated to use AEABI aligned function variants. <a href=http://reviews.llvm.org/rL237127>r237127</a>.</p></li><li><p>The heuristic for estimating the effect of complete loop unrolling has been reimplemented. <a href=http://reviews.llvm.org/rL237156>r237156</a>.</p></li><li><p>Statepoints are now 'patchable'. <a href=http://reviews.llvm.org/rL237214>r237214</a>.</p></li><li><p>Support for function entry count metadata has been added. <a href=http://reviews.llvm.org/rL237260>r237260</a>.</p></li><li><p>A new loop distribution pass has been born. It is off by default. <a href=http://reviews.llvm.org/rL237358>r237358</a>.</p></li><li><p>New SelectionDAG nodes have been added for signed/unsigned min/max. <a href=http://reviews.llvm.org/rL237423>r237423</a>.</p></li><li><p>A simple speculative execution pass, targeted mainly at GPUs has been added. <a href=http://reviews.llvm.org/rL237459>r237459</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>The little endian SPARC target has been added to clang. <a href=http://reviews.llvm.org/rL237001>r237001</a>.</p></li><li><p>clang-format's formatter has undergone some refactoring, which also led to a few bug fixes.<a href=http://reviews.llvm.org/rL237104>r237104</a>.</p></li><li><p>Documentation on adding new attributes has seen a significant update. <a href=http://reviews.llvm.org/rL237268>r237268</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>libcxx learnt <code>std::experimental::sample</code> <a href=http://reviews.llvm.org/rL237264>r237264</a>.</p></li><li><p>lldb has enabled multithreaded debugging on Windows. <a href=http://reviews.llvm.org/rL237392>r237392</a>.</p></li><li><p>lldb can now set and clear hardware watchpoints and breakpoints on AArch64. <a href=http://reviews.llvm.org/rL237419>r237419</a>.</p></li><li><p>lldb gained an assembly profiler for mips32. <a href=http://reviews.llvm.org/rL237420>r237420</a>.</p></li></ul></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/2015/05/llvm-weekly-71-may-11th-2015.html><i class="fa fa-chevron-circle-left"></i>LLVM Weekly - #71, May 11th 2015</a></li><li><a href=https://blog.llvm.org/2015/05/openmp-support_22.html>OpenMP Support <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><h6>llvm.org |
+<!doctype html><html lang=en>
+<head>
+<title>LLVM Weekly - #72, May 18th 2015 - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #72, May 18th 2015">
+<meta property="og:description" content="Welcome to the seventy-second issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/2015/05/llvm-weekly-72-may-18th-2015.html"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2015-05-18T05:56:00+00:00">
+<meta property="article:modified_time" content="2015-05-18T05:56:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="LLVM Weekly - #72, May 18th 2015">
+<meta name=twitter:description content="Welcome to the seventy-second issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>LLVM Weekly - #72, May 18th 2015</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2015-05-18T05:56:00Z>May 18, 2015</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a>
+</em>
+</li>
+<li>3 minute read</li>
+</ul>
+</aside>
+<p>Welcome to the seventy-second issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p><p>Some of you may be interested that over at the lowRISC project, we've announced the <a href=http://www.lowrisc.org/blog/2015/05/summer-of-code-students-for-lowrisc/>full set of summer student projects</a> we're supporting.</p> <p>The canonical home for this issue <a href=http://llvmweekly.org/issue/72>can be found here at llvmweekly.org</a>. </p> <a name=more></a><h3>News and articles from around the web</h3><p>The Rust programming language, which of course uses LLVM as its compiler backend, has just <a href=http://blog.rust-lang.org/2015/05/15/Rust-1.0.html>released version 1.0</a>.</p><p>The next Cambridge LLVM Social will <a href=http://article.gmane.org/gmane.comp.compilers.clang.devel/42786>take place on Wednesday 20th May</a> at the Cambridge Beer Festival.</p><h3>On the mailing lists</h3><ul><li><p>Teresa Johnson has posted an <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/85628>RFC on her ThinLTO implementation plan</a>. It's seen a lot of feedback, too much for me to hope to summarise, though much of it was around emitting bitcode wrapped in ELF.</p></li><li><p>Yaxun Liu is <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/85609>looking to upstream the Khronos Group LLM to SPIR-V converter</a>. There was some discussion as to whether SPIR-V makes most sense as a backend or as serialisation format alongside the LLVM bitcode output.</p></li><li><p>Reid Kleckner has written up an RFC on a <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/85783>new exception handling representation for MSVC</a>, given that the Itanium EH representation has been found insufficient.</p></li><li><p>Chris Matthews proposes <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/85775>changing LNT's regression detection algorithm</a>, with the aim being to reduce the number of false positives to the extent that people will be motivated to investigate reported regressions.</p></li><li><p>Matt Arsenault is proposing <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/85616>upstreaming an LLVM backend for HSAIL</a>. HSAIL presents a virtual target machine (in a way similar to NVPTX), and is defined by the HSA Foundation.</p></li><li><p>Owen Anderson proposes a new <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/85633>convergent attribute</a> aiming to make LLVM more suitable for SPMD/SIMT programming models. So far, all feedback has been very positive.</p></li></ul><h3>LLVM commits</h3><ul><li><p>The ARM backend has been updated to use AEABI aligned function variants. <a href=http://reviews.llvm.org/rL237127>r237127</a>.</p></li><li><p>The heuristic for estimating the effect of complete loop unrolling has been reimplemented. <a href=http://reviews.llvm.org/rL237156>r237156</a>.</p></li><li><p>Statepoints are now 'patchable'. <a href=http://reviews.llvm.org/rL237214>r237214</a>.</p></li><li><p>Support for function entry count metadata has been added. <a href=http://reviews.llvm.org/rL237260>r237260</a>.</p></li><li><p>A new loop distribution pass has been born. It is off by default. <a href=http://reviews.llvm.org/rL237358>r237358</a>.</p></li><li><p>New SelectionDAG nodes have been added for signed/unsigned min/max. <a href=http://reviews.llvm.org/rL237423>r237423</a>.</p></li><li><p>A simple speculative execution pass, targeted mainly at GPUs has been added. <a href=http://reviews.llvm.org/rL237459>r237459</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>The little endian SPARC target has been added to clang. <a href=http://reviews.llvm.org/rL237001>r237001</a>.</p></li><li><p>clang-format's formatter has undergone some refactoring, which also led to a few bug fixes.<a href=http://reviews.llvm.org/rL237104>r237104</a>.</p></li><li><p>Documentation on adding new attributes has seen a significant update. <a href=http://reviews.llvm.org/rL237268>r237268</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>libcxx learnt <code>std::experimental::sample</code> <a href=http://reviews.llvm.org/rL237264>r237264</a>.</p></li><li><p>lldb has enabled multithreaded debugging on Windows. <a href=http://reviews.llvm.org/rL237392>r237392</a>.</p></li><li><p>lldb can now set and clear hardware watchpoints and breakpoints on AArch64. <a href=http://reviews.llvm.org/rL237419>r237419</a>.</p></li><li><p>lldb gained an assembly profiler for mips32. <a href=http://reviews.llvm.org/rL237420>r237420</a>.</p></li></ul>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2015/05/llvm-weekly-71-may-11th-2015.html><i class="fa fa-chevron-circle-left"></i> LLVM Weekly - #71, May 11th 2015</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/2015/05/openmp-support_22.html>OpenMP Support <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>

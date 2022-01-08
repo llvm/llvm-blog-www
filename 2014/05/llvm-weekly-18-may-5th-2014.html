@@ -1,3 +1,116 @@
-<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #18, May 5th 2014"><meta property="og:description" content="Welcome to the eighteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.llvm.org/2014/05/llvm-weekly-18-may-5th-2014.html"><meta property="article:published_time" content="2014-05-05T09:01:00+00:00"><meta property="article:modified_time" content="2014-05-05T09:01:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="LLVM Weekly - #18, May 5th 2014"><meta name=twitter:description content="Welcome to the eighteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>LLVM Weekly - #18, May 5th 2014</h1><aside><ul><li><time class=post-date datetime=2014-05-05T09:01:00Z>May 5, 2014</time></li><li>Alex Bradbury</li><li><em><a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a></em></li><li>4 minutes read</li></ul></aside><p>Welcome to the eighteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p><p>I'm going to be in the San Francisco area May 13th-20th with some other Raspberry Pi people. We'll be at Maker Faire Bay Area on the 17th and 18th. Let me know if there's anything else I should check out while over there.</p><p>The canonical home for this issue <a href=http://llvmweekly.org/issue/18>can be found here at llvmweekly.org</a>.</p><a name=more></a><h3>News and articles from around the web</h3><p>Andrew Ruef has written a blog post about <a href=http://blog.trailofbits.com/2014/04/27/using-static-analysis-and-clang-to-find-heartbleed/>using static analysis and Clang to find the SSL heartbleed bug</a>. The code for the checker described in the blog post is <a href=https://github.com/awruef/find-heartbleed>available on Github</a>.</p><p>The FTL ('Fourth tier LLVM') Javascript JIT is <a href=https://trac.webkit.org/changeset/167958>now enabled in WebKit for Mac</a>. The WebKit Wiki has <a href=https://trac.webkit.org/wiki/FTLJIT>more information</a>. I haven't seen any public benchmark figures. Please do share if you have any.</p><p>Eli Bendersky has written an article about <a href=http://eli.thegreenplace.net/2014/05/01/modern-source-to-source-transformation-with-clang-and-libtooling/>how to use libTooling to implement source to source transformations</a>.</p><p>The next <a href=http://article.gmane.org/gmane.comp.debugging.lldb.devel/3828>Paris LLVM Social</a> will take place on May 5th (i.e. this evening).</p><p>The LLVM Bay Area social <a href=http://article.gmane.org/gmane.comp.compilers.clang.devel/36443>will take place on May 8th</a>. Please RSVP if you are interested.</p><h3>On the mailing lists</h3><ul><li><p>Discussion is still going on regarding <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/72466>last week's proposal to add intrinsics for safe division</a>. Philip Reames has <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/72588>shared his reasoning againt the proposal</a>. This triggered a <em>lot</em> of discussion which is unfortunately more than I have time to summarise.</p></li><li><p>Kevin Modzelewski is working on exceptions for Pyston, the LLVM-based Python JIT and <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/72668>asks for advice/experiences on how others have implemented them in projects like VMKit</a>. There are a number of useful responses.</p></li><li><p>Alp Toker <a href=http://article.gmane.org/gmane.comp.compilers.clang.scm/97880>suggests adding a coding style policy to discourage excessive use of default arguments</a>.</p></li><li><p>Yi Kong has <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/72598>suggested improvements to LNT for benchmarking</a>. One of the concerns raised in followup responses is that benchmark results may not be stable and may take too long to be practical on e.g. ARM hardware. Chris Matthews suggests <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/72619>performing a geometric mean similar to the SPEC benchmarks</a> as an alternative to a plain total execution time metric.</p></li><li><p>Dario Domizioli has <a href=http://article.gmane.org/gmane.comp.compilers.clang.devel/36314>posted an RFC for an optnone pragma</a>. This proposal triggered robust discussion about whether there is any advantage to supporting this in addition to the optnone function attribute, though it seems as though there is enough support for the feature for it to make its way in.</p></li></ul><h3>LLVM commits</h3><ul><li><p>The patch to <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/72366>perform common subexpression elimination for a group of getelementptrs</a> that was discussed a couple of weeks ago has been merged. It is currently only enabled for the NVPTX backend. <a href=http://reviews.llvm.org/rL207783>r207783</a>.</p></li><li><p>X86 code generation has been implemented for the musttail function attribute. <a href=http://reviews.llvm.org/rL207598>r207598</a>.</p></li><li><p>Pass run listeners were added to the pass manager. This adds C/C++ APIs to enable fine-grain progress report and safe suspension points. See the commit message for more info <a href=http://reviews.llvm.org/rL207430>r207430</a>.</p></li><li><p>The optimisation remark system has started to be used, with calls to emitOptimizationRemark added to the loop unroller and vectorizer. <a href=http://reviews.llvm.org/rL207528>r207528</a>, <a href=http://reviews.llvm.org/rL207574>r207574</a>.</p></li><li><p>The SLPVectorizer gained the ability to recognize and vectorize intrinsic math functions. <a href=http://reviews.llvm.org/rL207901>r207901</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>NRVO (named return value optimisation) determination was rewritten. According to the commit message, "a variable now has NRVO applied if and only if every return statement in that scope returns that variable." Also, NRVO is performed roughly 7% more often in a bootstrap clang build. <a href=http://reviews.llvm.org/rL207890>r207890</a>.</p></li><li><p>libclang's documentation comment API has been split in to a separate header. <a href=http://reviews.llvm.org/rL207392>r207392</a>.</p></li><li><p>The SLPVectorizer (superword-level parallelism) is now disabled at O0, O1 and Oz. <a href=http://reviews.llvm.org/rL207433>r207433</a>. It was later re-enabled at Oz. <a href=http://reviews.llvm.org/rL207858>r207858</a>.</p></li><li><p>The libclang API now supports attributes 'pure', 'const', and 'noduplicate'. <a href=http://reviews.llvm.org/rL207767>r207767</a>.</p></li><li><p>The comment parser no longer attempts to validate HTML attributes (the previous solution was insufficient). <a href=http://reviews.llvm.org/rL207712>r207712</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p><code>R_MIPS_REL32</code> relocation are now supported in lld. <a href=http://reviews.llvm.org/rL207494>r207494</a>.</p></li><li><p>A collection of CTRL+C related issues were fixed in lldb. <a href=http://reviews.llvm.org/rL207816>r207816</a>.</p></li></ul></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/2014/04/llvm-weekly-17-apr-28th-2014.html><i class="fa fa-chevron-circle-left"></i>LLVM Weekly - #17, Apr 28th 2014</a></li><li><a href=https://blog.llvm.org/2014/05/llvm-341-release.html>LLVM 3.4.1 Release <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><h6>llvm.org |
+<!doctype html><html lang=en>
+<head>
+<title>LLVM Weekly - #18, May 5th 2014 - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #18, May 5th 2014">
+<meta property="og:description" content="Welcome to the eighteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/2014/05/llvm-weekly-18-may-5th-2014.html"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2014-05-05T09:01:00+00:00">
+<meta property="article:modified_time" content="2014-05-05T09:01:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="LLVM Weekly - #18, May 5th 2014">
+<meta name=twitter:description content="Welcome to the eighteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>LLVM Weekly - #18, May 5th 2014</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2014-05-05T09:01:00Z>May 5, 2014</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a>
+</em>
+</li>
+<li>4 minute read</li>
+</ul>
+</aside>
+<p>Welcome to the eighteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or <a href=https://twitter.com/llvmweekly>@llvmweekly</a> or <a href=https://twitter.com/asbradbury>@asbradbury</a> on Twitter.</p><p>I'm going to be in the San Francisco area May 13th-20th with some other Raspberry Pi people. We'll be at Maker Faire Bay Area on the 17th and 18th. Let me know if there's anything else I should check out while over there.</p> <p>The canonical home for this issue <a href=http://llvmweekly.org/issue/18>can be found here at llvmweekly.org</a>. </p> <a name=more></a> <h3>News and articles from around the web</h3><p>Andrew Ruef has written a blog post about <a href=http://blog.trailofbits.com/2014/04/27/using-static-analysis-and-clang-to-find-heartbleed/>using static analysis and Clang to find the SSL heartbleed bug</a>. The code for the checker described in the blog post is <a href=https://github.com/awruef/find-heartbleed>available on Github</a>.</p><p>The FTL ('Fourth tier LLVM') Javascript JIT is <a href=https://trac.webkit.org/changeset/167958>now enabled in WebKit for Mac</a>. The WebKit Wiki has <a href=https://trac.webkit.org/wiki/FTLJIT>more information</a>. I haven't seen any public benchmark figures. Please do share if you have any.</p><p>Eli Bendersky has written an article about <a href=http://eli.thegreenplace.net/2014/05/01/modern-source-to-source-transformation-with-clang-and-libtooling/>how to use libTooling to implement source to source transformations</a>.</p><p>The next <a href=http://article.gmane.org/gmane.comp.debugging.lldb.devel/3828>Paris LLVM Social</a> will take place on May 5th (i.e. this evening).</p><p>The LLVM Bay Area social <a href=http://article.gmane.org/gmane.comp.compilers.clang.devel/36443>will take place on May 8th</a>. Please RSVP if you are interested.</p><h3>On the mailing lists</h3><ul><li><p>Discussion is still going on regarding <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/72466>last week's proposal to add intrinsics for safe division</a>. Philip Reames has <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/72588>shared his reasoning againt the proposal</a>. This triggered a <em>lot</em> of discussion which is unfortunately more than I have time to summarise.</p></li><li><p>Kevin Modzelewski is working on exceptions for Pyston, the LLVM-based Python JIT and <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/72668>asks for advice/experiences on how others have implemented them in projects like VMKit</a>. There are a number of useful responses.</p></li><li><p>Alp Toker <a href=http://article.gmane.org/gmane.comp.compilers.clang.scm/97880>suggests adding a coding style policy to discourage excessive use of default arguments</a>.</p></li><li><p>Yi Kong has <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/72598>suggested improvements to LNT for benchmarking</a>. One of the concerns raised in followup responses is that benchmark results may not be stable and may take too long to be practical on e.g. ARM hardware. Chris Matthews suggests <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/72619>performing a geometric mean similar to the SPEC benchmarks</a> as an alternative to a plain total execution time metric.</p></li><li><p>Dario Domizioli has <a href=http://article.gmane.org/gmane.comp.compilers.clang.devel/36314>posted an RFC for an optnone pragma</a>. This proposal triggered robust discussion about whether there is any advantage to supporting this in addition to the optnone function attribute, though it seems as though there is enough support for the feature for it to make its way in.</p></li></ul><h3>LLVM commits</h3><ul><li><p>The patch to <a href=http://article.gmane.org/gmane.comp.compilers.llvm.devel/72366>perform common subexpression elimination for a group of getelementptrs</a> that was discussed a couple of weeks ago has been merged. It is currently only enabled for the NVPTX backend. <a href=http://reviews.llvm.org/rL207783>r207783</a>.</p></li><li><p>X86 code generation has been implemented for the musttail function attribute. <a href=http://reviews.llvm.org/rL207598>r207598</a>.</p></li><li><p>Pass run listeners were added to the pass manager. This adds C/C++ APIs to enable fine-grain progress report and safe suspension points. See the commit message for more info <a href=http://reviews.llvm.org/rL207430>r207430</a>.</p></li><li><p>The optimisation remark system has started to be used, with calls to emitOptimizationRemark added to the loop unroller and vectorizer. <a href=http://reviews.llvm.org/rL207528>r207528</a>, <a href=http://reviews.llvm.org/rL207574>r207574</a>.</p></li><li><p>The SLPVectorizer gained the ability to recognize and vectorize intrinsic math functions. <a href=http://reviews.llvm.org/rL207901>r207901</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>NRVO (named return value optimisation) determination was rewritten. According to the commit message, "a variable now has NRVO applied if and only if every return statement in that scope returns that variable." Also, NRVO is performed roughly 7% more often in a bootstrap clang build. <a href=http://reviews.llvm.org/rL207890>r207890</a>.</p></li><li><p>libclang's documentation comment API has been split in to a separate header. <a href=http://reviews.llvm.org/rL207392>r207392</a>.</p></li><li><p>The SLPVectorizer (superword-level parallelism) is now disabled at O0, O1 and Oz. <a href=http://reviews.llvm.org/rL207433>r207433</a>. It was later re-enabled at Oz. <a href=http://reviews.llvm.org/rL207858>r207858</a>.</p></li><li><p>The libclang API now supports attributes 'pure', 'const', and 'noduplicate'. <a href=http://reviews.llvm.org/rL207767>r207767</a>.</p></li><li><p>The comment parser no longer attempts to validate HTML attributes (the previous solution was insufficient). <a href=http://reviews.llvm.org/rL207712>r207712</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p><code>R_MIPS_REL32</code> relocation are now supported in lld. <a href=http://reviews.llvm.org/rL207494>r207494</a>.</p></li><li><p>A collection of CTRL+C related issues were fixed in lldb. <a href=http://reviews.llvm.org/rL207816>r207816</a>.</p></li></ul>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2014/04/llvm-weekly-17-apr-28th-2014.html><i class="fa fa-chevron-circle-left"></i> LLVM Weekly - #17, Apr 28th 2014</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/2014/05/llvm-341-release.html>LLVM 3.4.1 Release <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>

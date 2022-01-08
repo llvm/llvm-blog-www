@@ -1,3 +1,116 @@
-<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #113, Feb 29th 2016"><meta property="og:description" content="Welcome to the one hundred and thirteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.llvm.org/2016/02/llvm-weekly-113-feb-29th-2016.html"><meta property="article:published_time" content="2016-02-29T06:58:00+00:00"><meta property="article:modified_time" content="2016-02-29T06:58:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="LLVM Weekly - #113, Feb 29th 2016"><meta name=twitter:description content="Welcome to the one hundred and thirteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury."><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>LLVM Weekly - #113, Feb 29th 2016</h1><aside><ul><li><time class=post-date datetime=2016-02-29T06:58:00Z>Feb 29, 2016</time></li><li>Alex Bradbury</li><li><em><a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a></em></li><li>3 minutes read</li></ul></aside><p>Welcome to the one hundred and thirteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or @llvmweekly or @asbradbury on Twitter.</p><h3>News and articles from around the web</h3><p>LLVM and Clang 3.8RC3 <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095756.html>has been tagged</a>.</p><p>EuroLLVM 2016 is <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095832.html>less than a month away</a>. If you want to attend, be sure to <a href=http://www.llvm.org/devmtg/2016-03/#registration>register</a>.</p><p>The Red Hat blog has a <a href=http://developerblog.redhat.com/2016/02/23/upcoming-features-in-gcc-6/>summary of new features in the upcoming GCC 6 release</a>.</p><p>The Meeting C++ blog has a <a href=http://meetingcpp.com/index.php/br/items/current-proposals-for-c17.html>helpful summary of a subset of the proposals for the next C++ committee meeting</a>.</p><h3>On the mailing lists</h3><ul><li><p>Chandler Carruth has suggested <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095809.html>moving the LLVM test-suite repository to Github</a>. In response to some concerns, Chris Lattner points out that using GitHub in this case <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095942.html>doesn't mean abandoning the current development workflow</a>, it just means it can be augmented with GitHub-style pull requests for those who prefer it. Chandler <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095943.html>summarised the thread</a> and provided a list of next steps.</p></li><li><p>Sanjoy Das <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095833.html>pointed out a potential soundness issue with the <code>available_externally</code> linkage type</a>. This triggered a very long discussion. James Knight pointed out the same issue <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095935.html>could happen with normal functions in a shared library</a>. There was some back and forth between Hal Finkel and Chandler Carruth <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/096025.html>on the best approach to addressing this problem</a>.</p></li><li><p>Philip Reames asks whether <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095964.html>a PHI depending on another PHI in the same basic block is valid</a>. It's currently accepted by the verifier but arguably shouldn't be. So far, nobody has argued that it should be valid.</p></li><li><p>Matthias Braun kicked off a discussion on <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095947.html>better defining the semantics of reserved and unallocatable registers</a>. After more discussion, he followed up with a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095999.html>revised definition</a>.</p></li><li><p>David Li has posted a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/096077.html>proposal for supporting in-process merging of profile data</a>.</p></li></ul><h3>LLVM commits</h3><ul><li><p>The Sparc backend now contains definitions for all registers and instructions defined in the Sparc v8 manual. <a href=http://reviews.llvm.org/rL262133>r262133</a>.</p></li><li><p>LLVM gained a basic LoopPassManager, though it currently only contains dummy passes. <a href=http://reviews.llvm.org/rL261831>r261831</a>.</p></li><li><p>A number of TargetInstrInfo predicates now take a reference to a MachineInstr rather than a pointer. <a href=http://reviews.llvm.org/rL261605>r261605</a>.</p></li><li><p>The WebAssembly backend gained redzone support for the userspace stack. <a href=http://reviews.llvm.org/rL261662>r261662</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>Whole-program vtable optimisation is now available in Clang using the <code>-fwhole-program-vtables</code> flag. <a href=http://reviews.llvm.org/rL261767>r261767</a>.</p></li><li><p>Clang gained <code>__builtin_canonicalize</code> which returns the platform-specific canonical encoding of a floating point number. <a href=http://reviews.llvm.org/rL262122>r262122</a>.</p></li><li><p>A hasAnyName matcher was added. <a href=http://reviews.llvm.org/rL261574>r261574</a>.</p></li><li><p>The pointer arithmetic checker has been improved to report fewer false positives. <a href=http://reviews.llvm.org/rL261632>r261632</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>The new ELF linker gained support for identical code folding (ICF). This reduces the size of an LLD binary by 3.6% and of a Clang binary by 2.7%. As described in the commit message, this is not a "safe" version of ICF as implemented in GNU gold, so will cause issues if the input relies on two distinct functions always having distinct addresses. <a href=http://reviews.llvm.org/rL261912>r261912</a>.</p></li><li><p>Polly's tree now contains an <code>update_check.py</code> script that may be useful to other LLVM devs. It updates a FileCheck-based lit test by updating the <code>CHECK:</code> lines with the actual output of the <code>RUN:</code> command. <a href=http://reviews.llvm.org/rL261899>r261899</a>.</p></li><li><p>LLDB gained a new set of plugins to help debug Java programs, specifically Java code JIT-ed by the Android runtime. <a href=http://reviews.llvm.org/rL262015>r262015</a>.</p></li><li><p>The new OpenMP 4.5 affinity API is now supported in LLVM's openmp implementation. <a href=http://reviews.llvm.org/rL261915>r261915</a>.</p></li><li><p>The new ELF linker gained support for the <code>-r</code> command-line option, which produces relocatable output (partial linking). <a href=http://reviews.llvm.org/rL261838>r261838</a>.</p></li><li><p>The CMake/lit runner for SPEC in the LLVM test-suite can now run the C CPU2006 floating point benchmarks (but not the Fortran ones). <a href=http://reviews.llvm.org/rL261816>r261816</a>.</p></li><li><p>The old ELF linker has been deleted from LLD. <a href=http://reviews.llvm.org/rL262158>r262158</a>.</p></li></ul></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/2016/02/llvm-weekly-112-feb-22nd-2016.html><i class="fa fa-chevron-circle-left"></i>LLVM Weekly - #112, Feb 22nd 2016</a></li><li><a href=https://blog.llvm.org/2016/03/llvm-weekly-114-mar-7th-2016.html>LLVM Weekly - #114, Mar 7th 2016 <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><h6>llvm.org |
+<!doctype html><html lang=en>
+<head>
+<title>LLVM Weekly - #113, Feb 29th 2016 - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Alex Bradbury"><meta property="og:title" content="LLVM Weekly - #113, Feb 29th 2016">
+<meta property="og:description" content="Welcome to the one hundred and thirteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/2016/02/llvm-weekly-113-feb-29th-2016.html"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2016-02-29T06:58:00+00:00">
+<meta property="article:modified_time" content="2016-02-29T06:58:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="LLVM Weekly - #113, Feb 29th 2016">
+<meta name=twitter:description content="Welcome to the one hundred and thirteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by Alex Bradbury.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>LLVM Weekly - #113, Feb 29th 2016</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2016-02-29T06:58:00Z>Feb 29, 2016</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/llvmweekly>#llvmweekly</a>
+</em>
+</li>
+<li>3 minute read</li>
+</ul>
+</aside>
+<p>Welcome to the one hundred and thirteenth issue of LLVM Weekly, a weekly newsletter (published every Monday) covering developments in LLVM, Clang, and related projects. LLVM Weekly is brought to you by <a href=http://asbradbury.org>Alex Bradbury</a>. Subscribe to future issues at <a href=http://llvmweekly.org>http://llvmweekly.org</a> and pass it on to anyone else you think may be interested. Please send any tips or feedback to <a href=mailto:asb@asbradbury.org>asb@asbradbury.org</a>, or @llvmweekly or @asbradbury on Twitter.</p><h3>News and articles from around the web</h3><p>LLVM and Clang 3.8RC3 <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095756.html>has been tagged</a>.</p><p>EuroLLVM 2016 is <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095832.html>less than a month away</a>. If you want to attend, be sure to <a href=http://www.llvm.org/devmtg/2016-03/#registration>register</a>.</p><p>The Red Hat blog has a <a href=http://developerblog.redhat.com/2016/02/23/upcoming-features-in-gcc-6/>summary of new features in the upcoming GCC 6 release</a>.</p><p>The Meeting C++ blog has a <a href=http://meetingcpp.com/index.php/br/items/current-proposals-for-c17.html>helpful summary of a subset of the proposals for the next C++ committee meeting</a>.</p><h3>On the mailing lists</h3><ul><li><p>Chandler Carruth has suggested <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095809.html>moving the LLVM test-suite repository to Github</a>. In response to some concerns, Chris Lattner points out that using GitHub in this case <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095942.html>doesn't mean abandoning the current development workflow</a>, it just means it can be augmented with GitHub-style pull requests for those who prefer it. Chandler <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095943.html>summarised the thread</a> and provided a list of next steps.</p></li><li><p>Sanjoy Das <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095833.html>pointed out a potential soundness issue with the <code>available_externally</code> linkage type</a>. This triggered a very long discussion. James Knight pointed out the same issue <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095935.html>could happen with normal functions in a shared library</a>. There was some back and forth between Hal Finkel and Chandler Carruth <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/096025.html>on the best approach to addressing this problem</a>.</p></li><li><p>Philip Reames asks whether <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095964.html>a PHI depending on another PHI in the same basic block is valid</a>. It's currently accepted by the verifier but arguably shouldn't be. So far, nobody has argued that it should be valid.</p></li><li><p>Matthias Braun kicked off a discussion on <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095947.html>better defining the semantics of reserved and unallocatable registers</a>. After more discussion, he followed up with a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/095999.html>revised definition</a>.</p></li><li><p>David Li has posted a <a href=http://lists.llvm.org/pipermail/llvm-dev/2016-February/096077.html>proposal for supporting in-process merging of profile data</a>.</p></li></ul><h3>LLVM commits</h3><ul><li><p>The Sparc backend now contains definitions for all registers and instructions defined in the Sparc v8 manual. <a href=http://reviews.llvm.org/rL262133>r262133</a>.</p></li><li><p>LLVM gained a basic LoopPassManager, though it currently only contains dummy passes. <a href=http://reviews.llvm.org/rL261831>r261831</a>.</p></li><li><p>A number of TargetInstrInfo predicates now take a reference to a MachineInstr rather than a pointer. <a href=http://reviews.llvm.org/rL261605>r261605</a>.</p></li><li><p>The WebAssembly backend gained redzone support for the userspace stack. <a href=http://reviews.llvm.org/rL261662>r261662</a>.</p></li></ul><h3>Clang commits</h3><ul><li><p>Whole-program vtable optimisation is now available in Clang using the <code>-fwhole-program-vtables</code> flag. <a href=http://reviews.llvm.org/rL261767>r261767</a>.</p></li><li><p>Clang gained <code>__builtin_canonicalize</code> which returns the platform-specific canonical encoding of a floating point number. <a href=http://reviews.llvm.org/rL262122>r262122</a>.</p></li><li><p>A hasAnyName matcher was added. <a href=http://reviews.llvm.org/rL261574>r261574</a>.</p></li><li><p>The pointer arithmetic checker has been improved to report fewer false positives. <a href=http://reviews.llvm.org/rL261632>r261632</a>.</p></li></ul><h3>Other project commits</h3><ul><li><p>The new ELF linker gained support for identical code folding (ICF). This reduces the size of an LLD binary by 3.6% and of a Clang binary by 2.7%. As described in the commit message, this is not a "safe" version of ICF as implemented in GNU gold, so will cause issues if the input relies on two distinct functions always having distinct addresses. <a href=http://reviews.llvm.org/rL261912>r261912</a>.</p></li><li><p>Polly's tree now contains an <code>update_check.py</code> script that may be useful to other LLVM devs. It updates a FileCheck-based lit test by updating the <code>CHECK:</code> lines with the actual output of the <code>RUN:</code> command. <a href=http://reviews.llvm.org/rL261899>r261899</a>.</p></li><li><p>LLDB gained a new set of plugins to help debug Java programs, specifically Java code JIT-ed by the Android runtime. <a href=http://reviews.llvm.org/rL262015>r262015</a>.</p></li><li><p>The new OpenMP 4.5 affinity API is now supported in LLVM's openmp implementation. <a href=http://reviews.llvm.org/rL261915>r261915</a>.</p></li><li><p>The new ELF linker gained support for the <code>-r</code> command-line option, which produces relocatable output (partial linking). <a href=http://reviews.llvm.org/rL261838>r261838</a>.</p></li><li><p>The CMake/lit runner for SPEC in the LLVM test-suite can now run the C CPU2006 floating point benchmarks (but not the Fortran ones). <a href=http://reviews.llvm.org/rL261816>r261816</a>.</p></li><li><p>The old ELF linker has been deleted from LLD. <a href=http://reviews.llvm.org/rL262158>r262158</a>.</p></li></ul>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/2016/02/llvm-weekly-112-feb-22nd-2016.html><i class="fa fa-chevron-circle-left"></i> LLVM Weekly - #112, Feb 22nd 2016</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/2016/03/llvm-weekly-114-mar-7th-2016.html>LLVM Weekly - #114, Mar 7th 2016 <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>

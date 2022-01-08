@@ -1,46 +1,221 @@
-<!doctype html><html lang=en><head><title>The LLVM Project Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Sylvestre Ledru"><meta property="og:title" content="apt.llvm.org - moving from physical server to the cloud"><meta property="og:description" content="In this blog post, I would like to explain how I migrated apt.llvm.org from physical hardware hosted in a datacenter to the Google cloud. This has resulted in better security and faster builds for LLVM Debian/Ubuntu nightly builds."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.llvm.org/posts/2021-11-02-apt.llvm.org-moving-from-physical-server-to-the-cloud/"><meta property="article:published_time" content="2021-11-02T00:00:00+00:00"><meta property="article:modified_time" content="2021-11-02T00:00:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="apt.llvm.org - moving from physical server to the cloud"><meta name=twitter:description content="In this blog post, I would like to explain how I migrated apt.llvm.org from physical hardware hosted in a datacenter to the Google cloud. This has resulted in better security and faster builds for LLVM Debian/Ubuntu nightly builds."><meta name=generator content="Hugo 0.68.3"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>apt.llvm.org - moving from physical server to the cloud</h1><aside><ul><li><time class=post-date datetime=2021-11-02T00:00:00Z>Nov 2, 2021</time></li><li>Sylvestre Ledru</li><li><em><a href=https://blog.llvm.org/tags/infrastructure>#infrastructure</a>
+<!doctype html><html lang=en>
+<head>
+<title>apt.llvm.org - moving from physical server to the cloud - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Sylvestre Ledru"><meta property="og:title" content="apt.llvm.org - moving from physical server to the cloud">
+<meta property="og:description" content="In this blog post, I would like to explain how I migrated apt.llvm.org from physical hardware hosted in a datacenter to the Google cloud. This has resulted in better security and faster builds for LLVM Debian/Ubuntu nightly builds.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/posts/2021-11-02-apt.llvm.org-moving-from-physical-server-to-the-cloud/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2021-11-02T00:00:00+00:00">
+<meta property="article:modified_time" content="2021-11-02T00:00:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="apt.llvm.org - moving from physical server to the cloud">
+<meta name=twitter:description content="In this blog post, I would like to explain how I migrated apt.llvm.org from physical hardware hosted in a datacenter to the Google cloud. This has resulted in better security and faster builds for LLVM Debian/Ubuntu nightly builds.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>apt.llvm.org - moving from physical server to the cloud</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2021-11-02T00:00:00Z>Nov 2, 2021</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/infrastructure>#infrastructure</a>
 ,
-<a href=https://blog.llvm.org/tags/compiler>#Compiler</a></em></li><li>4 minutes read</li></ul></aside><p>In this blog post, I would like to explain how I migrated
+<a href=https://blog.llvm.org/tags/compiler>#Compiler</a>
+</em>
+</li>
+<li>4 minute read</li>
+</ul>
+</aside>
+<p>In this blog post, I would like to explain how I migrated
 <a href=https://apt.llvm.org>apt.llvm.org</a> from physical hardware hosted in
 a datacenter to the Google cloud. This has resulted in better security
-and faster builds for LLVM Debian/Ubuntu nightly builds.</p><h1 id=previous-infrastructure>Previous infrastructure</h1><p>About 10 years ago, Nick Lewycky from Google offered to replace my mix
+and faster builds for LLVM Debian/Ubuntu nightly builds.</p>
+<h1 id=previous-infrastructure>Previous infrastructure</h1>
+<p>About 10 years ago, Nick Lewycky from Google offered to replace my mix
 of old and terrible servers with 16 blade servers in a chassis and a
 control server. Below are pictures of the front and back of these
-servers, which have served us faithfully for 10 years:</p><hr><p><img src=https://blog.llvm.org/img/gcp/servers-front.png alt="Old server - front"> <img src=https://blog.llvm.org/img/gcp/servers-back.png alt="Old server - back"></p><hr><p>The hosting was sponsored by <a href=https://www.irill.org/><em>IRILL</em></a>, at
-Inria, next to Versailles.</p><p>This setup was running using a PXE install with preseed to set up
-everything on the 16 blades.</p><p>While it served us very well for years, it is now holding us back.</p><ul><li>Some of the blades are dying;</li><li>Old hardware - it takes from 4 to 7 hours per build;</li><li>All blades are always on even if no build is executed;</li><li>Even if it happened rarely, I had to drive to the DC to fix some
-systems.</li></ul><h1 id=new-infrastructure>New infrastructure</h1><p>As part of the <a href=https://openssf.org/><em>OpenSSF initiative</em></a>, Google and
+servers, which have served us faithfully for 10 years:</p>
+<hr>
+<p><img src=https://blog.llvm.org/img/gcp/servers-front.png alt="Old server - front"> <img src=https://blog.llvm.org/img/gcp/servers-back.png alt="Old server - back"></p>
+<hr>
+<p>The hosting was sponsored by <a href=https://www.irill.org/><em>IRILL</em></a>, at
+Inria, next to Versailles.</p>
+<p>This setup was running using a PXE install with preseed to set up
+everything on the 16 blades.</p>
+<p>While it served us very well for years, it is now holding us back.</p>
+<ul>
+<li>Some of the blades are dying;</li>
+<li>Old hardware - it takes from 4 to 7 hours per build;</li>
+<li>All blades are always on even if no build is executed;</li>
+<li>Even if it happened rarely, I had to drive to the DC to fix some
+systems.</li>
+</ul>
+<h1 id=new-infrastructure>New infrastructure</h1>
+<p>As part of the <a href=https://openssf.org/><em>OpenSSF initiative</em></a>, Google and
 the Linux foundation offered a budget to migrate this service on Google
-Cloud Platform (GCP).</p><p>As Jenkins has been working very well, I reused this approach and
+Cloud Platform (GCP).</p>
+<p>As Jenkins has been working very well, I reused this approach and
 imported the previous configurations (available on
-<a href=https://github.com/opencollab/llvm-jenkins.debian.net/tree/master/jobs><em>https://github.com/opencollab/llvm-jenkins.debian.net/tree/master/jobs</em></a>).</p><p>I followed most of the tutorial provided on GCP, <a href=https://cloud.google.com/architecture/using-jenkins-for-distributed-builds-on-compute-engine><em>Using Jenkins for
+<a href=https://github.com/opencollab/llvm-jenkins.debian.net/tree/master/jobs><em>https://github.com/opencollab/llvm-jenkins.debian.net/tree/master/jobs</em></a>).</p>
+<p>I followed most of the tutorial provided on GCP, <a href=https://cloud.google.com/architecture/using-jenkins-for-distributed-builds-on-compute-engine><em>Using Jenkins for
 distributed builds on Compute
-Engine</em></a>.</p><p>The architecture is the following:</p><p><img src=https://blog.llvm.org/img/gcp/gcp-archi-infra.png alt="The schema of the infra"></p><p>Similar to puppet or chef, Salt is the configuration management tool
+Engine</em></a>.</p>
+<p>The architecture is the following:</p>
+<p><img src=https://blog.llvm.org/img/gcp/gcp-archi-infra.png alt="The schema of the infra"></p>
+<p>Similar to puppet or chef, Salt is the configuration management tool
 used to configure the various systems. A salt server configures both the
 Jenkins controller and the reference node. This node is a preconfigured
 VM with all the dependencies and tools to start the build. This node is
 halted most of the time and only started when the image needs to be
-updated.</p><p>For example, the list of Virtual Machines now usually looks like the
-following screenshot:</p><p><img src=https://blog.llvm.org/img/gcp/gcp-list-server.png alt="GCP - list of servers"></p><ul><li>5 build VMs - off after 5 minutes without activity</li><li>The template VM (off as it is only started to update the image)</li><li>The jenkins orchestrator</li></ul><h2 id=build-servers>Build servers</h2><p>The controller is always on and starts/ends the build nodes.</p><p>The reference node is configured and updated using this script, based on
-gcloud, the Google cloud CLI:</p><p><a href=https://github.com/opencollab/llvm-jenkins.debian.net/blob/master/image-update.sh><em>https://github.com/opencollab/llvm-jenkins.debian.net/blob/master/image-update.sh</em></a></p><p>This script performs the following steps:</p><ul><li>starts the reference node and then ssh into it.</li><li>Perform the needed changes (ex: new chroot for a new distro version,
-new build hooks, etc).</li><li>Once the changes are performed.</li></ul><p>Usually:</p><ul><li>Salt update</li><li>Refresh the chroots</li><li><em>git pull</em> llvm-project</li><li>Stops the VM</li><li>Creates a new image.</li><li>Archives the old image.</li><li>This image will be used by Jenkins to start new VMs.</li></ul><p>The node image contains the various i386 and amd64 chroot for supported
+updated.</p>
+<p>For example, the list of Virtual Machines now usually looks like the
+following screenshot:</p>
+<p><img src=https://blog.llvm.org/img/gcp/gcp-list-server.png alt="GCP - list of servers"></p>
+<ul>
+<li>5 build VMs - off after 5 minutes without activity</li>
+<li>The template VM (off as it is only started to update the image)</li>
+<li>The jenkins orchestrator</li>
+</ul>
+<h2 id=build-servers>Build servers</h2>
+<p>The controller is always on and starts/ends the build nodes.</p>
+<p>The reference node is configured and updated using this script, based on
+gcloud, the Google cloud CLI:</p>
+<p><a href=https://github.com/opencollab/llvm-jenkins.debian.net/blob/master/image-update.sh><em>https://github.com/opencollab/llvm-jenkins.debian.net/blob/master/image-update.sh</em></a></p>
+<p>This script performs the following steps:</p>
+<ul>
+<li>starts the reference node and then ssh into it.</li>
+<li>Perform the needed changes (ex: new chroot for a new distro version,
+new build hooks, etc).</li>
+<li>Once the changes are performed.</li>
+</ul>
+<p>Usually:</p>
+<ul>
+<li>Salt update</li>
+<li>Refresh the chroots</li>
+<li><em>git pull</em> llvm-project</li>
+<li>Stops the VM</li>
+<li>Creates a new image.</li>
+<li>Archives the old image.</li>
+<li>This image will be used by Jenkins to start new VMs.</li>
+</ul>
+<p>The node image contains the various i386 and amd64 chroot for supported
 Debian and Ubuntu installs. The LLVM repository is also checked out to
-avoid doing a long clone with many files on every VM startup.</p><p>Thanks to this, the jobs just need to perform a small <em>git pull</em> instead
-of a full clone.</p><p><img src=https://blog.llvm.org/img/gcp/gcp-image-node.png alt="GCP - image node"></p><p>The size of this image is 6.67gb. This approach saves about 10 minutes
+avoid doing a long clone with many files on every VM startup.</p>
+<p>Thanks to this, the jobs just need to perform a small <em>git pull</em> instead
+of a full clone.</p>
+<p><img src=https://blog.llvm.org/img/gcp/gcp-image-node.png alt="GCP - image node"></p>
+<p>The size of this image is 6.67gb. This approach saves about 10 minutes
 of the build pipeline (skipping the creation of the chroot + full
-clone).</p><p>This wasn&rsquo;t easy. I had to iterate 25 times to have a proper image
-supporting all the use cases.</p><p>GCP provides a shared file system mechanism available as an NFS mountage
+clone).</p>
+<p>This wasn&rsquo;t easy. I had to iterate 25 times to have a proper image
+supporting all the use cases.</p>
+<p>GCP provides a shared file system mechanism available as an NFS mountage
 called <a href=https://cloud.google.com/filestore><em>Filestore</em></a>. Each build
 node has access to it and will update the various repositories just like
-if it was a local file system.</p><h2 id=benefits-and-cost>Benefits and cost</h2><p>The first benefit is security. This is based on the Google cloud
-infrastructure, so it benefits from all their security work.</p><p>The fact that the VMs are always cycled and recreated from a clean image
+if it was a local file system.</p>
+<h2 id=benefits-and-cost>Benefits and cost</h2>
+<p>The first benefit is security. This is based on the Google cloud
+infrastructure, so it benefits from all their security work.</p>
+<p>The fact that the VMs are always cycled and recreated from a clean image
 will also help. They are not directly accessible from the Internet (they
 leverage cloud NAT to be able to download packages from the Internet),
-so it will be harder to attack.</p><p>An amd64 build now runs in parallel takes **about 50 minutes **instead
-of almost 7 hours.</p><p>In terms of cost, depending on the activity, the daily cost varies from
-70 to 150 US$/day.</p><p>Now that the migration has been completed, it is now possible to
-consider some builds leveraging PGO and LTO for faster binaries.</p><h2 id=thanks>Thanks</h2><p>Thanks to Laurent Vaylet from the GCP team for the help and patience
+so it will be harder to attack.</p>
+<p>An amd64 build now runs in parallel takes **about 50 minutes **instead
+of almost 7 hours.</p>
+<p>In terms of cost, depending on the activity, the daily cost varies from
+70 to 150 US$/day.</p>
+<p>Now that the migration has been completed, it is now possible to
+consider some builds leveraging PGO and LTO for faster binaries.</p>
+<h2 id=thanks>Thanks</h2>
+<p>Thanks to Laurent Vaylet from the GCP team for the help and patience
 answering my newbie questions, and also thanks to Google and the Linux
-Foundation for the GCP credits and support.</p></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/posts/2021-10-01-generating-relocatable-code-for-arm-processors/><i class="fa fa-chevron-circle-left"></i>Generating relocatable code for ARM processors</a></li><li><a href=https://blog.llvm.org/posts/2021-11-18-relicensing-update/>LLVM relicensing update & call for help <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><h6>llvm.org |
+Foundation for the GCP credits and support.</p>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/posts/2021-10-01-generating-relocatable-code-for-arm-processors/><i class="fa fa-chevron-circle-left"></i> Generating relocatable code for ARM processors</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts/2021-11-18-relicensing-update/>LLVM relicensing update & call for help <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>
