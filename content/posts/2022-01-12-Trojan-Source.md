@@ -101,7 +101,10 @@ similar to
 
 # Concluding Words
 
-Two of the above checks have been implemented in GCC as warnings within the
-compiler, and made available through `-Wbidi-chars` and `-Whomoglyph`. We chose
-to implement them as `clang-tidy` checkers to limit the impact it would have on
-parse time.
+As described in this post, we chose to implement Trojan Source counter-measure
+as several `clang-tidy` checkers. Doing so instead of implementing them as Clang warning
+is a trade-off on parse time.
+
+The interested reader can discover the alternative GCC aproach in this
+[dedicated blog
+post](https://developers.redhat.com/articles/2022/01/12/prevent-trojan-source-attacks-gcc-12)!
