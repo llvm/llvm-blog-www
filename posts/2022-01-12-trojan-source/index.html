@@ -1,0 +1,176 @@
+<!doctype html><html lang=en>
+<head>
+<title>New passes in clang-tidy to detect (some) Trojan Source - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Serge Guelton"><meta property="og:title" content="New passes in clang-tidy to detect (some) Trojan Source">
+<meta property="og:description" content="Trojan Source The original Trojan Source paper encompasses a family of attacks that rely on Unicode properties to make code look different from how a compiler processes it. For instance the following code taken from the paper:">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/posts/2022-01-12-trojan-source/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2022-01-12T00:00:00+00:00">
+<meta property="article:modified_time" content="2022-01-12T00:00:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="New passes in clang-tidy to detect (some) Trojan Source">
+<meta name=twitter:description content="Trojan Source The original Trojan Source paper encompasses a family of attacks that rely on Unicode properties to make code look different from how a compiler processes it. For instance the following code taken from the paper:">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>New passes in clang-tidy to detect (some) Trojan Source</h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2022-01-12T00:00:00Z>Jan 12, 2022</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/clang>#Clang</a>
+</em>
+</li>
+<li>3 minute read</li>
+</ul>
+</aside>
+<h1 id=trojan-source>Trojan Source</h1>
+<p>The original <a href=https://trojansource.codes/>Trojan Source paper</a> encompasses a
+family of attacks that rely on Unicode properties to make code <em>look</em> different
+from how a compiler <em>processes</em> it. For instance the following code taken from
+the paper:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;stdio.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;stdbool.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>
+<span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+  <span style=color:#66d9ef>bool</span> isAdmin <span style=color:#f92672>=</span> false;
+  <span style=color:#75715e>/*‮ } ⁦if (isAdmin)⁩ ⁦begin admins only */</span>
+  printf(<span style=color:#e6db74>&#34;You are an admin.</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
+  <span style=color:#75715e>/* end admins only ‮ { ⁦*/</span>
+  <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+}
+</code></pre></div><p>looks like there is a guard on <code>isAdmin</code> while the compiler actually reads the
+following byte stream</p>
+<pre tabindex=0><code>/* &lt;U+0x202E&gt; } &lt;U+0x2066&gt; if (isAdmin) &lt;U+0x2069&gt; &lt;U+0x2066&gt; begin admins only */
+</code></pre><p>This issue got submitted before the official release to the LLVM Security group,
+and while we agreed this was more of a display issue than an actual
+compiler-related issue, we also agreed having a <code>clang-tidy</code> check for each
+flaws described in the paper could not hurt.</p>
+<h1 id=using-clang-tidy>Using clang-tidy</h1>
+<p>The tool named <code>clang-tidy</code> can run a bunch of extra passes on a codebase,
+detecting coding convention issues, API misuses, security flaws etc. We have
+been adding three new checkers:</p>
+<h2 id=detecting-misleading-bidirectional-characters>Detecting misleading bidirectional characters</h2>
+<p>The new check <code>misc-misleading-bidirectional</code> parses each comment and string
+literal from the codebase and looks for unterminated bidirectional sequence,
+i.e. sequence that leak past the end of comment or string literal, making
+regular code being displayed right-to-left instead of the usual left-to-right.
+In the case of the example above we get a warning close to:</p>
+<pre tabindex=0><code>5:3: warning: comment contains misleading bidirectional Unicode characters [misc-misleading-bidirectional]
+</code></pre><h2 id=detecting-misleading-identifiers>Detecting misleading identifiers</h2>
+<p>C++ allows for some Unicode codepoints within identifiers, including identifiers
+that have a strong right-to-left direction, which can lead to misleading
+statements. For instance in the following,</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>int</span> <span style=color:#960050;background-color:#1e0010>א</span> <span style=color:#f92672>=</span> <span style=color:#960050;background-color:#1e0010>ג</span>;
+</code></pre></div><p>Are we assigining to <code>א</code> or to <code>ג</code>? We are actually doing the latter, and
+that is confusing. The pass <code>misc-misleading-identifier</code> detect that
+configuration and outputs a warning similar to</p>
+<pre tabindex=0><code>10:3: warning: identifier has right-to-left codepoints [misc-misleading-identifier]
+</code></pre><h2 id=detecting-confusing-identifiers>Detecting confusing identifiers</h2>
+<p>Who never received a spam using unicode characters that look alike ascii
+characters to bypass some hypothetical anti-spam scanning? C like language do
+not escape the trend, and it is perfeclty valid and confusing to define</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>int</span> foo;
+</code></pre></div><p>at some point of the program, and</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>int</span> <span style=color:#960050;background-color:#1e0010>𝐟</span>oo;
+</code></pre></div><p>elsewhere. The <code>misc-homoglyph</code> checker detects such confusable identifiers
+(a.k.a. <em>homoglyph</em>) based on a list of
+<a href=https://www.unicode.org/Public/security/latest/confusables.txt>confusables.txt</a>
+maintained by the Unicode consortium. In the case above, one would get a warning
+similar to</p>
+<pre tabindex=0><code>7:5: warning: 𝐟oo is confusable with foo [misc-homoglyph]
+</code></pre><h1 id=concluding-words>Concluding Words</h1>
+<p>As described in this post, we chose to implement Trojan Source counter-measure
+as several <code>clang-tidy</code> checkers. Doing so instead of implementing them as Clang warning
+is a trade-off on parse time.</p>
+<p>The interested reader can discover the alternative GCC aproach in this
+<a href=https://developers.redhat.com/articles/2022/01/12/prevent-trojan-source-attacks-gcc-12>dedicated blog
+post</a>!</p>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/posts/2022-01-07-moving-to-discourse/><i class="fa fa-chevron-circle-left"></i> Improving LLVM Infrastructure - Part 1: Mailing lists</a>
+</li>
+<li>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
+Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>
