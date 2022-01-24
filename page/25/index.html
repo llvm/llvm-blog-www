@@ -74,6 +74,24 @@
 <section id=home>
 <ul>
 <li class=first>
+<h1><a href=https://blog.llvm.org/2010/04/arm-advanced-simd-neon-intrinsics-and.html title="ARM Advanced SIMD (NEON) Intrinsics and Types in LLVM">ARM Advanced SIMD (NEON) Intrinsics and Types in LLVM</a></h1>
+<aside>
+<ul>
+<li>
+<time class=post-date datetime=2010-04-07T21:34:00Z>Apr 7, 2010</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/arm>#ARM</a>
+</em>
+</li>
+<li>5 minute read</li>
+</ul>
+</aside>
+<p>LLVM now supports all the intrinsic functions defined by ARM for the Advanced SIMD (aka "NEON") instruction set, but if you are migrating from GCC to LLVM, there are some implementation differences that you may encounter.</p>
+<a href=https://blog.llvm.org/2010/04/arm-advanced-simd-neon-intrinsics-and.html>Read more…</a>
+</li>
+<li>
 <h1><a href=https://blog.llvm.org/2010/04/whats-wrong-with-this-code.html title="What's wrong with this code?">What's wrong with this code?</a></h1>
 <aside>
 <ul>
@@ -248,24 +266,6 @@ The resulting Clang-built-Clang is not yet functional, so this "</p>
 </aside>
 <p>C++ has more than its fair share of dark, dank corners, especially where templates are concerned. One of the most vexing is "two-phase name lookup", which involves lookup for any names that occur in the body of a template.</p>
 <a href=https://blog.llvm.org/2009/12/dreaded-two-phase-name-lookup.html>Read more…</a>
-</li>
-<li>
-<h1><a href=https://blog.llvm.org/2009/12/introduction-to-load-elimination-in-gvn.html title="Introduction to load elimination in the GVN pass">Introduction to load elimination in the GVN pass</a></h1>
-<aside>
-<ul>
-<li>
-<time class=post-date datetime=2009-12-17T23:28:00Z>Dec 17, 2009</time>
-</li>
-<li>
-<em>
-<a href=https://blog.llvm.org/tags/optimization>#optimization</a>
-</em>
-</li>
-<li>4 minute read</li>
-</ul>
-</aside>
-<p>One very important optimization that the GVN pass (opt -gvn) does is load elimination.&nbsp;Load elimination involves several subsystems (including alias analysis, memory dependence analysis,&nbsp;SSA construction, PHI translation) and&nbsp;has many facets (full vs partial redundancy elimination, value coercion, handling memset/memcpy, etc).</p>
-<a href=https://blog.llvm.org/2009/12/introduction-to-load-elimination-in-gvn.html>Read more…</a>
 </li>
 </ul>
 </section>
