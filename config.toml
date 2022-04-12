@@ -10,6 +10,8 @@ summaryLength = 30
 enableEmoji = true
 pygmentsCodeFences = true
 
+ignoreFiles = ['template.md']
+
 #disqusShortname = "myShortName"
 
 [markup]
