@@ -6,7 +6,7 @@ weight: "1" #Right-most nav item
 meta: "false" #Do not display tags or categories
 ---
 
-Welcome to the new LLVM Blog!
+Welcome to the LLVM Blog!
 
 To create a new post on this blog start by cloning the repository:
 
@@ -45,8 +45,8 @@ hugo v0.96.0+extended darwin/amd64 BuildDate=unknown
   Cleaned          |   0
 
 Built in 2291 ms
-Watching for changes in /Users/kbarton/Workspaces/llvm.community/llvm-blog-www/{content,static,themes}
-Watching for config changes in /Users/kbarton/Workspaces/llvm.community/llvm-blog-www/config.toml, /Users/kbarton/Workspaces/llvm.community/llvm-blog-www/themes/hugo-kiera/config.toml
+Watching for changes in /tmp/llvm-blog-www/{content,static,themes}
+Watching for config changes in /tmp/llvm-blog-www/config.toml, /tmp/llvm-blog-www/themes/hugo-kiera/config.toml
 Environment: "development"
 Serving pages from memory
 Running in Fast Render Mode. For full rebuilds on change: hugo server --disableFastRender
@@ -64,5 +64,6 @@ the official LLVM website.
 Once you are happy with the content of your blog post, and checked that it
 renders properly the final step is to issue a pull request to merge it into the
 main branch of the llvm-blog-www repository.
+
 
 
