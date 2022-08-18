@@ -65,7 +65,8 @@ Therefore, we don't need relicensing agreements for those.
 Furthermore, there are a few commits that don't seem to meet the
 "threshold-of-originality" even though they're changing/adding more than 10
 lines. We also consider those to not needing a relicensing agreement. One
-example is https://github.com/llvm/llvm-project/commit/cd13ef01a21e, which only
+example is [this
+commit](https://github.com/llvm/llvm-project/commit/cd13ef01a21e), which only
 removes the full stop at the end of a few sentences.
     
 ## Code no longer present in Top-of-Trunk.
@@ -99,8 +100,8 @@ following are the most impactful next steps to take:
   - We found that it can help a lot when corporations can get a list of which
     commits they're agreeing to relicense. If you're progressing getting a
     corporation/company to sign, please do send an email to
-    license-questions@llvm.org asking for the list of commits that the company
-    may own copyright on.
+    [license-questions@llvm.org](mailto:license-questions@llvm.org) asking for
+    the list of commits that the company may own copyright on.
 - Go through the commits that look like they may no longer be in top-of-trunk,
   and verify that manually.
 
@@ -114,12 +115,13 @@ following are the most impactful next steps to take:
   and answer them.
 - You could check if you know who the right people are to contact at any of the
   remaining companies/corporations and talk with them directly or share their
-  contact details with us at license-questions@llvm.org. They are also listed
-  in the [same
-spreadsheet](https://docs.google.com/spreadsheets/d/18_0Hog_eSwES8lKwf7WJal3yBwwcYfvPu1yCfZnTcek/edit?usp=sharing),
+  contact details with us at
+  [license-questions@llvm.org](mailto:license-questions@llvm.org). They are also
+  listed in the [same
+  spreadsheet](https://docs.google.com/spreadsheets/d/18_0Hog_eSwES8lKwf7WJal3yBwwcYfvPu1yCfZnTcek/edit?usp=sharing),
   on the sheet starting with "Corporations".
 
 - If you'd be interested in helping to check if specific commits are still
   present in the current code base, please do let me know at
-  license-questions@llvm.org.
+  [license-questions@llvm.org](mailto:license-questions@llvm.org).
 
