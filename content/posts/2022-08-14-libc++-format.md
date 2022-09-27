@@ -1,6 +1,6 @@
 ---
 author: Mark de Wever
-date: "2022-09-11"
+date: "2022-09-27"
 tags: ["C++", "libc++", "std::format"]
 title: Text formatting in C++ using libc++
 ---
