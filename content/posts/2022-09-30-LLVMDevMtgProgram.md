@@ -2,7 +2,7 @@
 author: Tanya Lattner
 date: "2022-09-30"
 tags: ["llvmdevmtg", "foundation"]
-title: Announcing the 2022 LLVM Developers' Meeting
+title: Announcing the 2022 LLVM Developers' Meeting Program
 ---
 
 ![2022 LLVM Dev Mtg Logo](/img/2022-LLVMDevMtgLogo.jpg)
