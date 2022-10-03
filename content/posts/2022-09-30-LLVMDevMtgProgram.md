@@ -61,7 +61,7 @@ Here is the 2022 LLVM Developers' Meeting program:
 **Quick Talks:**
 * LLVM Education Initiativei - Chris Bieneman, Kit Barton, Mike Edwards
 * Enabling AArch64 Instrumentation Support In BOLT - Elvina Yakubova
-* Approximating at Scale: How strto<float> in LLVM’s libc is faster -  Michael Jones
+* Approximating at Scale: How strtofloat in LLVM’s libc is faster -  Michael Jones
 * MIR support in llvm-reduce - Matthew Arsenault
 * Interactive Crashlogs in LLDB - Med Ismail Bennani
 * clang-extract-api: Clang support for API information generation in JSON - Zixu Wang
