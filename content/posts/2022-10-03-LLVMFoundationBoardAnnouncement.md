@@ -5,7 +5,7 @@ tags: ["llvmdevmtg", "foundation"]
 title: Announcing the LLVM Foundation Board of Directors for the 2022-2024 term
 ---
 
-The [LLVM Foundation](https://foundation.llvm.org) would like to announce our Board of Directors for the 2022-2024:
+The [LLVM Foundation](https://foundation.llvm.org) would like to announce our Board of Directors for the 2022-2024 term:
 * [Kit Barton](#kit) (Secretary)
 * [Kristof Beyls](#kristof)
 * [Chris Bieneman](#beanz)
@@ -63,7 +63,7 @@ and DirectX and bringing HLSL support into Clang.
 
 [[Twitter]](https://twitter.com/thegreatbeanz) [[GitHub]](https://github.com/llvm-beanz) [[Email](mailto:beanz@llvm.org)
  
-`beanz` on LLVM's Discourse, Discord, and IRC.
+beanz on LLVM's Discourse, Discord, and IRC.
 
 ### <a name="mike">Mike Edwards</a>
 
