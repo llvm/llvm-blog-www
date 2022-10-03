@@ -74,6 +74,29 @@
 <section id=home>
 <ul>
 <li class=first>
+<h1><a href=https://blog.llvm.org/2010/05/glasgow-haskell-compiler-and-llvm.html title="The Glasgow Haskell Compiler and LLVM">The Glasgow Haskell Compiler and LLVM</a></h1>
+<aside>
+<ul>
+<li>By David Terei</li>
+<li>
+<time class=post-date datetime=2010-05-17T21:19:00Z>May 17, 2010</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/ghc>#GHC</a>
+,
+<a href=https://blog.llvm.org/tags/llvm-users>#llvm-users</a>
+,
+<a href=https://blog.llvm.org/tags/new-in-llvm-2.7>#new-in-llvm-2.7</a>
+</em>
+</li>
+<li>14 minute read</li>
+</ul>
+</aside>
+<p>If you read the LLVM 2.7 release notes carefully you would have noticed that one of the new external users is the Glasgow Haskell Compiler (GHC). As the author of the LLVM backend for GHC, I have been invited to write a post detailing the design of the backend and my experiences with using LLVM.</p>
+<a href=https://blog.llvm.org/2010/05/glasgow-haskell-compiler-and-llvm.html>Read more…</a>
+</li>
+<li>
 <h1><a href=https://blog.llvm.org/2010/05/new-libc-c-standard-library.html title='New "libc++" C++ Standard Library'>New "libc++" C++ Standard Library</a></h1>
 <aside>
 <ul>
@@ -254,27 +277,6 @@ If you aren't familiar with it, KLEE is a tool for symbolic execution of LLVM co
 </aside>
 <p>Disassemblers make binary analysis work. With a reliable disassembler, you can solve high-level problems like tracing back through a program's call stack or analyzing sample-based profiles to low-level problems like figuring out how your compiler unrolled a tight floating-point loop or what advantages declaring a variable const actually had at the other end of the optimization chain.</p>
 <a href=https://blog.llvm.org/2010/01/x86-disassembler.html>Read more…</a>
-</li>
-<li>
-<h1><a href=https://blog.llvm.org/2010/01/address-of-label-and-indirect-branches.html title="Address of Label and Indirect Branches in LLVM IR">Address of Label and Indirect Branches in LLVM IR</a></h1>
-<aside>
-<ul>
-<li>By Chris Lattner</li>
-<li>
-<time class=post-date datetime=2010-01-03T00:11:00Z>Jan 3, 2010</time>
-</li>
-<li>
-<em>
-<a href=https://blog.llvm.org/tags/optimization>#optimization</a>
-,
-<a href=https://blog.llvm.org/tags/new-in-llvm-2.7>#new-in-llvm-2.7</a>
-</em>
-</li>
-<li>12 minute read</li>
-</ul>
-</aside>
-<p>The GCC Compiler supports a useful "Label as Values" extension, which allows code to take the address of a label and then later do an unconditional branch to an address specified as a void*.</p>
-<a href=https://blog.llvm.org/2010/01/address-of-label-and-indirect-branches.html>Read more…</a>
 </li>
 </ul>
 </section>
