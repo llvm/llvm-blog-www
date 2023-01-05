@@ -1,0 +1,4 @@
+# Ignore the in-tree hugo builds
+public/
+.hugo_build.lock
+
