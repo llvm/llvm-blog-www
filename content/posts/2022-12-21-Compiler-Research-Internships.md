@@ -7,12 +7,23 @@ Blog Post"
 ----------------------------------------------------------------
 
 
-Another program year is ending and we are extremely happy to share the hard 
-work and the results of our interns contributors!
+Another program year is ending and our <a href="https://compiler-research.org/">Compiler Research</a> 
+team is extremely happy to share the hard work and the results of our interns 
+contributors!
 
+The Compiler Research team includes researchers located at Princeton University 
+and CERN. 
+Our primary goal is research into foundational software tools helping scientists 
+to program for speed, interoperability, interactivity, flexibility, and 
+reproducibility. We work in various fields of science such as high energy 
+physics, where research is fundamentally connected to software at exabyte scale. 
+We develop computational methods and research software for scientific 
+exploration and discovery. Our current research focuses on three main topics: 
+<a href="https://compiler-research.org/interactive_cpp">interpretative C/C++/CUDA</a>
+, automatic differentiation tools, and C++ language interoperability with Python
+ and D.
 
-This year the <a href="https://compiler-research.org/">Compiler Research</a> 
-group had six participants who worked on seven projects, covering a wide 
+This year, we had six participants who worked on seven projects, covering a wide 
 range of topics, from LLVM’s new JIT linker 
 (<a href="https://llvm.org/docs/JITLink.html#jit-linking">JITLink</a>) to 
 <a href="https://clang.llvm.org/docs/ClangRepl.html">Clang-Repl</a>, 
