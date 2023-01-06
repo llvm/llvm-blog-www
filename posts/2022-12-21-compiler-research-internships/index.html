@@ -1,0 +1,311 @@
+<!doctype html><html lang=en>
+<head>
+<title>Interactive programming in C++ internships — LLVM Blog Post - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Sara Bellei"><meta property="og:title" content="Interactive programming in C++ internships — LLVM Blog Post">
+<meta property="og:description" content="Another program year is ending and our Compiler Research team is extremely happy to share the hard work and the results of our interns contributors!
+The Compiler Research team includes researchers located at Princeton University and CERN.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/posts/2022-12-21-compiler-research-internships/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2022-12-21T00:00:00+00:00">
+<meta property="article:modified_time" content="2022-12-21T00:00:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Interactive programming in C++ internships — LLVM Blog Post">
+<meta name=twitter:description content="Another program year is ending and our Compiler Research team is extremely happy to share the hard work and the results of our interns contributors!
+The Compiler Research team includes researchers located at Princeton University and CERN.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>Interactive programming in C++ internships — LLVM Blog Post</h1>
+<aside>
+<ul>
+<li>By Sara Bellei</li>
+<li>
+<time class=post-date datetime=2022-12-21T00:00:00Z>Dec 21, 2022</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/compiler-research>#Compiler Research</a>
+,
+<a href=https://blog.llvm.org/tags/internships>#internships</a>
+,
+<a href=https://blog.llvm.org/tags/google-summer-of-code-2022>#Google Summer of Code 2022</a>
+,
+<a href=https://blog.llvm.org/tags/clang>#clang</a>
+,
+<a href=https://blog.llvm.org/tags/llvm>#llvm</a>
+,
+<a href=https://blog.llvm.org/tags/clang-repl>#Clang-Repl</a>
+,
+<a href=https://blog.llvm.org/tags/incremental-c++>#Incremental C++</a>
+,
+<a href=https://blog.llvm.org/tags/jitlink>#JITLink</a>
+,
+<a href=https://blog.llvm.org/tags/clad>#Clad</a>
+</em>
+</li>
+<li>7 minute read</li>
+</ul>
+</aside>
+<hr>
+<p>Another program year is ending and our <a href=https://compiler-research.org/>Compiler Research</a>
+team is extremely happy to share the hard work and the results of our interns
+contributors!</p>
+<p>The Compiler Research team includes researchers located at Princeton University
+and CERN.
+Our primary goal is research into foundational software tools helping scientists
+to program for speed, interoperability, interactivity, flexibility, and
+reproducibility. We work in various fields of science such as high energy
+physics, where research is fundamentally connected to software at exabyte scale.
+We develop computational methods and research software for scientific
+exploration and discovery. Our current research focuses on three main topics:
+<a href=https://compiler-research.org/interactive_cpp>interpretative C/C++/CUDA</a>
+, automatic differentiation tools, and C++ language interoperability with Python
+and D.</p>
+<p>This year, we had six participants who worked on seven projects, covering a wide
+range of topics, from LLVM’s new JIT linker
+(<a href=https://llvm.org/docs/JITLink.html#jit-linking>JITLink</a>) to
+<a href=https://clang.llvm.org/docs/ClangRepl.html>Clang-Repl</a>,
+an interactive C++ interpreter for incremental compilation integrated
+in <a href=https://clang.llvm.org/>Clang</a>. All projects rise toward a
+common, ambitious goal: <strong>to establish a proficient workflow in LLVM,
+where <a href=https://compiler-research.org/interactive_cpp>interactive
+development in C++</a> is possible, and exploratory C++ becomes an accessible
+experience to a wider audience.</strong></p>
+<p>Below you can find the list of projects from our interns, an overview of the
+objectives and results. We invite you to follow the links to access a more
+detailed description of each project.</p>
+<h2 id=a-hrefhttpscompiler-researchorgassetsdocssunho_kim_gsoc22_reportpdfjitlink-support-for-a-new-formatarchitecture-elfaarch64a><a href=https://compiler-research.org/assets/docs/Sunho_Kim_GSoC22_Report.pdf>JITLink support for a new format/architecture (ELF/AARCH64)</a></h2>
+<p>Developer: <strong><a href=https://github.com/sunho>Sunho Kim</a></strong>
+(<em>Computer Science, De Anza College, Cupertino, California</em>)</p>
+<p>Mentors: <strong>Stefan Gränitz</strong> (<em>Freelance Compiler Developer, Berlin,
+Deutschland</em>),
+<strong>Lang Hames</strong> (<em>Apple</em>), <strong>Vassil Vassilev</strong> (<em>Princeton University/CERN</em>)</p>
+<p>Founding: <strong>Google Summer of Code 2022</strong></p>
+<p>Suhno developed a <a href=https://llvm.org/docs/JITLink.html#jit-linking>JITLink</a>
+specialization that extends JITLink’s generic linker algorithm, allowing
+JITLink to support ELF/aarch64 target and provides full support of all advanced
+PE/COFF object file features. By supporting the ELF/aarch64 target, JITLink can
+now be used in Julia, while COFF/X86_64 enables Microsoft Visual C++ (MSCV)
+target in <a href=https://clang.llvm.org/docs/ClangRepl.html>Clang-Repl</a>.
+Here you can find Sunho’s GSoC
+<a href=https://compiler-research.org/assets/docs/Sunho_Kim_GSoC22_Report.pdf>final report</a>.</p>
+<p><strong>Hurray!</strong> This project has been accepted as a Tutorial at the
+<a href=https://llvm.swoogo.com/2022devmtg/speakers>2022 LLVM Developers’ Meeting</a>!
+The conference took place in San Jose, California, from 7th to 10th November
+2022.
+Here you can find the
+<a href="https://www.youtube.com/watch?v=UwHgCqQ2DDA&list=PL_R5A0lGi1ACZDCQw533fo2dBljmOqIYx&index=42">video</a>
+and the <a href=https://llvm.org/devmtg/2022-11/slides/Tutorial2-JITLink.pdf>slides</a>
+of Sunho’s presentation.</p>
+<p>The project was also presented at the Compiler As a Service (CaaS) monthly
+meeting. Here you can find the <a href="https://www.youtube.com/watch?v=_5_gm58sQIg">video</a>
+and the <a href=https://compiler-research.org/assets/presentations/S_Kim-Jitlink_Coff.pdf>slides</a>
+of Sunho’s presentation.</p>
+<h2 id=a-hrefhttpscompiler-researchorgblogsgsoc22_izvekov_experience_blogextend-clang-to-resugar-template-specialization-accessesa><a href=https://compiler-research.org/blogs/gsoc22_izvekov_experience_blog/>Extend Clang to resugar template specialization accesses</a></h2>
+<p>Developer: <strong><a href=https://github.com/mizvekov>Matheus Izvekov</a></strong></p>
+<p>Mentors: <strong>Richard Smith</strong> (<em>Google</em>), <strong>Vassil Vassilev</strong> (<em>Princeton
+University/CERN</em>)</p>
+<p>Funding: <strong>Google Summer of Code 2022</strong></p>
+<p><a href=https://clang.llvm.org/>Clang</a>’s type system was optimized by
+pushing type-syntactic-sugar on the arguments of a template specialization into
+those member accesses. This was achieved by: 1. creating a new type node into
+the Abstract Syntax Tree (AST) that represents the sugar of a member access in
+a template specialization; and 2. implementing single step desugaring logic
+which will perform the substitution of template parameter sugar into the
+corresponding specialization argument sugar. As a result, we improved Clang’s
+diagnostic system by enabling other constructs to preserve type sugar, allowing
+both for their representation when present in the specialization argument.
+Here you can find Matheus' GSoC
+<a href=https://compiler-research.org/assets/docs/Matheus_Izvekov_GSoC22_Report.pdf>final report</a>.</p>
+<p><strong>Hurray!</strong> This project has been accepted as a Lightning Talk at the
+<a href=https://llvm.swoogo.com/2022devmtg/speakers>2022 LLVM Developers’ Meeting</a>!
+The conference took place in San Jose, California, from 7th to 10th November
+2022.
+Here you can find the <a href="https://www.youtube.com/watch?v=bZ2HPrSkTZI">video</a>
+and the
+<a href=https://llvm.org/devmtg/2022-11/slides/Lightning9-TypeResugaringInClang%20.pdf>slides</a>
+of Matheus’s presentation.</p>
+<h2 id=a-hrefhttpscompiler-researchorgblogsgsoc22_zhang_chaudhari_experience_blogrecovering-from-errors-in-clang-repl-and-code-undoa><a href=https://compiler-research.org/blogs/gsoc22_zhang_chaudhari_experience_blog/>Recovering from Errors in Clang-Repl and Code Undo</a></h2>
+<p>Developers: <strong><a href=https://github.com/junaire>Jun Zhang</a></strong>
+(<em>Software Engineering, Anhui Normal University, WuHu, China</em>) and
+<strong><a href=https://github.com/Purva-Chaudhari>Purva Chaudhari</a></strong>
+(<em>California State University Northridge, Northridge CA, USA</em>)</p>
+<p>Mentors: <strong>Vassil Vassilev</strong> (<em>Princeton University/CERN</em>)</p>
+<p><a href=https://clang.llvm.org/docs/ClangRepl.html>Clang-Repl</a> is an
+interactive C++ interpreter integrated in Clang, which enables incremental
+compilation. It supports interactive programming for C++ in a
+Read-Eval_Print Loop
+(<a href=https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop>REPL</a>)
+style, compiling the code just-in-time with a JIT approach that reduces the
+compile-run cycles. We added the “undo” functionality to Clang-REPL, and we
+improved error-recovery by adding the possibility to recover the low-level
+execution infrastructure. As a result, Clang-REPL now supports reversal
+execution and recovery actions on behalf of a user in an automatic and
+convenient way.</p>
+<p><strong>Hurray!</strong> This project has been accepted as a Lightning Talk at the
+<a href=https://llvm.swoogo.com/2022devmtg/speakers>2022 LLVM Developers’ Meeting</a>!
+The conference took place in San Jose, California, from 7th to 10th November
+2022.
+Here you can find the <a href="https://www.youtube.com/watch?v=LSPBPC2av54">video</a>
+and the
+<a href=https://llvm.org/devmtg/2022-11/slides/Lightning6-RecoveringFromErrorsInClang-ReplAndCodeUndo.pdf>slides</a>
+of Purva and Jun’s presentation.</p>
+<h2 id=a-hrefhttpscompiler-researchorgblogsgsoc22_ghosh_experience_blogshared-memory-based-jitlink-memory-managera><a href=https://compiler-research.org/blogs/gsoc22_ghosh_experience_blog/>Shared Memory Based JITLink Memory Manager</a></h2>
+<p>Developer: <strong><a href=https://github.com/argentite>Anubhab Ghosh</a></strong>
+(<em>Computer Science and Engineering, Indian Institute of Information Technology, Kalyani, India</em>)</p>
+<p>Mentors: <strong>Stefan Gränitz</strong> (<em>Freelance Compiler Developer, Berlin, Deutschland</em>),
+<strong>Lang Hames</strong> (<em>Apple</em>), <strong>Vassil Vassilev</strong> (<em>Princeton University/CERN</em>)</p>
+<p>Funding: <strong>Google Summer of Code 2022</strong></p>
+<p>Anubhab introduced a new <a href=https://llvm.org/docs/JITLink.html>JITLinkMemoryManager</a>
+based on a MemoryMapper abstraction that is capable of allocating JIT code
+(and data) using shared memory. The following advantages should arise from the
+implemented strategy: 1. a faster transport (and access) for code and data when
+running JIT’d code in a separate process on the same machine, and 2. the
+guarantee that all allocations are close together in memory and meet the
+constraints of the default code model allowing the use of outputs from regular
+compilers.
+Here you can find Anubhab’s GSoC
+<a href=https://compiler-research.org/assets/docs/Anubhab_Ghosh_GSoC2022_Report.pdf>final report</a>.</p>
+<p><strong>Hurray!</strong> This project has been accepted as a Lightning Talk at the
+<a href=https://llvm.swoogo.com/2022devmtg/speakers>2022 LLVM Developers’ Meeting</a>!
+The conference took place in San Jose, California, from 7th to 10th November
+2022.
+Here you can find the <a href="https://www.youtube.com/watch?v=dosXtBAFWiE">video</a>
+and the
+<a href=https://llvm.org/devmtg/2022-11/slides/Lightning4-EfficientJIT-basedRemoteExecution.pdf>slides</a>
+of Anubhab’s presentation.</p>
+<h2 id=a-hrefhttpshepsoftwarefoundationorggsocblogs2022blog_root_junzhanghtmloptimize-root-use-of-modules-for-large-codebasesa><a href=https://hepsoftwarefoundation.org/gsoc/blogs/2022/blog_ROOT_JunZhang.html>Optimize ROOT use of modules for large codebases</a></h2>
+<p>Developer: <strong><a href=https://github.com/junaire>Jun Zhang</a></strong>
+(<em>Software Engineering, Anhui Normal University, WuHu, China</em>)</p>
+<p>Mentors: <strong>David Lange</strong> (<em>Princeton University</em>), <strong>Alexander Penev</strong>
+(<em>University of Plovdiv Paisii Hilendarski, Bulgaria</em>), <strong>Vassil Vassilev</strong>
+(<em>Princeton University/CERN</em>)</p>
+<p>Funding: <strong>Google Summer of Code 2022</strong></p>
+<p>The current performance of the modules usage in <a href=https://root.cern/>ROOT</a>
+was evaluated, and a strategy for optimizing the memory footprint was developed.
+This strategy includes reducing unnecessary symbol-lookups and module-loading,
+and is especially useful for very large codebases like <a href=https://cms-sw.github.io/>CMSSW</a>,
+where Jun reduced the amount of memory by half (from 1.1GB to 600MB) for simple
+workflows like hsimple.C, and the number of loaded from 180 to 52.
+Here you can find Jun’s GSoC
+<a href=https://compiler-research.org/assets/docs/Jun_Zhang_GSoC22_Report.pdf>final report</a>.</p>
+<h2 id=a-hrefhttpshepsoftwarefoundationorggsocblogs2022blog_compilerresearch-manishkausikhtmladd-initial-integration-of-clad-with-enzymea><a href=https://hepsoftwarefoundation.org/gsoc/blogs/2022/blog_CompilerResearch-ManishKausik.html>Add Initial Integration of Clad with Enzyme</a></h2>
+<p>Developer: <strong><a href=https://github.com/Nirhar>Manish Kausik H</a></strong>
+(<em>.Tech and M.Tech in Computer Science and Engineering(Dual Degree),
+Indian Institute of Technology Bhubaneswar</em>)</p>
+<p>Mentors: <strong>David Lange</strong> (<em>Princeton University</em>), <strong>William Moses</strong>
+(<em>Massachusetts Institute of Technology</em>), <strong>Vassil Vassilev</strong> (<em>Princeton University/CERN</em>)</p>
+<p>Funding: <strong>Google Summer of Code 2022</strong></p>
+<p><a href=https://clad.readthedocs.io/en/latest/index.html>Clad</a> is an open
+source plugin to the Clang compiler that enables <a href=https://en.wikipedia.org/wiki/Automatic_differentiation>Automatic Differentiation</a>
+for C++. Clad receives an Abstract Syntax Tree (AST) from the underlying<br>
+compiler platform (Clang), decides whether a derivative is requested and
+produces it, and modifies the AST to insert the generated code.
+<a href=https://enzyme.mit.edu/>Enzyme AD</a> is an LLVM based AD plugin.
+It works by taking existing code as LLVM IR and computing the derivative
+(and gradient) of that function.
+In this project, Manish integrated Enzyme within Clad, giving a Clad user the
+option of selecting Enzyme for Automatic Differentiation on demand. The
+integration of Clad and Enzyme t results in a new tool that offers an optimized
+and flexible implementation of automatic differentiation.
+Here you can find Manish’s GSoC
+<a href=https://compiler-research.org/assets/docs/Manish_Kausik_H_GSoC22_Report.pdf>final report</a>.</p>
+<h2 id=thank-you-developers>Thank you, developers!</h2>
+<p>We hope our interns contributors enjoyed our community. Our best reward is to
+know that we supported your early steps into the world of open-source software
+development and compiler construction. We hope that this experience motivated
+you to continue to be involved with the broad LLVM ecosystem.
+We express our gratitude to the <a href=https://summerofcode.withgoogle.com/>Google Summer of Code</a>
+Program and to the Institute for Research and Innovation in Software for High
+Energy Physics (<a href=https://iris-hep.org/>IRIS-HEP</a>) for supporting our
+research and providing six young developers this wonderful opportunity.
+A special thanks goes to the LLVM community for being supportive and for sharing
+their knowledge and introducing our community to the new contributors. Thank you
+so much!
+Thanks for choosing Compiler-Research for your internship! We were lucky to
+have you!</p>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/posts/2022-10-27-office-hours/><i class="fa fa-chevron-circle-left"></i> Office hours and the LLVM community calendar.</a>
+</li>
+<li>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
+Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>
