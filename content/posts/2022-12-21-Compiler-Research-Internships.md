@@ -47,7 +47,7 @@ Mentors: **Stefan Gränitz** (*Freelance Compiler Developer, Berlin,
 Deutschland*), 
 **Lang Hames** (*Apple*), **Vassil Vassilev** (*Princeton University/CERN*)
 
-Founding: **Google Summer of Code 2022**
+Funding: **Google Summer of Code 2022**
 
 Suhno developed a <a href="https://llvm.org/docs/JITLink.html#jit-linking">JITLink</a> 
 specialization that extends JITLink’s generic linker algorithm, allowing 
@@ -100,7 +100,7 @@ The conference took place in San Jose, California, from 7th to 10th November
 Here you can find the <a href="https://www.youtube.com/watch?v=bZ2HPrSkTZI">video</a> 
 and the 
 <a href="https://llvm.org/devmtg/2022-11/slides/Lightning9-TypeResugaringInClang%20.pdf">slides</a>
- of Matheus’s presentation. 
+ of Matheus’ presentation. 
 
 
 <a href="https://compiler-research.org/blogs/gsoc22_zhang_chaudhari_experience_blog/">Recovering from Errors in Clang-Repl and Code Undo</a>
