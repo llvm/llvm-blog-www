@@ -22,22 +22,34 @@ We will start by establishing some background and definitions of relevant concep
 
 ### Linking
 
-The code we write often contains external dependencies; a simple hello-world program, that we may write in C, depends on the C stdlib for the printf function. These dependencies manifest as symbolic references (think of them as names of data/functions whose addresses are unknown) and are resolved or fixed up by the linking step.
+The code we write often contains external dependencies; a simple hello-world program, that we may write in C, 
+depends on the C stdlib for the printf function. These dependencies manifest as symbolic references (think of them 
+as names of data/functions whose addresses are unknown) and are resolved or fixed up by the linking step.
 
 In chronological order -
 
 1. The compiler converts source code to machine code.
 2. The assembler converts machine code to object files (ELF, MachO, COFF etc.)
-3. The linker links one or more objects files (fixing up symbolic references along the way) and produces an executable or a shared object (also called shared libraries or dylibs).
+3. The linker links one or more object files (fixing up symbolic references along the way) and produces an 
+   executable or a shared library (also called shared objects or dylibs).
 
 > For the purposes of this discussion we will focus on executables, but the points that will be made hold for shared
 > objects as well.
 
 ### JIT linking
 
-Unlike static linking, JIT (Just-in-time) linking is performed at runtime. While a static linker produces executables that are stored on disk, a JIT linker produces an in-memory image of the executable - which is essentially ready-to-execute bytes in memory. You can imagine this feeling very much like running a C program the same way as a shell script. To make this possible the JIT linker must patch up memory to account for the addresses of symbols at runtime, and execute necessary initializers.
+Unlike static linking, JIT (Just-in-time) linking is performed at runtime. While a static linker produces 
+executables that are stored on disk, a JIT linker produces an in-memory image of the executable - which is 
+essentially ready-to-execute bytes in memory. You can imagine this feeling very much like running a C program the 
+same way as a shell script, where the C program is linked into the memory of the invoking process (commonly referred 
+to as the executor process). To make this possible the JIT linker must patch up the executor process' memory to account 
+for the addresses of symbols at runtime, and execute necessary initializers.
 
-If you are familiar with dynamic loading then JIT linking may sound familiar, and the two have a lot in common, however they are not the same. JIT linking operates on relocatable objects (vs shared objects/dylibs for dynamic loading), and JIT linking performs both the static linker’s and the dynamic loader’s jobs. Doing so allows the JIT linker to dead-strip redundant functions and variables, which dynamic loading cannot do, and this allows JIT linking to support finer grained compilation of languages that tend to produce a lot of redundant definitions (e.g. C++).
+If you are familiar with dynamic loading then JIT linking may sound familiar, and the two have a lot in common, 
+however they are not the same. JIT linking operates on relocatable objects (vs shared objects/dylibs for dynamic 
+loading), and JIT linking performs both the static linker’s and the dynamic loader’s jobs. Doing so allows the JIT 
+linker to dead-strip redundant functions and variables, which dynamic loading cannot do, and this allows JIT 
+linking to support finer grained compilation of languages that tend to produce a lot of redundant definitions (e.g. C++).
 
 ### Need for JIT linking
 
@@ -104,12 +116,13 @@ existing processes (that may or may not already contain state/context), in an AB
 
 ### LLVM JITLink
 
-LLVM JITLink is a JIT linking implementation, in the form of a low-level library within the LLVM infrastructure. It provides primitives for:
+LLVM JITLink is a JIT linking implementation, in the form of a low-level library within the LLVM infrastructure. 
+It powers [LLVM's ORC JIT APIs](https://llvm.org/docs/ORCv2.html), which is what end-users would usually use for 
+building runtime linking environments. It provides primitives for:
 
-1. Re-using existing compilers to generate code at runtime.
-2. Allocating memory within a process.
-3. Linking code into a process in an ABI-compatible way.
-
+1. Re-using existing compilers to generate relocatable objects at runtime.
+2. Allocating memory within a target executor process.
+3. Linking code into a target executor process in an ABI-compatible way.
 
 In simple words, a program Y, running in a process X, can hand JITLink a relocatable object file and JITLink will
 link the object file’s code into X’s memory and run it under X’s existing context (globals, functions etc.), as if
@@ -138,12 +151,14 @@ The end goal of the project was to make LLVM JITLink capable of linking a 32-bit
 ### Understanding high level constructs
 
 The first step in this phase of the project was understanding what high level constructs I’m dealing with. In the
-context of this project, there is perhaps nothing more important than the [LinkGraph](https://github.com/llvm/llvm-project/blob/main/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L827) (the LLVM JITLink
-[documentation](https://llvm.org/docs/JITLink.html#linkgraph) has an excellent description of LinkGraph). LinkGraph is an internal representation of an object file,
-in LLVM JITLink. All object files, no matter the format and target architecture, are represented as LinkGraphs in JITLink.
+context of this project, there is perhaps nothing more important than the [LinkGraph](https://github.com/llvm/llvm-project/blob/110c1b64a7b9984a604aa2809e0fb8c01278609d/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L845) 
+(the LLVM JITLink [documentation](https://llvm.org/docs/JITLink.html#linkgraph) has an excellent description of 
+LinkGraph). LinkGraph is an internal representation of an object file, in LLVM JITLink. All object files, no matter 
+the format and target architecture, are represented as LinkGraphs in JITLink.
 
 Object formats have different schemas and names for similar concepts, but they share a common goal - to represent
-machine code that can be relocated in virtual memory. A LinkGraph tries to generically represent similar concepts and nuances across object files.
+machine code that can be relocated in virtual memory. A LinkGraph tries to generically represent similar concepts 
+and nuances across object file formats.
 
 To draw conceptual analogies between the LinkGraph and an object format, I will use ELF as an example since it is
 the format I am most familiar with. An ELF object contains sections, symbols and relocations.
@@ -154,18 +169,18 @@ the format I am most familiar with. An ELF object contains sections, symbols and
 
 A LinkGraph is capable of representing all of the above concepts. It first defines some building blocks.
 
-1. [Addressable](https://github.com/llvm/llvm-project/blob/main/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L105) - Anything that can be assigned an address in the executor process’ virtual address space.
-2. [Block](https://github.com/llvm/llvm-project/blob/main/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L152) - A chunk of bytes that is addressable and occurs as part of a section.
+1. [Addressable](https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L105) - Anything that can be assigned an address in the executor process’ virtual address space.
+2. [Block](https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L152) - A chunk of bytes that is addressable and occurs as part of a section.
 
 On top of these building blocks it defines the higher level object format concepts.
 
-1. [Symbol](https://github.com/llvm/llvm-project/blob/main/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L408) - Equivalent of a symbol in the ELF format. Represented using an offset from the base (address) of a
-   Block + a size.
-2. [Section](https://github.com/llvm/llvm-project/blob/main/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L673) - Equivalent of a section in the ELF format. Represented using a collection of symbols and blocks.
-3. [Edge](https://github.com/llvm/llvm-project/blob/main/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L61) - Equivalent of a relocation in the ELF format. Represented using an offset from the start of the
+1. [Symbol](https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L410) - Equivalent of a symbol in the ELF format. Represented using an offset from the base (address) of a
+   Block and a size in bytes.
+2. [Section](https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L688) - Equivalent of a section in the ELF format. Represented using a collection of symbols and blocks.
+3. [Edge](https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L61) - Equivalent of a relocation in the ELF format. Represented using an offset from the start of the
    containing block (indicating the storage location that needs to be fixed up), a pointer to the target whose address needs to be used for the fix-up and a kind to specify the patching formula.
 
-> Another important LLVM JITLink construct, that I did not directly interact with too much, is [JITLinkContext](https://github.com/llvm/llvm-project/blob/main/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L61). But
+> Another important LLVM JITLink construct, that I did not directly interact with too much, is [JITLinkContext](https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L1765). But
 > @lhames suggested and I agreed that this would be a good place to talk about it, since it is one of the building blocks of LLVM JITLink.
 >
 > So if you're linking, what are you linking into?
@@ -181,13 +196,16 @@ After establishing an understanding of LinkGraph, the next step involved underst
 Something that did not click for me initially, but simplified things significantly once it did, was the fact that
 the LinkGraph was just that, a graph! And that the LLVM JITLink linking algorithm essentially involved performing
 multiple passes over this graph, modifying it as needed until we had something that was ready to be emitted to the
-memory for execution. Re-reading LLVM JITLink’s high-level description of the [generic JIT linking algorithm](https://github.com/llvm/llvm-project/blob/main/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L61) with
-this simple view of the
-LinkGraph made it much easier and intuitive to make sense of what was going on in the JIT linking process.
+memory for execution. Re-reading LLVM JITLink’s high-level description of the [generic JIT linking algorithm](https://llvm.org/docs/JITLink.html#generic-link-algorithm) with
+this simple view of the LinkGraph made it much easier and intuitive to make sense of what was going on in the JIT 
+linking process.
 
 Here’s a 10,000ft view description of JITLink’s generic JIT linking algorithm.
 
-The algorithm happens in multiple phases, with each phase consisting of multiple passes over the LinkGraph and a call to the next phase at the end. The algorithm also provides implementers and users of JITLink hooks to tap into the linking process. These hooks can be used to achieve a number of things, including but not limited to, implementing link-time optimizations, testing, validation etc.
+The algorithm happens in multiple phases, with each phase consisting of multiple passes over the LinkGraph and a 
+call to the next phase at the end. The algorithm also provides implementers and users of JITLink hooks to tap into 
+the linking process. These hooks can be used to achieve a number of things, including but not limited to, 
+implementing link-time optimizations, testing, validation etc.
 
 ### The tangibles
 
@@ -789,7 +807,7 @@ With the above process dynamic linking enables us to call a functions in positio
    instance, has the Java Virtual Machine (JVM) whose [loading and linking](https://www.artima.com/insidejvm/ed2/lifetype.html) behavior can be customized to achieve 
    the aforementioned task.
 [^2]: JIT-linking is primarily useful in the context of linking in pre-compiled languages (that's certainly what 
-   inspired it), but it's not only useful in that context. In LLVM JITLink, through the [JITLinkContext](https://github.com/llvm/llvm-project/blob/main/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L1731) you can 
+   inspired it), but it's not only useful in that context. In LLVM JITLink, through the [JITLinkContext](https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L1765) you can 
    link against other (non-statically compiled) code, so it's useful for anyone who wants to interoperate with C/C++ that's linked at runtime. You could also theoretically bring up a purely JIT'd language with it (and I think Julia does this). The advantages are interoperability with existing languages, compilers, tools, and the disadvantage is that it's heavyweight compared to a custom JIT that manages its own linking directly.
 [^3]: Clang-REPL is an effort to move Cling, which is a standalone tool, into the LLVM infrastructure.
 [^4]: In fact, given a suitable JITLinkContext, JITLink can even link objects into a different process. LLDB uses this 
