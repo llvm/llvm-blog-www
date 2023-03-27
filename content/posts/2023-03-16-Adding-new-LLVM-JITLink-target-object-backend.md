@@ -6,32 +6,35 @@ title: "Adding a new target/object backend to LLVM JITLink copy"
 ---
 ## Motivation
 
-For the last year, I have been contributing to [LLVM JITLink](https://llvm.org/docs/JITLink.html). This post aims to doubly serve as a summary of my work
-and documentation for future contributors looking to add a new target/object backend to LLVM JITLink.
+For the last year, I have been contributing to [LLVM JITLink](https://llvm.org/docs/JITLink.html). This post aims to 
+doubly serve as a summary of my work and documentation for future contributors looking to add a new target/object 
+backend to LLVM JITLink.
 
-We will start by establishing some background and definitions of relevant concepts. Then, we will talk about what the project actually entailed. And finally we will go over the execution details of the project.
-
+We will start by establishing some background and definitions of relevant concepts. Then, we will talk about what 
+the project actually entailed. Finally, we will go over the execution details of the project.
 
 > The end goal of the project was to make LLVM JITLink capable of linking a 32-bit ELF object file, with i386
 > specific relocations, into a 32-bit process on the i386 hardware architecture.
 >
 > If the goal of the project already makes sense to you and you are looking to get started with adding a new
-> target/object backend to LLVM JITLink yourself, you might want to skip to the “[Recap and conveniences](#recap-and-conveniences)” section.
+> target/object backend to LLVM JITLink yourself, you can skip to the “[Recap and conveniences](#recap-and-conveniences)” 
+> section.
 
 ## Background
 
 ### Linking
 
-The code we write often contains external dependencies; a simple hello-world program, that we may write in C, 
-depends on the C stdlib for the printf function. These dependencies manifest as symbolic references (think of them 
-as names of data/functions whose addresses are unknown) and are resolved or fixed up by the linking step.
+Our code often relies on external dependencies. For example, even a simple hello-world program written in C depends 
+on the C stdlib for the printf function. These external dependencies are expressed as symbolic references, which I 
+will henceforth refer to as just symbols. Symbols are names of data or functions that have unknown addresses and 
+are resolved or fixed up during the linking process.
 
 In chronological order -
 
 1. The compiler converts source code to machine code.
 2. The assembler converts machine code to object files (ELF, MachO, COFF etc.)
 3. The linker links one or more object files (fixing up symbolic references along the way) and produces an 
-   executable or a shared library (also called shared objects or dylibs).
+   executable or a shared library (also called shared object or dylib).
 
 > For the purposes of this discussion we will focus on executables, but the points that will be made hold for shared
 > objects as well.
@@ -39,25 +42,27 @@ In chronological order -
 ### JIT linking
 
 Unlike static linking, JIT (Just-in-time) linking is performed at runtime. While a static linker produces 
-executables that are stored on disk, a JIT linker produces an in-memory image of the executable - which is 
-essentially ready-to-execute bytes in memory. You can imagine this feeling very much like running a C program the 
-same way as a shell script, where the C program is linked into the memory of the invoking process (commonly referred 
-to as the executor process). To make this possible the JIT linker must patch up the executor process' memory to account 
-for the addresses of symbols at runtime, and execute necessary initializers.
+executables that are stored on disk, a JIT linker produces an in-memory image of the executable -- essentially 
+ready to execute bytes in memory. JIT linking a C program may feel very much like running a shell script. Under 
+the hood though, the C program is linked into the memory of the invoking process, also commonly referred 
+to as the executor process. The JIT linker patches up the executor process' memory to account for the addresses of
+symbols at runtime, and executes necessary initializers.
 
 If you are familiar with dynamic loading then JIT linking may sound familiar, and the two have a lot in common, 
 however they are not the same. JIT linking operates on relocatable objects (vs shared objects/dylibs for dynamic 
-loading), and JIT linking performs both the static linker’s and the dynamic loader’s jobs. Doing so allows the JIT 
-linker to dead-strip redundant functions and variables, which dynamic loading cannot do, and this allows JIT 
-linking to support finer grained compilation of languages that tend to produce a lot of redundant definitions (e.g. C++).
+loading), and performs both the static linker’s and the dynamic loader’s jobs. Doing so allows the JIT 
+linker to dead-strip redundant symbols, which dynamic loading cannot do, and this allows JIT linking to support 
+finer grained compilation of languages that tend to produce a lot of redundant symbol definitions(e.g. C++).
 
 ### Need for JIT linking
 
 JIT linking is primarily useful in the context of pre-compiled languages, such as C, C++, Rust etc. Why? At run time,
-these languages have no way[^1] to bring new symbol definitions into a running process’ memory and resolve symbolic
-references to these new symbols (unless the symbolic references are to symbols in a shared library, in which case, dynamic loading will at least “work”). All symbols must be defined and all symbol resolution must be completed before a program from one of these languages can be run.
+these languages have no way[^1] to bring new symbol definitions into a running process’ memory and resolve 
+references to them. Although dynamic loading partially solves this issue, it has its drawbacks (discussed above)
+and lags far behind the static linking experience.
 
-With JIT linking, at run time, symbolic references can be resolved to existing symbols (from the newly JIT’d code), or to newly JIT'd symbols (from the pre-compiled code). The below toy example shows what this looks like in code.
+With JIT linking, at run time, symbolic references can be resolved to existing symbols (from the newly JIT’d code), or 
+to newly JIT'd symbols (from the pre-compiled code). The below toy example shows what this looks like in code.
 
 ```c
 // Let's assume we have the following, rather contrived,
@@ -128,51 +133,54 @@ In simple words, a program Y, running in a process X, can hand JITLink a relocat
 link the object file’s code into X’s memory and run it under X’s existing context (globals, functions etc.), as if
 it were part of a dynamic library loaded into process X[^4].
 
-## The project: Adding a new target/object backend to LLVM JITLink
+## The project
 
-Having set up all that background, let’s talk about the task I set out to do - adding a new target/object backend to JITLink.
+Having set up all that background, let’s understand the main task and the end goal of the project.
 
-I added the i386(**target**)/ELF(**object**) backend to JITLink. But...
-
+### The task - Adding the i386(target)/ELF(object)backend to JITLink
 1. **What is a target?**
-    1. Target here refers to a hardware architecture - x86-64, AArch64, MIPS etc. i386 is a 32 bit x86 architecture.
-    2. In the context of this project, different targets matter because, in combination with the object format, they
-       may require distinct methods of connecting symbolic references with symbol definitions. These methods are
-       commonly referred to as [relocations](https://docs.oracle.com/cd/E23824_01/html/819-0690/chapter6-54839.html#scrolltoc).
+    1. Target here, refers to a hardware architecture. **i386 is a 32 bit x86 architecture**.
 2. **What is an object?**
-    1. Object here refers to an object file format - [ELF](https://en.wikipedia.org/wiki/Executable_and_Linkable_Format), MachO, COFF etc. I did not need to teach JITLink how to
-       parse ELF files from scratch as JITLink already had support for other target+ELF format combos.
-    2. What I needed to add support for, was dealing with i386 specific ELF relocations.
+    1. Object here, refers to an object file format. [ELF](https://en.wikipedia.org/wiki/Executable_and_Linkable_Format) 
+       is the object format commonly used on Linux systems.
+3. **Why do different target/object combinations matter and need additional work?**
+   1. Different target/object combinations matter, because each combination may use distinct methods for connecting 
+      symbolic references to symbol definitions. These methods are commonly referred to as 
+      [relocations](https://docs.oracle.com/cd/E23824_01/html/819-0690/chapter6-54839.html#scrolltoc).
 
-The end goal of the project was to make LLVM JITLink capable of linking a 32-bit ELF object file, with i386 specific relocations, into a 32-bit process on the i386 hardware architecture.
+### The end goal
+The end goal of the project was to make LLVM JITLink capable of linking a 32-bit ELF object file, with i386 specific
+relocations, into a 32-bit process on the i386 hardware architecture.
 
 ## Execution
 
 ### Understanding high level constructs
 
-The first step in this phase of the project was understanding what high level constructs I’m dealing with. In the
-context of this project, there is perhaps nothing more important than the [LinkGraph](https://github.com/llvm/llvm-project/blob/110c1b64a7b9984a604aa2809e0fb8c01278609d/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L845) 
-(the LLVM JITLink [documentation](https://llvm.org/docs/JITLink.html#linkgraph) has an excellent description of 
-LinkGraph). LinkGraph is an internal representation of an object file, in LLVM JITLink. All object files, no matter 
-the format and target architecture, are represented as LinkGraphs in JITLink.
+#### [LinkGraph](https://github.com/llvm/llvm-project/blob/110c1b64a7b9984a604aa2809e0fb8c01278609d/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L845)
 
-Object formats have different schemas and names for similar concepts, but they share a common goal - to represent
-machine code that can be relocated in virtual memory. A LinkGraph tries to generically represent similar concepts 
-and nuances across object file formats.
+> The LLVM JITLink [documentation](https://llvm.org/docs/JITLink.html#linkgraph) has an excellent description of LinkGraph.
+> I recommend reading it after the below, high-level description of LinkGraph. 
 
-To draw conceptual analogies between the LinkGraph and an object format, I will use ELF as an example since it is
-the format I am most familiar with. An ELF object contains sections, symbols and relocations.
+LinkGraph is an internal representation of an object file within LLVM JITLink. While object formats may have 
+different schemas and terminology for similar concepts, they all aim to represent machine code that can be relocated 
+in virtual memory. The purpose of a LinkGraph is to provide a generic representation of these concepts and nuances 
+across different object file formats.
 
-1. A section is any chunk of bytes that must be moved into memory as a unit.
-2. A symbol is a named chunk of bytes that could represent either data or executable instructions. Symbols occur as children of sections.
-3. A relocation describes how to fix up bytes within a section once the address of the relocation's target symbol is resolved.
+To draw conceptual analogies between the LinkGraph and an object format, let's use ELF as an example. An ELF object 
+contains:
+
+1. **Sections** - Any chunk of bytes that must be moved into memory as a unit.
+2. **Symbols** - A named chunk of bytes that could represent either data or executable instructions. Symbols occur as 
+   children of sections.
+3. **Relocations** - A description of how to fix up bytes within a section once the address of the relocation's 
+   target symbol is resolved.
 
 A LinkGraph is capable of representing all of the above concepts. It first defines some building blocks.
 
 1. [Addressable](https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L105) - Anything that can be assigned an address in the executor process’ virtual address space.
 2. [Block](https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L152) - A chunk of bytes that is addressable and occurs as part of a section.
 
-On top of these building blocks it defines the higher level object format concepts.
+On top of these building blocks, it defines the higher level object format concepts.
 
 1. [Symbol](https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L410) - Equivalent of a symbol in the ELF format. Represented using an offset from the base (address) of a
    Block and a size in bytes.
@@ -180,61 +188,88 @@ On top of these building blocks it defines the higher level object format concep
 3. [Edge](https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L61) - Equivalent of a relocation in the ELF format. Represented using an offset from the start of the
    containing block (indicating the storage location that needs to be fixed up), a pointer to the target whose address needs to be used for the fix-up and a kind to specify the patching formula.
 
-> Another important LLVM JITLink construct, that I did not directly interact with too much, is [JITLinkContext](https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L1765). But
-> @lhames suggested and I agreed that this would be a good place to talk about it, since it is one of the building blocks of LLVM JITLink.
->
-> So if you're linking, what are you linking into?
-> The answer is JITLinkContext.
->
-> A JITLinkContext represents the process that you're linking into — this is the conceptual view from the point of
-> view of a specific linker instance. The linker is linking into some process, but it needs a way to ask questions about the process and take actions in the process. The JITLinkContext provides this mediation; it knows how to look up symbols and allocate memory in the existing process, and publish the results of the link to the wider world: notifying others of the addresses that it has assigned to symbols, and when those symbols become available in memory.
+#### [JITLinkContext](https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L1765)
+
+JITLinkContext represents the target process that you're linking into, and it provides the JIT linker with the 
+ability to ask questions about and take actions within the process. This includes the ability to look up symbols and 
+allocate memory, in the target process, as well as to publish the results of the linking process to the broader 
+environment. Specifically, the JITLinkContext informs others of the addresses it has assigned to symbols and when those
+symbols become available in memory.
 
 ### Understanding the JIT linking algorithm
 
-After establishing an understanding of LinkGraph, the next step involved understanding its role and interactions in the JIT linking process.
+The LLVM JITLink linking algorithm happens in multiple phases, with each phase consisting of passes over the 
+LinkGraph and a call to the next phase at the end. In each phase the algorithm modifies the LinkGraph as needed, by 
+the end, producing a ready to execute in-memory image of the relocatable object that we started out with.
 
-Something that did not click for me initially, but simplified things significantly once it did, was the fact that
-the LinkGraph was just that, a graph! And that the LLVM JITLink linking algorithm essentially involved performing
-multiple passes over this graph, modifying it as needed until we had something that was ready to be emitted to the
-memory for execution. Re-reading LLVM JITLink’s high-level description of the [generic JIT linking algorithm](https://llvm.org/docs/JITLink.html#generic-link-algorithm) with
-this simple view of the LinkGraph made it much easier and intuitive to make sense of what was going on in the JIT 
-linking process.
+> Something that did not click for me initially, but simplified things significantly once it did, was the fact that
+the LinkGraph was just that, a graph! Re-reading LLVM JITLink’s high-level description of the [generic JIT linking 
+> algorithm](https://llvm.org/docs/JITLink.html#generic-link-algorithm) with this simple view of the LinkGraph made
+> it much easier and intuitive to make sense of what was going on in the JIT linking process.
 
-Here’s a 10,000ft view description of JITLink’s generic JIT linking algorithm.
-
-The algorithm happens in multiple phases, with each phase consisting of multiple passes over the LinkGraph and a 
-call to the next phase at the end. The algorithm also provides implementers and users of JITLink hooks to tap into 
-the linking process. These hooks can be used to achieve a number of things, including but not limited to, 
-implementing link-time optimizations, testing, validation etc.
+The algorithm also provides, implementers and users of JITLink, hooks to tap into the linking process. These hooks can 
+be used to achieve a number of things, including but not limited to, link-time optimizations, testing, validation etc.
 
 ### The tangibles
 
-This step, in the execution phase of the project, involved, as the name suggests, doing the tangible - adding code to LLVM JITLink to deal with i386/ELF relocations (which is what we established the task was). Truth be told (and perhaps unsurprisingly) the third step of execution was rather interleaved with the first two. My understanding of the high level constructs and the JIT linking algorithm evolved as I incrementally added support for the i386/ELF backend to LLVM JITLink.
+First, I set up a test loop to validate whether LLVM JITLink is able to link 32-bit i386 ELF objects, containing 
+valid i386/ELF relocations, into a 32 bit process. The existing llvm-jitlink tool, which is built and put into the bin 
+folder by default when you build the LLVM project, came in handy. llvm-jitlink is a command line wrapper for the 
+JITLink library. It takes relocatable objects as input and links them into the executor process using JITLink.
 
-For any software project/task, the first thing that I usually do is set up a test loop. So that’s what I started with. In my case, I needed to be able to test whether LLVM JITLink was able to link 32-bit i386 ELF objects, containing valid i386/ELF relocations, into a 32 bit process. LLVM, conveniently, already has a tool called llvm-jitlink, which is built and put into the bin folder by default, when you build the LLVM project. llvm-jitlink is a command line wrapper for the JITLink library, which takes object files as input and then links them using JITLink. The process that the object files are linked into is the one that’s running llvm-jitlink itself.
+The tricky part here, at least for me, was to get a 32-bit llvm-jitlink ELF executable. By default, Clang produces
+executables for the host architecture because of which I had to understand cross-compilation[^5] (compiling for a 
+target different from the host architecture) since I was developing on x86-64 hardware. In order to obtain a 32-bit 
+llvm-jitlink ELF executable, on an x86-64 system, I needed the following -
 
-The tricky part here, at least for me, was to get a 32-bit i386 llvm-jitlink executable. By default Clang produces
-executables for the host architecture, which meant that I needed to dabble a bit in cross-compilation[^5] (compiling
-for a target different than the host architecture) since I was developing on x86-64[^6] hardware. But eventually, I
-had on my hands a 32-bit i386 llvm-jitlink executable!
+1. **Cross-compiler** - A cross-compiler that could generate 32 bit x86 code. Clang generates 32-bit x86 code if the 
+   following flags are specified in the build configuration:
+   1. `CMAKE_CXX_FLAGS="-m32"` or `CMAKE_C_FLAGS="-m32"` - instructs Clang to generate 32-bit code instead of the 
+      default 64-bit code. 
+   2. `LLVM_DEFAULT_TARGET_TRIPLE=X86` - instructs Clang to generate machine code for the x86 target by default.
+    
+2. **Target shared libraries** - 32 bit x86 shared libraries, that might be checked against during compilation. In my
+   case installing `libstdc++.i686` and `glibc-devel.i686` sufficed since that is all I needed to generate programs
+   containing all possible i386/ELF relocations.
 
-The last piece missing in my test loop was the plumbing in LLVM JITLink, on top of which I could start adding
-i386/ELF relocations. I added this plumbing as part of my first [commit](https://github.com/llvm/llvm-project/commit/29fe204b4e87dcd78bebd40df512e8017dffea8f) to LLVM JITLink! On a high level, there
-were 2 things that I implemented in that commit -
+> The full command that I used to generate my build configuration was -
+> ```c
+> cmake -DCMAKE_CXX_FLAGS="-m32" -DCMAKE_C_FLAGS="-m32" \ 
+> -DCMAKE_CXX_COMPILER=<PATH_PREFIX>/bin/clang++ \
+> -DCMAKE_BUILD_TYPE=Debug \ 
+> 
+> // It is important that the `llvm-tblgen`executable is for the host architecture
+> -DLLVM_TABLEGEN=<LLVM_BUILD_DIR_FOR_HOST_ARCH>/bin/llvm-tblgen \
+> 
+> -DLLVM_DEFAULT_TARGET_TRIPLE=i386-unknown-linux-gnu \
+> 
+> // Set of targets that the compiler must be able to generate code for. 
+> // Can save compilation time by omitting redundant target backends.
+> -DLLVM_TARGETS_TO_BUILD=X86 \
+> 
+> -G "Ninja" ../llvm
+> ```
+
+The last piece of my test loop was the plumbing in LLVM JITLink, on top of which I could start adding i386/ELF 
+relocations. I added this plumbing as part of my first [commit](https://github.com/llvm/llvm-project/commit/29fe204b4e87dcd78bebd40df512e8017dffea8f) to LLVM JITLink. 
+At a high level, there were 2 things that I implemented in that commit -
 
 1. **ELFLinkGraphBuilder_i386** - contained specialized logic for parsing i386/ELF relocations from an object file.
 2. **ELFJITLinker_i386** - contained specialized logic for fixing up i386/ELF relocations in the executable image
    supposed to be emitted to memory.
 
-Over the next few months, I incrementally added support for the following i386/ELF relocations to LLVM JITLink.
+Having set up a test loop, I incrementally added support for the following i386/ELF relocations to LLVM JITLink.
 
 > Quick aside, before we talk about the individual relocations! Let’s recall what relocations are.
 >
 > The compiler generates code which contains symbolic references to actual symbols (everything other than local
-> variables in a function and functions themselves). The compiler just refers to symbols by the names used by the programmer and leaves a set of TODOs for the linker to complete during linking.
+> variables in a function and functions themselves). The compiler just refers to symbols by the names used by the 
+> programmer and leaves a set of TODOs for the linker to complete during linking.
 >
-> In ELF objects, these TODOs are found in the [relocation](https://docs.oracle.com/cd/E23824_01/html/819-0690/chapter6-54839.html#scrolltoc) section. They tell the linker where and how a symbolic
-> reference needs to be fixed. The linker then, for the most part, follows the compiler’s instructions and resolves all the relocations in the program. The linker can resolve relocations because it has a view of the entire compiled program.
+> In ELF objects, these TODOs are found in the [relocation](https://docs.oracle.com/cd/E23824_01/html/819-0690/chapter6-54839.html#scrolltoc) 
+> section. They tell the linker where and how a symbolic reference needs to be fixed. The linker then, for the most 
+> part, follows the compiler’s instructions and resolves all the relocations in the program. The linker can resolve
+> relocations because it has a view of the entire compiled program.
 
 1. R_386_32
     1. **What** - Tells the linker to replace the symbolic reference with the symbol’s absolute memory address.
@@ -328,16 +363,19 @@ Over the next few months, I incrementally added support for the following i386/E
        17:   5d                      pop    %ebp
        18:   c3                      ret
         ```
-> Another short detour, before we discuss the remaining relocations, because they are used in the context of dynamic
-> linking.
+> Another short detour to talk about dynamic linking because the remaining relocations are what enable dynamic linking. 
 >
-> In static linking, if your program accesses even a single symbol from a given library, then that entire library is
-linked with your program, which among other issues, increases the size of the generated executable. For instance, let’s talk about that simple C program that just prints hello world again. With static linking, the executable that’s generated from your program is going to pull in the entire C standard library, because your program accessed the printf function.
+> In static linking, if your program accesses even a single symbol from a given library, then that entire library is 
+> linked with your program, which among other issues, increases the size of the generated executable. For instance, let’s 
+> talk about that simple C program that just prints hello world again. With static linking, the executable that’s 
+> generated from your program is going to pull in the entire C standard library, because your program accessed the 
+> printf function.
 >
 > In dynamic linking, referenced libraries are accessed at build time but they are not brought into the linked
-> executable. Instead, the referenced global variables from these libraries are linked at load time (when the program is loaded into memory, to be run) and referenced functions from these libraries are linked at invocation time.
+> executable. Instead, the referenced global variables from these libraries are linked at load time (when the program is
+> loaded into memory, to be run) and referenced functions from these libraries are linked at invocation time.
 >
-> There’s pros and cons to both approaches, which I will cursorily mention below, but not go into too many details.
+> There’s pros and cons to both approaches, whose details I will not go into, but will cursorily mention below.
 > 1. With static linking the only thing the user of your executable needs is the executable itself. They won’t run
      into issues of missing libraries.
 >
@@ -345,8 +383,6 @@ linked with your program, which among other issues, increases the size of the ge
      especially useful if you are distributing your executable.
 >
 > 3. Dynamic linking is just harder to implement than static linking.
->
-> The upcoming relocations we will talk about, are what enable dynamic linking.
 
 > If you’re not already familiar with the concepts of GOT and PLT, I also recommend you take yet another quick detour
 > for some [visual explanations](#what-are-got-and-plt)!
@@ -570,20 +606,24 @@ linked with your program, which among other issues, increases the size of the ge
       ``` 
 ## Testing
 
-Talking about the project’s execution will not be complete without talking about testing. While I did talk about setting up a “test loop” earlier, here I wanted to briefly touch upon the topic of regression tests - not so much upon the “why” and the “what”, but the “how”. There’s some excellent testing utilities already available in the LLVM project, but I found related documentation to be lagging. Specifically, I want to focus on the utilities that one might interact with for writing a regression test for one of LLVM JITLink’s target-object backend.
+While I did talk about setting up a “test loop” earlier, here I want to briefly touch upon the topic of regression 
+tests -- not so much upon the “why” and the “what”, but the “how”. There’s some excellent testing utilities already 
+available in the LLVM project, but I found related documentation to be lagging. Specifically, I want to focus on the 
+utilities that one might interact with for writing a regression test for one of LLVM JITLink’s target-object backend.
 
-Before we go ahead, I wanted to mention this high level [testing guide](https://llvm.org/docs/TestingGuide.html#writing-new-regression-tests) for LLVM. The guide should get you to the
-point where you know where/how to create a test file, how to make your tests discoverable by the test runner (LLVM Integration Tester - lit) and how to run the tests using the test runner.
+Before we go ahead, I want to mention this high level [testing guide](https://llvm.org/docs/TestingGuide.html#writing-new-regression-tests) 
+for LLVM. The guide should get you to the point where you know where/how to create a test file, how to make your tests 
+discoverable by the test runner (LLVM Integration Tester - lit) and how to run the tests using the test runner.
 
-That said, let’s use the sample test file below, to talk about the utilities that you might use for writing a regression test for one of LLVM JITLink’s target-object backend.
+That said, let’s use the sample test file below, to talk about the utilities that you might use for writing a regression
+test for one of LLVM JITLink’s target-object backend.
 
 ```as
 // Regression test files are assembly files (".s" extension).
 
 // The files must begin with what are known as "RUN" lines.
 // Each "RUN” line tells lit how to run the test file.
-// RUN lines look and feel like you were running shell commands,
-// although that's not what they are.
+// RUN lines look and feel like you were running shell commands.
 
 // Each regression test will likely begin with the following
 // two RUN lines, although the exact RUN command may need to be
@@ -610,7 +650,10 @@ main:
 .size   main, .-main
 ```
 
-The main thing that we want to determine in these target-object backend regression tests is whether the relocations in the code emitted to memory were fixed up correctly. Meaning, we have to literally check whether certain bytes in certain memory locations are what we expect them to be. Let’s look at some more intricate test cases that will show the different kinds of checks we might need to perform and how we can perform them.
+The main thing that we want to determine in these target-object backend regression tests is whether the relocations in 
+the code emitted to memory were fixed up correctly. Meaning, we have to literally check whether certain bytes in certain
+memory locations are what we expect them to be. Let’s look at some more intricate test cases that will show the 
+different kinds of checks we might need to perform and how we can perform them.
 
 ```as
 // llvm-jitlink allows you to specify jitlink-check expressions.
@@ -740,11 +783,14 @@ Below is an index of resources that I found useful (I may have mentioned them el
 
 ## Closing thoughts
 
-And that’s about it! I don’t have too much more to say on top of what’s already been said. It was a great learning experience contributing to LLVM JITLink. I’d recommend it to anyone who wants to understand the story after compilation and up until a program is run - come say hi on the #jit channel of the LLVM discord server!
+And that’s about it! I don’t have too much more to say on top of what’s already been said. It was a great learning 
+experience contributing to LLVM JITLink. I’d recommend it to anyone who wants to understand the story after compilation
+and up until a program is run - come say hi on the #jit channel of the LLVM discord server!
 
-I’d also like to give a big shout out to the folks on the #jit channel for helping me understand things and
-answering my questions. And a special thanks to [Lang Hames](https://github.com/lhames) for his help throughout the project and reviewing this
-article!
+I’d also like to give a big shout out to the folks on the #jit channel for helping me understand things and answering my
+questions. And a special thanks to [Lang Hames](https://github.com/lhames) for his help throughout the project and 
+reviewing this post (thanks to [Stefan Gränitz](https://github.com/weliveindetail) and [Vassil Vassilev](https://github.com/vgvassilev)
+for reviewing as well)!
 
 I plan on continuing my involvement with LLVM and JITLink, and am excited to see what I pick up next!
 
@@ -753,8 +799,14 @@ I plan on continuing my involvement with LLVM and JITLink, and am excited to see
 ### What are GOT and PLT?
 
 The GLOBAL_OFFSET_TABLE (GOT) and PROCEDURE_LINKAGE_TABLE (PLT) are 2 tables used during the linking process that
-make dynamic linking work. Dynamically linked code needs to be position-independent[^7], meaning that it should be
-able to be loaded at any address in memory and continue to work - all symbols that it references and all referenced symbols that it contains, must be resolvable. Dynamically linked shared libraries can fulfill this position independence requirement for internal symbols using pc-relative addressing, as the code of the shared libraries stays together in memory. However, these libraries may also refer to external symbols or contain symbols, referenced by other shared libraries or the main executable. And since the load address of shared libraries, in memory, is not fixed, they require another layer of abstraction for the resolution of external symbols, for both data and functions. GOT and PLT are those abstractions.
+make dynamic linking work. Dynamically linked code needs to be position-independent[^6], meaning that it should be
+able to be loaded at any address in memory and continue to work - all symbols that it references and all referenced 
+symbols that it contains, must be resolvable. Dynamically linked shared libraries can fulfill this position independence
+requirement for internal symbols using pc-relative addressing, as the code of the shared libraries stays together in 
+memory. However, these libraries may also refer to external symbols or contain symbols, referenced by other shared 
+libraries or the main executable. And since the load address of shared libraries, in memory, is not fixed, they require 
+another layer of abstraction for the resolution of external symbols, for both data and functions. GOT and PLT are those 
+abstractions.
 
 Below are some simple visual examples to understand the GOT and PLT.
 
@@ -798,7 +850,8 @@ Below are some simple visual examples to understand the GOT and PLT.
         2. However, since the dynamic linker now fixed the entry in GOT[3] to reflect x’s address, subsequent invocations of x look as below -
             1. PLT[1] → *GOT[3] (which is essentially calling x, since that is what GOT[3] stores now)
 
-With the above process dynamic linking enables us to call a functions in position-independent code. Additionally, it makes the common case (every invocation of x other than the first) faster!
+With the above process dynamic linking enables us to call a functions in position-independent code. Additionally, it 
+makes the common case (every invocation of x other than the first) faster!
 
 ## Footnotes
 
@@ -815,12 +868,6 @@ capability (via LLVM’s older MCJIT APIs) to JIT-link expressions in the debugg
 [^5]: I found the following 2 resources very useful for understanding cross-compilation.
     1. “Cross-platform Compilation” chapter of the [Getting Started with LLVM Core Libraries](https://www.oreilly.com/library/view/getting-started-with/9781782166924/?_gl=1*142ghif*_ga*MTU5OTExNzkyNS4xNjc1MTc2MTkw*_ga_092EL089CH*MTY3Njc3NzE5MC4zLjEuMTY3Njc3NzMxMS42MC4wLjA.) book.
     2. Clang [documentation](https://clang.llvm.org/docs/CrossCompilation.html) for cross-compiling.
-[^6]:. In order to a compile a 32-bit i386 llvm-jitlink executable on an x86-64 system, I needed the following -
-    1. **Cross-compiler** - A cross-compiler that could generate 32 bit code. Luckily, Clang is already a 
-       cross-compiler capable of generating 32-bit x86 code. This can be done via the -m32 command line option in Clang.
-    2. **Target shared libraries** - All the shared libraries required by a 32 bit x86 program, that might be checked 
-       against during compilation. In my case installing libstdc++.i686 and glibc-devel.i686 sufficed.
-    3. The above 2 components are applicable to any cross-compilation.
-[^7]: Dynamically linked code can actually use the "static" relocation model, but the position-independent model is 
+[^6]: Dynamically linked code can actually use the "static" relocation model, but the position-independent model is 
 generally preferred. In position-independent code you only need to fix up the GOT, whereas in static code you need to fix up every external reference, which can hurt launch times.
 
