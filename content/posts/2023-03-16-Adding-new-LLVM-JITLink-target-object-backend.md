@@ -2,7 +2,7 @@
 author: "Kshitij Jain"
 date: "2023-03-16"
 tags: ["llvm", "JITLink", "linking", "relocations", "ELF", "i386"]
-title: "Adding a new target/object backend to LLVM JITLink copy"
+title: "Adding a new target/object backend to LLVM JITLink"
 ---
 ## Motivation
 
