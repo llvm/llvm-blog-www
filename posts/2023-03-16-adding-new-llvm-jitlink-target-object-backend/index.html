@@ -1,0 +1,1026 @@
+<!doctype html><html lang=en>
+<head>
+<title>Adding a new target/object backend to LLVM JITLink - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Kshitij Jain"><meta property="og:title" content="Adding a new target/object backend to LLVM JITLink">
+<meta property="og:description" content="Motivation For the last year, I have been contributing to LLVM JITLink. This post aims to doubly serve as a summary of my work and documentation for future contributors looking to add a new target/object backend to LLVM JITLink.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/posts/2023-03-16-adding-new-llvm-jitlink-target-object-backend/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2023-03-16T00:00:00+00:00">
+<meta property="article:modified_time" content="2023-03-16T00:00:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Adding a new target/object backend to LLVM JITLink">
+<meta name=twitter:description content="Motivation For the last year, I have been contributing to LLVM JITLink. This post aims to doubly serve as a summary of my work and documentation for future contributors looking to add a new target/object backend to LLVM JITLink.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>Adding a new target/object backend to LLVM JITLink</h1>
+<aside>
+<ul>
+<li>By Kshitij Jain</li>
+<li>
+<time class=post-date datetime=2023-03-16T00:00:00Z>Mar 16, 2023</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/llvm>#llvm</a>
+,
+<a href=https://blog.llvm.org/tags/jitlink>#JITLink</a>
+,
+<a href=https://blog.llvm.org/tags/linking>#linking</a>
+,
+<a href=https://blog.llvm.org/tags/relocations>#relocations</a>
+,
+<a href=https://blog.llvm.org/tags/elf>#ELF</a>
+,
+<a href=https://blog.llvm.org/tags/i386>#i386</a>
+</em>
+</li>
+<li>32 minute read</li>
+</ul>
+</aside>
+<h2 id=motivation>Motivation</h2>
+<p>For the last year, I have been contributing to <a href=https://llvm.org/docs/JITLink.html>LLVM JITLink</a>. This post aims to
+doubly serve as a summary of my work and documentation for future contributors looking to add a new target/object
+backend to LLVM JITLink.</p>
+<p>We will start by establishing some background and definitions of relevant concepts. Then, we will talk about what
+the project actually entailed. Finally, we will go over the execution details of the project.</p>
+<blockquote>
+<p>The end goal of the project was to make LLVM JITLink capable of linking a 32-bit ELF object file, with i386
+specific relocations, into a 32-bit process on the i386 hardware architecture.</p>
+<p>If the goal of the project already makes sense to you and you are looking to get started with adding a new
+target/object backend to LLVM JITLink yourself, you can skip to the “<a href=#recap-and-conveniences>Recap and conveniences</a>”
+section.</p>
+</blockquote>
+<h2 id=background>Background</h2>
+<h3 id=linking>Linking</h3>
+<p>Our code often relies on external dependencies. For example, even a simple hello-world program written in C depends
+on the C stdlib for the printf function. These external dependencies are expressed as symbolic references, which I
+will henceforth refer to as just symbols. Symbols are names of data or functions that have unknown addresses and
+are resolved or fixed up during the linking process.</p>
+<p>In chronological order -</p>
+<ol>
+<li>The compiler converts source code to machine code.</li>
+<li>The assembler converts machine code to object files (ELF, MachO, COFF etc.)</li>
+<li>The linker links one or more object files (fixing up symbolic references along the way) and produces an
+executable or a shared library (also called shared object or dylib).</li>
+</ol>
+<blockquote>
+<p>For the purposes of this discussion we will focus on executables, but the points that will be made hold for shared
+objects as well.</p>
+</blockquote>
+<h3 id=jit-linking>JIT linking</h3>
+<p>Unlike static linking, JIT (Just-in-time) linking is performed at runtime. While a static linker produces
+executables that are stored on disk, a JIT linker produces an in-memory image of the executable &ndash; essentially
+ready to execute bytes in memory. JIT linking a C program may feel very much like running a shell script. Under
+the hood though, the C program is linked into the memory of the invoking process, also commonly referred
+to as the executor process. The JIT linker patches up the executor process' memory to account for the addresses of
+symbols at runtime, and executes necessary initializers.</p>
+<p>If you are familiar with dynamic loading then JIT linking may sound familiar, and the two have a lot in common,
+however they are not the same. JIT linking operates on relocatable objects (vs shared objects/dylibs for dynamic
+loading), and performs both the static linker’s and the dynamic loader’s jobs. Doing so allows the JIT
+linker to dead-strip redundant symbols, which dynamic loading cannot do, and this allows JIT linking to support
+finer grained compilation of languages that tend to produce a lot of redundant symbol definitions(e.g. C++).</p>
+<h3 id=need-for-jit-linking>Need for JIT linking</h3>
+<p>JIT linking is primarily useful in the context of pre-compiled languages, such as C, C++, Rust etc. Why? At run time,
+these languages have no way<sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup> to bring new symbol definitions into a running process’ memory and resolve
+references to them. Although dynamic loading partially solves this issue, it has its drawbacks (discussed above)
+and lags far behind the static linking experience.</p>
+<p>With JIT linking, at run time, symbolic references can be resolved to existing symbols (from the newly JIT’d code), or
+to newly JIT&rsquo;d symbols (from the pre-compiled code). The below toy example shows what this looks like in code.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#75715e>// Let&#39;s assume we have the following, rather contrived,
+</span><span style=color:#75715e>// C++ program that wants to add 2 numbers, but wants to use
+</span><span style=color:#75715e>// an `add` function from a relocatable object file supplied by
+</span><span style=color:#75715e>// the user.
+</span><span style=color:#75715e>//
+</span><span style=color:#75715e>// Let&#39;s also assume that the add function in the user-supplied
+</span><span style=color:#75715e>// relocatable object will reference a symbol named `MAGIC` in its
+</span><span style=color:#75715e>// definition.
+</span><span style=color:#75715e></span>
+<span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> MAGIC <span style=color:#f92672>=</span> <span style=color:#ae81ff>42</span>;
+
+<span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>(<span style=color:#66d9ef>int</span> argc, <span style=color:#66d9ef>char</span><span style=color:#f92672>*</span> argv[]) {
+    <span style=color:#66d9ef>int</span> a <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+    <span style=color:#66d9ef>int</span> b <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;
+    
+    <span style=color:#75715e>// Read the path of the user supplied relocatable object.
+</span><span style=color:#75715e></span>    string userSuppliedObjectPath <span style=color:#f92672>=</span> ...;
+    
+    <span style=color:#75715e>// Initialize your JIT class that uses JIT linking under the hood.
+</span><span style=color:#75715e></span>    JIT J;
+    
+    <span style=color:#75715e>// Add the relocatable object to your JIT.
+</span><span style=color:#75715e></span>    J.addObject(userSuppliedObjectPath);
+    
+    <span style=color:#75715e>// Lookup the `add` function in the newly added JIT object.
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// Once all symbolic references within the user supplied object
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// are resolved, the content is fixed up and emitted to memory.
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// And we can then get a pointer to the `add` function.
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>auto</span> <span style=color:#f92672>*</span>add <span style=color:#f92672>=</span> (<span style=color:#66d9ef>int</span>(<span style=color:#f92672>*</span>)(<span style=color:#66d9ef>int</span>, <span style=color:#66d9ef>int</span>))J.lookup(<span style=color:#e6db74>&#34;add&#34;</span>).getAddress();
+    
+    <span style=color:#75715e>// At this point the symbolic reference to `MAGIC` in add&#39;s
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// definition must have been resolved to the memory address
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// of the constant `MAGIC` that we defined in this program.
+</span><span style=color:#75715e></span>
+    <span style=color:#75715e>// Run the add function found in the JIT module.
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>int</span> result <span style=color:#f92672>=</span> add(a, b);
+}
+</code></pre></div><p>That said, JIT linking by itself is not something that is very useful for an end user. JIT linking is an enabler
+for certain use-cases with pre-compiled languages (some use-cases exist for JIT-compiled languages as well<sup id=fnref:2><a href=#fn:2 class=footnote-ref role=doc-noteref>2</a></sup>).</p>
+<ol>
+<li><strong>JIT compilers</strong> (think of something like the JIT compilation component of the <a href=https://en.wikipedia.org/wiki/HotSpot_(virtual_machine)>Java Hotspot VM</a>, but for a
+statically compiled language)</li>
+<li><strong>Debugger expression evaluators</strong> (such as the LLDB expression evaluator)</li>
+<li><strong>REPLs</strong> (such as <a href=https://root.cern/cling/>Cling</a> and the currently experimental<sup id=fnref:3><a href=#fn:3 class=footnote-ref role=doc-noteref>3</a></sup> <a href=https://clang.llvm.org/docs/ClangRepl.html>Clang-REPL</a>)</li>
+<li><strong>Standalone scripts</strong> (such as the <a href=https://jblevins.org/log/swift>Swift scripts</a>, where the JIT linking is
+used to add an <a href=https://github.com/apple/swift/blob/main/lib/Immediate/Immediate.cpp#L228>immediate</a> mode to
+the compiler, which runs your code in-place via a JIT, rather than compiling it)</li>
+<li><strong>Scriptable extensions</strong> (think about running JIT’d code in the context of some existing app, allowing the app
+to be extended by JIT’d code rather than precompiled plugins)</li>
+</ol>
+<p>While the above use cases may seem different, they are really the same — <strong>JIT linking enables linking code into
+existing processes (that may or may not already contain state/context), in an ABI-compatible way.</strong></p>
+<h3 id=llvm-jitlink>LLVM JITLink</h3>
+<p>LLVM JITLink is a JIT linking implementation, in the form of a low-level library within the LLVM infrastructure.
+It powers <a href=https://llvm.org/docs/ORCv2.html>LLVM&rsquo;s ORC JIT APIs</a>, which is what end-users would usually use for
+building runtime linking environments. It provides primitives for:</p>
+<ol>
+<li>Re-using existing compilers to generate relocatable objects at runtime.</li>
+<li>Allocating memory within a target executor process.</li>
+<li>Linking code into a target executor process in an ABI-compatible way.</li>
+</ol>
+<p>In simple words, a program Y, running in a process X, can hand JITLink a relocatable object file and JITLink will
+link the object file’s code into X’s memory and run it under X’s existing context (globals, functions etc.), as if
+it were part of a dynamic library loaded into process X<sup id=fnref:4><a href=#fn:4 class=footnote-ref role=doc-noteref>4</a></sup>.</p>
+<h2 id=the-project>The project</h2>
+<p>Having set up all that background, let’s understand the main task and the end goal of the project.</p>
+<h3 id=the-task---adding-the-i386targetelfobjectbackend-to-jitlink>The task - Adding the i386(target)/ELF(object)backend to JITLink</h3>
+<ol>
+<li><strong>What is a target?</strong>
+<ol>
+<li>Target here, refers to a hardware architecture. <strong>i386 is a 32 bit x86 architecture</strong>.</li>
+</ol>
+</li>
+<li><strong>What is an object?</strong>
+<ol>
+<li>Object here, refers to an object file format. <a href=https://en.wikipedia.org/wiki/Executable_and_Linkable_Format>ELF</a>
+is the object format commonly used on Linux systems.</li>
+</ol>
+</li>
+<li><strong>Why do different target/object combinations matter and need additional work?</strong>
+<ol>
+<li>Different target/object combinations matter, because each combination may use distinct methods for connecting
+symbolic references to symbol definitions. These methods are commonly referred to as
+<a href=https://docs.oracle.com/cd/E23824_01/html/819-0690/chapter6-54839.html#scrolltoc>relocations</a>.</li>
+</ol>
+</li>
+</ol>
+<h3 id=the-end-goal>The end goal</h3>
+<p>The end goal of the project was to make LLVM JITLink capable of linking a 32-bit ELF object file, with i386 specific
+relocations, into a 32-bit process on the i386 hardware architecture.</p>
+<h2 id=execution>Execution</h2>
+<h3 id=understanding-high-level-constructs>Understanding high level constructs</h3>
+<h4 id=linkgraphhttpsgithubcomllvmllvm-projectblob110c1b64a7b9984a604aa2809e0fb8c01278609dllvmincludellvmexecutionenginejitlinkjitlinkhl845><a href=https://github.com/llvm/llvm-project/blob/110c1b64a7b9984a604aa2809e0fb8c01278609d/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L845>LinkGraph</a></h4>
+<blockquote>
+<p>The LLVM JITLink <a href=https://llvm.org/docs/JITLink.html#linkgraph>documentation</a> has an excellent description of LinkGraph.
+I recommend reading it after the below, high-level description of LinkGraph.</p>
+</blockquote>
+<p>LinkGraph is an internal representation of an object file within LLVM JITLink. While object formats may have
+different schemas and terminology for similar concepts, they all aim to represent machine code that can be relocated
+in virtual memory. The purpose of a LinkGraph is to provide a generic representation of these concepts and nuances
+across different object file formats.</p>
+<p>To draw conceptual analogies between the LinkGraph and an object format, let&rsquo;s use ELF as an example. An ELF object
+contains:</p>
+<ol>
+<li><strong>Sections</strong> - Any chunk of bytes that must be moved into memory as a unit.</li>
+<li><strong>Symbols</strong> - A named chunk of bytes that could represent either data or executable instructions. Symbols occur as
+children of sections.</li>
+<li><strong>Relocations</strong> - A description of how to fix up bytes within a section once the address of the relocation&rsquo;s
+target symbol is resolved.</li>
+</ol>
+<p>A LinkGraph is capable of representing all of the above concepts. It first defines some building blocks.</p>
+<ol>
+<li><a href=https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L105>Addressable</a> - Anything that can be assigned an address in the executor process’ virtual address space.</li>
+<li><a href=https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L152>Block</a> - A chunk of bytes that is addressable and occurs as part of a section.</li>
+</ol>
+<p>On top of these building blocks, it defines the higher level object format concepts.</p>
+<ol>
+<li><a href=https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L410>Symbol</a> - Equivalent of a symbol in the ELF format. Represented using an offset from the base (address) of a
+Block and a size in bytes.</li>
+<li><a href=https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L688>Section</a> - Equivalent of a section in the ELF format. Represented using a collection of symbols and blocks.</li>
+<li><a href=https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L61>Edge</a> - Equivalent of a relocation in the ELF format. Represented using an offset from the start of the
+containing block (indicating the storage location that needs to be fixed up), a pointer to the target whose address needs to be used for the fix-up and a kind to specify the patching formula.</li>
+</ol>
+<h4 id=jitlinkcontexthttpsgithubcomllvmllvm-projectblob4cb0b7ce3b4987446264312d582dac9c9a98a488llvmincludellvmexecutionenginejitlinkjitlinkhl1765><a href=https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L1765>JITLinkContext</a></h4>
+<p>JITLinkContext represents the target process that you&rsquo;re linking into, and it provides the JIT linker with the
+ability to ask questions about and take actions within the process. This includes the ability to look up symbols and
+allocate memory, in the target process, as well as to publish the results of the linking process to the broader
+environment. Specifically, the JITLinkContext informs others of the addresses it has assigned to symbols and when those
+symbols become available in memory.</p>
+<h3 id=understanding-the-jit-linking-algorithm>Understanding the JIT linking algorithm</h3>
+<p>The LLVM JITLink linking algorithm happens in multiple phases, with each phase consisting of passes over the
+LinkGraph and a call to the next phase at the end. In each phase the algorithm modifies the LinkGraph as needed, by
+the end, producing a ready to execute in-memory image of the relocatable object that we started out with.</p>
+<blockquote>
+<p>Something that did not click for me initially, but simplified things significantly once it did, was the fact that
+the LinkGraph was just that, a graph! Re-reading LLVM JITLink’s high-level description of the <a href=https://llvm.org/docs/JITLink.html#generic-link-algorithm>generic JIT linking
+algorithm</a> with this simple view of the LinkGraph made
+it much easier and intuitive to make sense of what was going on in the JIT linking process.</p>
+</blockquote>
+<p>The algorithm also provides, implementers and users of JITLink, hooks to tap into the linking process. These hooks can
+be used to achieve a number of things, including but not limited to, link-time optimizations, testing, validation etc.</p>
+<h3 id=the-tangibles>The tangibles</h3>
+<p>First, I set up a test loop to validate whether LLVM JITLink is able to link 32-bit i386 ELF objects, containing
+valid i386/ELF relocations, into a 32 bit process. The existing llvm-jitlink tool, which is built and put into the bin
+folder by default when you build the LLVM project, came in handy. llvm-jitlink is a command line wrapper for the
+JITLink library. It takes relocatable objects as input and links them into the executor process using JITLink.</p>
+<p>The tricky part here, at least for me, was to get a 32-bit llvm-jitlink ELF executable. By default, Clang produces
+executables for the host architecture because of which I had to understand cross-compilation<sup id=fnref:5><a href=#fn:5 class=footnote-ref role=doc-noteref>5</a></sup> (compiling for a
+target different from the host architecture) since I was developing on x86-64 hardware. In order to obtain a 32-bit
+llvm-jitlink ELF executable, on an x86-64 system, I needed the following -</p>
+<ol>
+<li>
+<p><strong>Cross-compiler</strong> - A cross-compiler that could generate 32 bit x86 code. Clang generates 32-bit x86 code if the
+following flags are specified in the build configuration:</p>
+<ol>
+<li><code>CMAKE_CXX_FLAGS="-m32"</code> or <code>CMAKE_C_FLAGS="-m32"</code> - instructs Clang to generate 32-bit code instead of the
+default 64-bit code.</li>
+<li><code>LLVM_DEFAULT_TARGET_TRIPLE=X86</code> - instructs Clang to generate machine code for the x86 target by default.</li>
+</ol>
+</li>
+<li>
+<p><strong>Target shared libraries</strong> - 32 bit x86 shared libraries, that might be checked against during compilation. In my
+case installing <code>libstdc++.i686</code> and <code>glibc-devel.i686</code> sufficed since that is all I needed to generate programs
+containing all possible i386/ELF relocations.</p>
+</li>
+</ol>
+<blockquote>
+<p>The full command that I used to generate my build configuration was -</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c>cmake <span style=color:#f92672>-</span>DCMAKE_CXX_FLAGS<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;-m32&#34;</span> <span style=color:#f92672>-</span>DCMAKE_C_FLAGS<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;-m32&#34;</span> <span style=color:#960050;background-color:#1e0010>\</span> 
+<span style=color:#f92672>-</span>DCMAKE_CXX_COMPILER<span style=color:#f92672>=&lt;</span>PATH_PREFIX<span style=color:#f92672>&gt;/</span>bin<span style=color:#f92672>/</span>clang<span style=color:#f92672>++</span> \
+<span style=color:#f92672>-</span>DCMAKE_BUILD_TYPE<span style=color:#f92672>=</span>Debug <span style=color:#960050;background-color:#1e0010>\</span> 
+
+<span style=color:#75715e>// It is important that the `llvm-tblgen`executable is for the host architecture
+</span><span style=color:#75715e></span><span style=color:#f92672>-</span>DLLVM_TABLEGEN<span style=color:#f92672>=&lt;</span>LLVM_BUILD_DIR_FOR_HOST_ARCH<span style=color:#f92672>&gt;/</span>bin<span style=color:#f92672>/</span>llvm<span style=color:#f92672>-</span>tblgen \
+
+<span style=color:#f92672>-</span>DLLVM_DEFAULT_TARGET_TRIPLE<span style=color:#f92672>=</span>i386<span style=color:#f92672>-</span>unknown<span style=color:#f92672>-</span>linux<span style=color:#f92672>-</span>gnu \
+
+<span style=color:#75715e>// Set of targets that the compiler must be able to generate code for. 
+</span><span style=color:#75715e>// Can save compilation time by omitting redundant target backends.
+</span><span style=color:#75715e></span><span style=color:#f92672>-</span>DLLVM_TARGETS_TO_BUILD<span style=color:#f92672>=</span>X86 \
+
+<span style=color:#f92672>-</span>G <span style=color:#e6db74>&#34;Ninja&#34;</span> ..<span style=color:#f92672>/</span>llvm
+</code></pre></div></blockquote>
+<p>The last piece of my test loop was the plumbing in LLVM JITLink, on top of which I could start adding i386/ELF
+relocations. I added this plumbing as part of my first <a href=https://github.com/llvm/llvm-project/commit/29fe204b4e87dcd78bebd40df512e8017dffea8f>commit</a> to LLVM JITLink.
+At a high level, there were 2 things that I implemented in that commit -</p>
+<ol>
+<li><strong>ELFLinkGraphBuilder_i386</strong> - contained specialized logic for parsing i386/ELF relocations from an object file.</li>
+<li><strong>ELFJITLinker_i386</strong> - contained specialized logic for fixing up i386/ELF relocations in the executable image
+supposed to be emitted to memory.</li>
+</ol>
+<p>Having set up a test loop, I incrementally added support for the following i386/ELF relocations to LLVM JITLink.</p>
+<blockquote>
+<p>Quick aside, before we talk about the individual relocations! Let’s recall what relocations are.</p>
+<p>The compiler generates code which contains symbolic references to actual symbols (everything other than local
+variables in a function and functions themselves). The compiler just refers to symbols by the names used by the
+programmer and leaves a set of TODOs for the linker to complete during linking.</p>
+<p>In ELF objects, these TODOs are found in the <a href=https://docs.oracle.com/cd/E23824_01/html/819-0690/chapter6-54839.html#scrolltoc>relocation</a>
+section. They tell the linker where and how a symbolic reference needs to be fixed. The linker then, for the most
+part, follows the compiler’s instructions and resolves all the relocations in the program. The linker can resolve
+relocations because it has a view of the entire compiled program.</p>
+</blockquote>
+<ol>
+<li>R_386_32
+<ol>
+<li><strong>What</strong> - Tells the linker to replace the symbolic reference with the symbol’s absolute memory address.</li>
+<li><strong>When</strong> - Used to reference global and static variables in non position-independent code (PIC). PIC allows code
+to be loaded at any address in memory, rather than at a fixed address.</li>
+<li><strong>Code</strong> -
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e>// Compile with =&gt; clang -m32 -c -o obj.o obj.c
+</span><span style=color:#75715e></span>
+<span style=color:#75715e>// declare a global variable x
+</span><span style=color:#75715e></span><span style=color:#66d9ef>int</span> x;
+
+<span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+    <span style=color:#75715e>// Compiler should generate a R_386_32 relocation here.  
+</span><span style=color:#75715e></span>    x <span style=color:#f92672>+=</span> <span style=color:#ae81ff>1</span>;
+    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+}
+</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-as data-lang=as><span style=color:#ae81ff>00000000</span> <span style=color:#f92672>&lt;</span><span style=color:#a6e22e>main</span><span style=color:#f92672>&gt;:</span>
+<span style=color:#ae81ff>0</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>55</span>                      <span style=color:#a6e22e>push</span>   <span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>1</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>89</span> <span style=color:#a6e22e>e5</span>                   <span style=color:#a6e22e>mov</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>esp</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>3</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>50</span>                      <span style=color:#a6e22e>push</span>   <span style=color:#f92672>%</span><span style=color:#a6e22e>eax</span>
+<span style=color:#ae81ff>4</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>c7</span> <span style=color:#ae81ff>45</span> <span style=color:#a6e22e>fc</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    <span style=color:#a6e22e>movl</span>   <span style=color:#a6e22e>$0x0</span><span style=color:#f92672>,-</span><span style=color:#ae81ff>0x4</span>(<span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>)
+
+<span style=color:#75715e>// Compiler wants to move the value of x into
+</span><span style=color:#75715e>// the eax register but doesn&#39;t know the address
+</span><span style=color:#75715e>// of x. So it leaves a TODO for the linker and
+</span><span style=color:#75715e>// temporarily uses 0 as x&#39;s address.
+</span><span style=color:#75715e></span><span style=color:#a6e22e>b</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>a1</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>          <span style=color:#a6e22e>mov</span>    <span style=color:#ae81ff>0x0</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>eax</span>
+                         <span style=color:#a6e22e>c</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>R_386_32</span>     <span style=color:#a6e22e>x</span>
+
+<span style=color:#ae81ff>10</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>83</span> <span style=color:#a6e22e>c0</span> <span style=color:#ae81ff>01</span>                <span style=color:#a6e22e>add</span>    <span style=color:#a6e22e>$0x1</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>eax</span>
+
+<span style=color:#75715e>// Same thing here
+</span><span style=color:#75715e></span><span style=color:#ae81ff>13</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>a3</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>          <span style=color:#a6e22e>mov</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>eax</span><span style=color:#f92672>,</span><span style=color:#ae81ff>0x0</span>
+                         <span style=color:#ae81ff>14</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>R_386_32</span>    <span style=color:#a6e22e>x</span>
+
+<span style=color:#ae81ff>18</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>31</span> <span style=color:#a6e22e>c0</span>                   <span style=color:#a6e22e>xor</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>eax</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>eax</span>
+<span style=color:#ae81ff>1</span><span style=color:#a6e22e>a</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>83</span> <span style=color:#a6e22e>c4</span> <span style=color:#ae81ff>04</span>                <span style=color:#a6e22e>add</span>    <span style=color:#a6e22e>$0x4</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>esp</span>
+<span style=color:#ae81ff>1</span><span style=color:#a6e22e>d</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>5</span><span style=color:#a6e22e>d</span>                      <span style=color:#a6e22e>pop</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>1</span><span style=color:#a6e22e>e</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>c3</span>                      <span style=color:#a6e22e>ret</span>
+</code></pre></div></li>
+</ol>
+</li>
+<li>R_386_PC32
+<ol>
+<li><strong>What</strong> - Tells the linker to resolve the symbolic reference using the symbol’s relative offset to the current
+program counter (PC). The linker finds the offset of the referenced symbol, relative to the PC and hard-codes
+it in the corresponding assembly instruction. At run time, the processor looks at the <a href=https://c9x.me/x86/html/file_module_x86_id_26.html>call instruction’s
+encoding</a> and knows that the operand to the instruction represents the symbol’s offset to the PC.</li>
+<li><strong>When</strong> - Used to call functions in PIC.</li>
+<li><strong>Code</strong> -
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e>// Compile with =&gt; clang -m32 -ffunction-sections -c -o obj.o obj.c
+</span><span style=color:#75715e></span>
+ <span style=color:#75715e>// declare a global function x
+</span><span style=color:#75715e></span> <span style=color:#66d9ef>void</span> x {}
+
+ <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+     <span style=color:#75715e>// Compiler should generate a R_386_PC32 relocation here.  
+</span><span style=color:#75715e></span>     x();
+     <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+ }
+</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-as data-lang=as><span style=color:#ae81ff>00000000</span> <span style=color:#f92672>&lt;</span><span style=color:#a6e22e>x</span><span style=color:#f92672>&gt;:</span>
+<span style=color:#ae81ff>0</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>55</span>                      <span style=color:#a6e22e>push</span>   <span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>1</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>89</span> <span style=color:#a6e22e>e5</span>                   <span style=color:#a6e22e>mov</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>esp</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>3</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>5</span><span style=color:#a6e22e>d</span>                      <span style=color:#a6e22e>pop</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>4</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>c3</span>                      <span style=color:#a6e22e>ret</span>
+
+<span style=color:#ae81ff>00000000</span> <span style=color:#f92672>&lt;</span><span style=color:#a6e22e>main</span><span style=color:#f92672>&gt;:</span>
+<span style=color:#ae81ff>0</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>55</span>                      <span style=color:#a6e22e>push</span>   <span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>1</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>89</span> <span style=color:#a6e22e>e5</span>                   <span style=color:#a6e22e>mov</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>esp</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>3</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>83</span> <span style=color:#a6e22e>ec</span> <span style=color:#ae81ff>08</span>                <span style=color:#a6e22e>sub</span>    <span style=color:#a6e22e>$0x8</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>esp</span>
+<span style=color:#ae81ff>6</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>c7</span> <span style=color:#ae81ff>45</span> <span style=color:#a6e22e>fc</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    <span style=color:#a6e22e>movl</span>   <span style=color:#a6e22e>$0x0</span><span style=color:#f92672>,-</span><span style=color:#ae81ff>0x4</span>(<span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>)
+
+<span style=color:#75715e>// Compiler wants to call function x
+</span><span style=color:#75715e>// but doesn&#39;t know its address. So it leaves
+</span><span style=color:#75715e>// a TODO for the linker and temporarily uses garbage
+</span><span style=color:#75715e>// bytes as x&#39;s address.
+</span><span style=color:#75715e>//
+</span><span style=color:#75715e>// The linker will replace the garbage bytes 0xfffffffc
+</span><span style=color:#75715e>// with `offset =&gt; PC - address of x`.
+</span><span style=color:#75715e>// `e8` here tells the i386 processor that the operand
+</span><span style=color:#75715e>// is a PC relative offset and that the address of x needs
+</span><span style=color:#75715e>// to be computed using `PC + offset`
+</span><span style=color:#75715e></span><span style=color:#a6e22e>d</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>e8</span> <span style=color:#a6e22e>fc</span> <span style=color:#a6e22e>ff</span> <span style=color:#a6e22e>ff</span> <span style=color:#a6e22e>ff</span>          <span style=color:#a6e22e>call</span>   <span style=color:#a6e22e>e</span> <span style=color:#f92672>&lt;</span><span style=color:#a6e22e>main</span><span style=color:#f92672>+</span><span style=color:#ae81ff>0xe</span><span style=color:#f92672>&gt;</span>
+                        <span style=color:#a6e22e>e</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>R_386_PC32</span>   <span style=color:#a6e22e>x</span>
+
+<span style=color:#ae81ff>12</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>31</span> <span style=color:#a6e22e>c0</span>                   <span style=color:#a6e22e>xor</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>eax</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>eax</span>
+<span style=color:#ae81ff>14</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>83</span> <span style=color:#a6e22e>c4</span> <span style=color:#ae81ff>08</span>                <span style=color:#a6e22e>add</span>    <span style=color:#a6e22e>$0x8</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>esp</span>
+<span style=color:#ae81ff>17</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>5</span><span style=color:#a6e22e>d</span>                      <span style=color:#a6e22e>pop</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>18</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>c3</span>                      <span style=color:#a6e22e>ret</span>
+</code></pre></div></li>
+</ol>
+</li>
+</ol>
+<blockquote>
+<p>Another short detour to talk about dynamic linking because the remaining relocations are what enable dynamic linking.</p>
+<p>In static linking, if your program accesses even a single symbol from a given library, then that entire library is
+linked with your program, which among other issues, increases the size of the generated executable. For instance, let’s
+talk about that simple C program that just prints hello world again. With static linking, the executable that’s
+generated from your program is going to pull in the entire C standard library, because your program accessed the
+printf function.</p>
+<p>In dynamic linking, referenced libraries are accessed at build time but they are not brought into the linked
+executable. Instead, the referenced global variables from these libraries are linked at load time (when the program is
+loaded into memory, to be run) and referenced functions from these libraries are linked at invocation time.</p>
+<p>There’s pros and cons to both approaches, whose details I will not go into, but will cursorily mention below.</p>
+<ol>
+<li>
+<p>With static linking the only thing the user of your executable needs is the executable itself. They won’t run
+into issues of missing libraries.</p>
+</li>
+<li>
+<p>With dynamic linking you don’t need to update your executable, if the shared library is updated. This is
+especially useful if you are distributing your executable.</p>
+</li>
+<li>
+<p>Dynamic linking is just harder to implement than static linking.</p>
+</li>
+</ol>
+</blockquote>
+<blockquote>
+<p>If you’re not already familiar with the concepts of GOT and PLT, I also recommend you take yet another quick detour
+for some <a href=#what-are-got-and-plt>visual explanations</a>!</p>
+</blockquote>
+<ol start=3>
+<li>R_386_GOTPC -
+<ol>
+<li><strong>What</strong> - Tells the linker to replace the symbolic reference with the delta between the storage location, where
+the relocation has to be applied (or the fixup location) and the address of the GLOBAL_OFFSET_TABLE (GOT) symbol.</li>
+<li><strong>When</strong> - This relocation isn’t used in isolation. Rather it is an enabler for R_386_GOTOFF, R_386_GOT32 and
+R_386_PLT32, which need to use the memory address of the GOT.</li>
+<li><strong>Code</strong> -
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e>// Compile with =&gt; clang -m32 -fPIC -c -o obj.o obj.c
+</span><span style=color:#75715e></span>
+<span style=color:#75715e>// Declare a global static
+</span><span style=color:#75715e></span><span style=color:#66d9ef>static</span> <span style=color:#66d9ef>int</span> a <span style=color:#f92672>=</span> <span style=color:#ae81ff>42</span>;
+
+<span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+    <span style=color:#75715e>// Since we passed the `PIC` flag to Clang to
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// indicate that we want position independent code
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// Clang will generate code to access `a` using
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// the GOT.
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>return</span> a;
+}
+</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-as data-lang=as><span style=color:#ae81ff>00000000</span> <span style=color:#f92672>&lt;</span><span style=color:#a6e22e>main</span><span style=color:#f92672>&gt;:</span>
+<span style=color:#ae81ff>0</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>55</span>                      <span style=color:#a6e22e>push</span>   <span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>1</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>89</span> <span style=color:#a6e22e>e5</span>                   <span style=color:#a6e22e>mov</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>esp</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>3</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>50</span>                      <span style=color:#a6e22e>push</span>   <span style=color:#f92672>%</span><span style=color:#a6e22e>eax</span>
+
+<span style=color:#75715e>// This `call` instr is just telling the processor to
+</span><span style=color:#75715e>// push the next instr&#39;s address on the stack and jump to
+</span><span style=color:#75715e>// address 9. But 9 is the address of the next line. That&#39;s
+</span><span style=color:#75715e>// weird...
+</span><span style=color:#75715e></span><span style=color:#ae81ff>4</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>e8</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>          <span style=color:#a6e22e>call</span>   <span style=color:#ae81ff>9</span> <span style=color:#f92672>&lt;</span><span style=color:#a6e22e>main</span><span style=color:#f92672>+</span><span style=color:#ae81ff>0x9</span><span style=color:#f92672>&gt;</span>
+
+<span style=color:#75715e>// And now that we did jump to 9, all we did was pop 
+</span><span style=color:#75715e>// the value that was on the stack and store it in ebx.
+</span><span style=color:#75715e>// Wasn&#39;t the value on the stack just 9&#39;s address? Even 
+</span><span style=color:#75715e>// weirder...
+</span><span style=color:#75715e></span><span style=color:#ae81ff>9</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>58</span>                      <span style=color:#a6e22e>pop</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>ebx</span>
+
+<span style=color:#75715e>// Wait a minute. The compiler left a TODO here for the
+</span><span style=color:#75715e>// linker, to find the delta between the fixup location 
+</span><span style=color:#75715e>// and the address of the GOT. 
+</span><span style=color:#75715e>// 
+</span><span style=color:#75715e>// Ok, so if the address of the GOT was let&#39;s say 20, 
+</span><span style=color:#75715e>// then the linker will try to hardcode the value 
+</span><span style=color:#75715e>// `0x20-0xc =&gt; 0x14` and add it to the value in eax (0x9),
+</span><span style=color:#75715e>// which will give us `0x14 + 0x9 =&gt; 0x1d`. 
+</span><span style=color:#75715e>// 
+</span><span style=color:#75715e>// Ah, that&#39;s not the address of the GOT. Yes, but 
+</span><span style=color:#75715e>// `0x1d + 0x3 =&gt; 0x20` is. Well, where is the 3 coming from?
+</span><span style=color:#75715e>// The compiler helps us here, a bit. The address in eax isn&#39;t
+</span><span style=color:#75715e>// the address of the fixup location it&#39;s off by 0x3. So along
+</span><span style=color:#75715e>// with leaving us a TODO, the compiler also leaves us a reminder
+</span><span style=color:#75715e>// to add 0x3 to our delta calculation, in order to arrive at 
+</span><span style=color:#75715e>// the correct address of the GOT.
+</span><span style=color:#75715e></span><span style=color:#a6e22e>a</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>81</span> <span style=color:#a6e22e>c0</span> <span style=color:#ae81ff>03</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>       <span style=color:#a6e22e>add</span>    <span style=color:#a6e22e>$0x3</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>ebx</span>
+                     <span style=color:#a6e22e>c</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>R_386_GOTPC</span>  <span style=color:#a6e22e>_GLOBAL_OFFSET_TABLE_</span>
+<span style=color:#75715e>// Not super important what happens after the R_386_GOTPC
+</span><span style=color:#75715e>// relocation is resolved for now...
+</span></code></pre></div></li>
+</ol>
+</li>
+<li>R_386_GOTOFF -
+<ol>
+<li><strong>What</strong> - Tells the linker to resolve the symbolic reference with the offset between the symbol’s address and
+the address of the GOT’s base (computed and stored in a register when the R_386_GOTPC relocation is handled).</li>
+<li><strong>When</strong> - Used by shared libraries and executables to access internal symbols in a position independent way.</li>
+<li><strong>Code</strong> -
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e>// Compile with =&gt; clang -m32 -fPIC -c -o obj.o obj.c
+</span><span style=color:#75715e></span>
+<span style=color:#75715e>// Declare a global static
+</span><span style=color:#75715e></span><span style=color:#66d9ef>static</span> <span style=color:#66d9ef>int</span> a <span style=color:#f92672>=</span> <span style=color:#ae81ff>42</span>;
+
+<span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+   <span style=color:#75715e>// Since we passed the `PIC` flag to Clang to
+</span><span style=color:#75715e></span>   <span style=color:#75715e>// indicate that we want position independent code
+</span><span style=color:#75715e></span>   <span style=color:#75715e>// Clang will generate code to access `a` using
+</span><span style=color:#75715e></span>   <span style=color:#75715e>// the GOT.
+</span><span style=color:#75715e></span>   <span style=color:#66d9ef>return</span> a;
+}
+</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-as data-lang=as><span style=color:#ae81ff>00000000</span> <span style=color:#f92672>&lt;</span><span style=color:#a6e22e>main</span><span style=color:#f92672>&gt;:</span>
+<span style=color:#ae81ff>0</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>55</span>                      <span style=color:#a6e22e>push</span>   <span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>1</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>89</span> <span style=color:#a6e22e>e5</span>                   <span style=color:#a6e22e>mov</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>esp</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>3</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>50</span>                      <span style=color:#a6e22e>push</span>   <span style=color:#f92672>%</span><span style=color:#a6e22e>eax</span>
+<span style=color:#ae81ff>4</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>e8</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>          <span style=color:#a6e22e>call</span>   <span style=color:#ae81ff>9</span> <span style=color:#f92672>&lt;</span><span style=color:#a6e22e>main</span><span style=color:#f92672>+</span><span style=color:#ae81ff>0x9</span><span style=color:#f92672>&gt;</span>
+<span style=color:#ae81ff>9</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>58</span>                      <span style=color:#a6e22e>pop</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>eax</span>
+
+<span style=color:#75715e>// We saw above how the R_386_GOTPC relocation gets resolved
+</span><span style=color:#75715e>// and that the ebx register contains the address of the 
+</span><span style=color:#75715e>// GOT after the relocation is resolved.
+</span><span style=color:#75715e></span><span style=color:#a6e22e>a</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>81</span> <span style=color:#a6e22e>c0</span> <span style=color:#ae81ff>03</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>       <span style=color:#a6e22e>add</span>    <span style=color:#a6e22e>$0x3</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>ebx</span>
+                    <span style=color:#a6e22e>c</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>R_386_GOTPC</span>  <span style=color:#a6e22e>_GLOBAL_OFFSET_TABLE_</span>
+
+<span style=color:#ae81ff>10</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>c7</span> <span style=color:#ae81ff>45</span> <span style=color:#a6e22e>fc</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    <span style=color:#a6e22e>movl</span>   <span style=color:#a6e22e>$0x0</span><span style=color:#f92672>,-</span><span style=color:#ae81ff>0x4</span>(<span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>)
+
+<span style=color:#75715e>// Compiler wants to access `a`, but since we told it
+</span><span style=color:#75715e>// to generate position-independent code, it generates access
+</span><span style=color:#75715e>// to `a` using the GOT and leaves a TODO for the linker to find
+</span><span style=color:#75715e>// the offset of `a` from the base of the GOT.
+</span><span style=color:#75715e>//
+</span><span style=color:#75715e>// The linker already knows the address of the base of the GOT
+</span><span style=color:#75715e>// at this point - it&#39;s stored in ebx. It computes the address of
+</span><span style=color:#75715e>// `a` and fixes up the 4 bytes after `0x8b 0x80`, to store the
+</span><span style=color:#75715e>// offset between `a` and the GOT&#39;s base.
+</span><span style=color:#75715e></span><span style=color:#ae81ff>17</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>8</span><span style=color:#a6e22e>b</span> <span style=color:#ae81ff>80</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>       <span style=color:#a6e22e>mov</span>    <span style=color:#ae81ff>0x0</span>(<span style=color:#f92672>%</span><span style=color:#a6e22e>ebx</span>)<span style=color:#f92672>,%</span><span style=color:#a6e22e>eax</span>
+                    <span style=color:#ae81ff>19</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>R_386_GOTOFF</span>        <span style=color:#a6e22e>a</span>
+
+<span style=color:#ae81ff>1</span><span style=color:#a6e22e>d</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>83</span> <span style=color:#a6e22e>c4</span> <span style=color:#ae81ff>04</span>                <span style=color:#a6e22e>add</span>    <span style=color:#a6e22e>$0x4</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>esp</span>
+<span style=color:#ae81ff>20</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>5</span><span style=color:#a6e22e>d</span>                      <span style=color:#a6e22e>pop</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>21</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>c3</span>                      <span style=color:#a6e22e>ret</span>
+</code></pre></div></li>
+</ol>
+</li>
+<li>R_386_GOT32
+<ol>
+<li><strong>What</strong> - Tells the linker to resolve the symbolic reference with the offset between the address of the GOT’s
+base and the symbol’s entry in the GOT (essentially computing an index into the GOT).</li>
+<li><strong>When</strong> - Used by shared libraries and executable to access external data symbols in a position independent way.</li>
+<li><strong>Code</strong> -
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e>// Compile with =&gt; clang -m32 -fPIC -c -o obj.o obj.c
+</span><span style=color:#75715e></span>
+<span style=color:#75715e>// Declaring that `a` is defined externally.
+</span><span style=color:#75715e></span><span style=color:#66d9ef>extern</span> <span style=color:#66d9ef>int</span> a;
+
+<span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+    <span style=color:#75715e>// Since we passed the `PIC` flag to Clang to
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// indicate that we want position independent code
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// Clang will generate code to access `a` using
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// the GOT.
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>return</span> a;
+}
+</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-as data-lang=as><span style=color:#ae81ff>00000000</span> <span style=color:#f92672>&lt;</span><span style=color:#a6e22e>main</span><span style=color:#f92672>&gt;:</span>
+<span style=color:#ae81ff>0</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>55</span>                      <span style=color:#a6e22e>push</span>   <span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>1</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>89</span> <span style=color:#a6e22e>e5</span>                   <span style=color:#a6e22e>mov</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>esp</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>3</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>50</span>                      <span style=color:#a6e22e>push</span>   <span style=color:#f92672>%</span><span style=color:#a6e22e>eax</span>
+<span style=color:#ae81ff>4</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>e8</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>          <span style=color:#a6e22e>call</span>   <span style=color:#ae81ff>9</span> <span style=color:#f92672>&lt;</span><span style=color:#a6e22e>main</span><span style=color:#f92672>+</span><span style=color:#ae81ff>0x9</span><span style=color:#f92672>&gt;</span>
+<span style=color:#ae81ff>9</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>59</span>                      <span style=color:#a6e22e>pop</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>ecx</span>
+
+<span style=color:#75715e>// We saw above how the R_386_GOTPC relocation gets resolved
+</span><span style=color:#75715e>// and that the ebx register contains the address of the
+</span><span style=color:#75715e>// GOT after the relocation is resolved.
+</span><span style=color:#75715e></span><span style=color:#a6e22e>a</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>81</span> <span style=color:#a6e22e>c1</span> <span style=color:#ae81ff>03</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>       <span style=color:#a6e22e>add</span>    <span style=color:#a6e22e>$0x3</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>ebx</span>
+         <span style=color:#a6e22e>c</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>R_386_GOTPC</span>  <span style=color:#a6e22e>_GLOBAL_OFFSET_TABLE_</span>
+
+<span style=color:#ae81ff>10</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>c7</span> <span style=color:#ae81ff>45</span> <span style=color:#a6e22e>fc</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    <span style=color:#a6e22e>movl</span>   <span style=color:#a6e22e>$0x0</span><span style=color:#f92672>,-</span><span style=color:#ae81ff>0x4</span>(<span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>)
+
+<span style=color:#75715e>// Compiler wants to access `a`, but since we told it to
+</span><span style=color:#75715e>// generate position-independent code, it generates access to
+</span><span style=color:#75715e>// `a` using the GOT and leaves a TODO for the linker to find
+</span><span style=color:#75715e>// the offset of `a`&#39;s GOT entry from the base of the GOT.
+</span><span style=color:#75715e>//
+</span><span style=color:#75715e>// `a` got a GOT entry because we did not define it internally
+</span><span style=color:#75715e>// and the compiler thinks that it will either come from another
+</span><span style=color:#75715e>// source file or a shared library.
+</span><span style=color:#75715e>//
+</span><span style=color:#75715e>// The linker already knows the address of the base of the GOT
+</span><span style=color:#75715e>// at this point - it&#39;s stored in ebx. It finds the address of
+</span><span style=color:#75715e>// `a`&#39;s GOT entry and fixes up the 4 bytes after `0x8b 0x81`,
+</span><span style=color:#75715e>// to store the offset between `a`&#39;s GOT entry and the GOT&#39;s base.
+</span><span style=color:#75715e></span><span style=color:#ae81ff>17</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>8</span><span style=color:#a6e22e>b</span> <span style=color:#ae81ff>81</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>       <span style=color:#a6e22e>mov</span>    <span style=color:#ae81ff>0x0</span>(<span style=color:#f92672>%</span><span style=color:#a6e22e>ebx</span>)<span style=color:#f92672>,%</span><span style=color:#a6e22e>eax</span>
+                     <span style=color:#ae81ff>19</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>R_386_GOT32</span>        <span style=color:#a6e22e>a</span>
+
+<span style=color:#75715e>// eax, at this point contains `a`&#39;s address, which is dereferenced
+</span><span style=color:#75715e>// in this mov instruction and stored into eax itself.
+</span><span style=color:#75715e></span><span style=color:#ae81ff>1</span><span style=color:#a6e22e>d</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>8</span><span style=color:#a6e22e>b</span> <span style=color:#ae81ff>00</span>                   <span style=color:#a6e22e>mov</span>    (<span style=color:#f92672>%</span><span style=color:#a6e22e>eax</span>)<span style=color:#f92672>,%</span><span style=color:#a6e22e>eax</span>                        
+<span style=color:#ae81ff>1</span><span style=color:#a6e22e>f</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>83</span> <span style=color:#a6e22e>c4</span> <span style=color:#ae81ff>04</span>                <span style=color:#a6e22e>add</span>    <span style=color:#a6e22e>$0x4</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>esp</span>
+<span style=color:#ae81ff>22</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>5</span><span style=color:#a6e22e>d</span>                      <span style=color:#a6e22e>pop</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>
+<span style=color:#ae81ff>23</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>c3</span>                      <span style=color:#a6e22e>ret</span>
+</code></pre></div></li>
+</ol>
+</li>
+<li>R_386_PLT32
+<ol>
+<li><strong>What</strong> - Tells the linker to resolve the symbolic reference with the symbol’s PLT entry.</li>
+<li><strong>When</strong> - Used by shared libraries and executables to access external function symbols in a
+position-independent way.</li>
+<li><strong>Code</strong> -</li>
+</ol>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e>// Compile with =&gt; clang -m32 -fPIC -c -o obj.o obj.c
+</span><span style=color:#75715e></span>
+<span style=color:#75715e>// Declaring that `foo` is a function defined externally.
+</span><span style=color:#75715e></span><span style=color:#66d9ef>extern</span> <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>foo</span>(<span style=color:#66d9ef>void</span>);
+
+<span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>(<span style=color:#66d9ef>void</span>) {
+    <span style=color:#75715e>// Since we passed the `PIC` flag to Clang to
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// indicate that we want position independent code
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// Clang will generate code to access `foo` using
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// the PLT.
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>return</span> foo();
+}
+</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-as data-lang=as> <span style=color:#ae81ff>00000000</span> <span style=color:#f92672>&lt;</span><span style=color:#a6e22e>main</span><span style=color:#f92672>&gt;:</span>
+ <span style=color:#ae81ff>0</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>55</span>                      <span style=color:#a6e22e>push</span>   <span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>
+ <span style=color:#ae81ff>1</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>89</span> <span style=color:#a6e22e>e5</span>                   <span style=color:#a6e22e>mov</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>esp</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>ebp</span>
+ <span style=color:#ae81ff>3</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>53</span>                      <span style=color:#a6e22e>push</span>   <span style=color:#f92672>%</span><span style=color:#a6e22e>ebx</span>
+ <span style=color:#ae81ff>4</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>50</span>                      <span style=color:#a6e22e>push</span>   <span style=color:#f92672>%</span><span style=color:#a6e22e>eax</span>
+ <span style=color:#ae81ff>5</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>e8</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>          <span style=color:#a6e22e>call</span>   <span style=color:#a6e22e>a</span> <span style=color:#f92672>&lt;</span><span style=color:#a6e22e>main</span><span style=color:#f92672>+</span><span style=color:#ae81ff>0xa</span><span style=color:#f92672>&gt;</span>
+ <span style=color:#a6e22e>a</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>5</span><span style=color:#a6e22e>b</span>                      <span style=color:#a6e22e>pop</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>ebx</span>
+
+ <span style=color:#75715e>// We saw above how the R_386_GOTPC relocation gets resolved
+</span><span style=color:#75715e></span> <span style=color:#75715e>// and that the ebx register contains the address of the 
+</span><span style=color:#75715e></span> <span style=color:#75715e>// GOT after the relocation is resolved.
+</span><span style=color:#75715e></span> <span style=color:#a6e22e>b</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>81</span> <span style=color:#a6e22e>c3</span> <span style=color:#ae81ff>03</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>       <span style=color:#a6e22e>add</span>    <span style=color:#a6e22e>$0x3</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>ebx</span>
+                      <span style=color:#a6e22e>d</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>R_386_GOTPC</span>  <span style=color:#a6e22e>_GLOBAL_OFFSET_TABLE_</span>
+
+ <span style=color:#ae81ff>11</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>c7</span> <span style=color:#ae81ff>45</span> <span style=color:#a6e22e>f8</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span> <span style=color:#ae81ff>00</span>    <span style=color:#a6e22e>movl</span>   <span style=color:#a6e22e>$0x0</span><span style=color:#f92672>,-</span><span style=color:#ae81ff>0x8</span>(<span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>)
+
+ <span style=color:#75715e>// Compiler wants to access `foo`, but since we told it to
+</span><span style=color:#75715e></span> <span style=color:#75715e>// generate position-independent code, it generates access to
+</span><span style=color:#75715e></span> <span style=color:#75715e>// `foo` using its PLT entry and leaves a TODO for the linker to
+</span><span style=color:#75715e></span> <span style=color:#75715e>// find `foo`&#39;s PLT entry address.
+</span><span style=color:#75715e></span> <span style=color:#75715e>//
+</span><span style=color:#75715e></span> <span style=color:#75715e>// The PLT machinery was explained here!
+</span><span style=color:#75715e></span> <span style=color:#ae81ff>18</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>e8</span> <span style=color:#a6e22e>fc</span> <span style=color:#a6e22e>ff</span> <span style=color:#a6e22e>ff</span> <span style=color:#a6e22e>ff</span>          <span style=color:#a6e22e>call</span>   <span style=color:#ae81ff>19</span> <span style=color:#f92672>&lt;</span><span style=color:#a6e22e>main</span><span style=color:#f92672>+</span><span style=color:#ae81ff>0x19</span><span style=color:#f92672>&gt;</span>
+                      <span style=color:#ae81ff>19</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>R_386_PLT32</span>    <span style=color:#a6e22e>foo</span>
+ <span style=color:#ae81ff>1</span><span style=color:#a6e22e>d</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>83</span> <span style=color:#a6e22e>c4</span> <span style=color:#ae81ff>04</span>                <span style=color:#a6e22e>add</span>    <span style=color:#a6e22e>$0x4</span><span style=color:#f92672>,%</span><span style=color:#a6e22e>esp</span>
+ <span style=color:#ae81ff>20</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>5</span><span style=color:#a6e22e>b</span>                      <span style=color:#a6e22e>pop</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>ebx</span>
+ <span style=color:#ae81ff>21</span><span style=color:#f92672>:</span>   <span style=color:#ae81ff>5</span><span style=color:#a6e22e>d</span>                      <span style=color:#a6e22e>pop</span>    <span style=color:#f92672>%</span><span style=color:#a6e22e>ebp</span>
+ <span style=color:#ae81ff>22</span><span style=color:#f92672>:</span>   <span style=color:#a6e22e>c3</span>                      <span style=color:#a6e22e>ret</span>
+</code></pre></div></li>
+</ol>
+<h2 id=testing>Testing</h2>
+<p>While I did talk about setting up a “test loop” earlier, here I want to briefly touch upon the topic of regression
+tests &ndash; not so much upon the “why” and the “what”, but the “how”. There’s some excellent testing utilities already
+available in the LLVM project, but I found related documentation to be lagging. Specifically, I want to focus on the
+utilities that one might interact with for writing a regression test for one of LLVM JITLink’s target-object backend.</p>
+<p>Before we go ahead, I want to mention this high level <a href=https://llvm.org/docs/TestingGuide.html#writing-new-regression-tests>testing guide</a>
+for LLVM. The guide should get you to the point where you know where/how to create a test file, how to make your tests
+discoverable by the test runner (LLVM Integration Tester - lit) and how to run the tests using the test runner.</p>
+<p>That said, let’s use the sample test file below, to talk about the utilities that you might use for writing a regression
+test for one of LLVM JITLink’s target-object backend.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-as data-lang=as><span style=color:#75715e>// Regression test files are assembly files (&#34;.s&#34; extension).
+</span><span style=color:#75715e></span>
+<span style=color:#75715e>// The files must begin with what are known as &#34;RUN&#34; lines.
+</span><span style=color:#75715e>// Each &#34;RUN” line tells lit how to run the test file.
+</span><span style=color:#75715e>// RUN lines look and feel like you were running shell commands.
+</span><span style=color:#75715e></span>
+<span style=color:#75715e>// Each regression test will likely begin with the following
+</span><span style=color:#75715e>// two RUN lines, although the exact RUN command may need to be
+</span><span style=color:#75715e>// modified, based on the test cases need.
+</span><span style=color:#75715e></span>
+<span style=color:#960050;background-color:#1e0010>#</span> <span style=color:#a6e22e>RUN</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>llvm</span><span style=color:#f92672>-</span><span style=color:#a6e22e>mc</span> <span style=color:#f92672>-</span><span style=color:#a6e22e>triple</span><span style=color:#f92672>=</span><span style=color:#a6e22e>i386</span><span style=color:#f92672>-</span><span style=color:#a6e22e>unknown</span><span style=color:#f92672>-</span><span style=color:#a6e22e>linux</span><span style=color:#f92672>-</span><span style=color:#a6e22e>gnu</span> <span style=color:#f92672>-</span><span style=color:#a6e22e>position</span><span style=color:#f92672>-</span><span style=color:#a6e22e>independent</span> <span style=color:#f92672>-</span><span style=color:#a6e22e>filetype</span><span style=color:#f92672>=</span><span style=color:#a6e22e>obj</span> <span style=color:#f92672>-</span><span style=color:#a6e22e>o</span> <span style=color:#f92672>%</span><span style=color:#a6e22e>t</span>.<span style=color:#a6e22e>o</span> <span style=color:#f92672>%</span><span style=color:#a6e22e>s</span>
+
+<span style=color:#75715e>// Notice how llvm-jitlink is run with the &#34;-noexec&#34; option.
+</span><span style=color:#75715e>// The option tells llvm-jitlink to not run the code loaded
+</span><span style=color:#75715e>// to memory. This is important because JITLink may be linking
+</span><span style=color:#75715e>// and loading code for an architecture different from the one
+</span><span style=color:#75715e>// where the regression test is running in LLVM&#39;s build/release
+</span><span style=color:#75715e>// pipeline.
+</span><span style=color:#75715e></span><span style=color:#960050;background-color:#1e0010>#</span> <span style=color:#a6e22e>RUN</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>llvm</span><span style=color:#f92672>-</span><span style=color:#a6e22e>jitlink</span> <span style=color:#f92672>-</span><span style=color:#a6e22e>noexec</span> <span style=color:#f92672>%</span><span style=color:#a6e22e>t</span>.<span style=color:#a6e22e>o</span>
+
+<span style=color:#75715e>// llvm-jitlink also requires each file to have a &#34;main&#34; function.
+</span><span style=color:#75715e>// Your test code can go here, but it doesn&#39;t have to.
+</span><span style=color:#75715e></span>.<span style=color:#a6e22e>text</span>
+.<span style=color:#a6e22e>globl</span>  <span style=color:#a6e22e>main</span>
+.<span style=color:#a6e22e>p2align</span>        <span style=color:#ae81ff>4</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>0x90</span>
+.<span style=color:#a6e22e>type</span>   <span style=color:#a6e22e>main</span><span style=color:#f92672>,</span><span style=color:#960050;background-color:#1e0010>@</span><span style=color:#66d9ef>function</span>
+<span style=color:#a6e22e>main</span><span style=color:#f92672>:</span>
+    <span style=color:#a6e22e>ret</span>
+.<span style=color:#a6e22e>size</span>   <span style=color:#a6e22e>main</span><span style=color:#f92672>,</span> .<span style=color:#f92672>-</span><span style=color:#a6e22e>main</span>
+</code></pre></div><p>The main thing that we want to determine in these target-object backend regression tests is whether the relocations in
+the code emitted to memory were fixed up correctly. Meaning, we have to literally check whether certain bytes in certain
+memory locations are what we expect them to be. Let’s look at some more intricate test cases that will show the
+different kinds of checks we might need to perform and how we can perform them.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-as data-lang=as><span style=color:#75715e>// llvm-jitlink allows you to specify jitlink-check expressions.
+</span><span style=color:#75715e>// jit-link check expressions are checks against working memory.
+</span><span style=color:#75715e></span>
+<span style=color:#75715e>// jit-link check expressions can be used with the `decode_operand` function.
+</span><span style=color:#75715e>// `decode_operand` decodes the instruction at the given label
+</span><span style=color:#75715e>// and then accesses the operand number that you have specified.
+</span><span style=color:#75715e>//
+</span><span style=color:#75715e>// For the expression below, decode operand decodes the operand at the
+</span><span style=color:#75715e>// label `foo`, accesses its 0th operand `external_data` and checks whether
+</span><span style=color:#75715e>// its value is equal to the bytes represented by `0xDEADBEEF`.
+</span><span style=color:#75715e>//
+</span><span style=color:#75715e>// Note - The operand number does not always have a one-to-one mapping
+</span><span style=color:#75715e>// with what you see and while in this case `external_data` was indeed the
+</span><span style=color:#75715e>// 0th operand of the instruction, for another instruction its operand
+</span><span style=color:#75715e>// number may have been different.
+</span><span style=color:#75715e></span><span style=color:#960050;background-color:#1e0010>#</span> <span style=color:#a6e22e>jitlink</span><span style=color:#f92672>-</span><span style=color:#a6e22e>check</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>decode_operand</span>(<span style=color:#a6e22e>foo</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>0</span>) <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span><span style=color:#a6e22e>xDEADBEEF</span>
+     .<span style=color:#a6e22e>globl</span> <span style=color:#a6e22e>foo</span> 
+    .<span style=color:#a6e22e>p2align</span> <span style=color:#ae81ff>4</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>0x90</span>
+    .<span style=color:#a6e22e>type</span> <span style=color:#a6e22e>foo</span><span style=color:#f92672>,</span><span style=color:#960050;background-color:#1e0010>@</span><span style=color:#66d9ef>function</span>
+<span style=color:#a6e22e>foo</span><span style=color:#f92672>:</span>
+    <span style=color:#a6e22e>movl</span> <span style=color:#a6e22e>external_data</span><span style=color:#f92672>,</span> <span style=color:#f92672>%</span><span style=color:#a6e22e>eax</span>
+.<span style=color:#a6e22e>size</span> <span style=color:#a6e22e>foo</span><span style=color:#f92672>,</span> .<span style=color:#f92672>-</span><span style=color:#a6e22e>foo</span>
+
+
+<span style=color:#75715e>// The RHS of jitlink-check expressions doesn&#39;t have to be literal
+</span><span style=color:#75715e>// bytes. It can be an expression of labels and other functions over
+</span><span style=color:#75715e>// labels.
+</span><span style=color:#75715e>//
+</span><span style=color:#75715e>// In the below jitlink-check expression, the RHS
+</span><span style=color:#75715e>// is calculating the difference between the address of the label
+</span><span style=color:#75715e>// `foo` and the address of the program counter when the instruction at label
+</span><span style=color:#75715e>// `bar` is executed.
+</span><span style=color:#75715e></span><span style=color:#960050;background-color:#1e0010>#</span> <span style=color:#a6e22e>jitlink</span><span style=color:#f92672>-</span><span style=color:#a6e22e>check</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>decode_operand</span>(<span style=color:#a6e22e>bar</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>0</span>) <span style=color:#f92672>=</span> <span style=color:#a6e22e>foo</span> <span style=color:#f92672>-</span> <span style=color:#a6e22e>next_pc</span>(<span style=color:#a6e22e>bar</span>)
+     .<span style=color:#a6e22e>globl</span> <span style=color:#a6e22e>bar</span>
+    .<span style=color:#a6e22e>p2align</span> <span style=color:#ae81ff>4</span>
+    .<span style=color:#a6e22e>type</span> <span style=color:#a6e22e>bar</span><span style=color:#f92672>,</span><span style=color:#960050;background-color:#1e0010>@</span><span style=color:#66d9ef>function</span>
+<span style=color:#a6e22e>bar</span><span style=color:#f92672>:</span>
+    <span style=color:#a6e22e>calll</span> <span style=color:#a6e22e>foo</span>
+.<span style=color:#a6e22e>size</span> <span style=color:#a6e22e>bar</span><span style=color:#f92672>,</span> .<span style=color:#f92672>-</span><span style=color:#a6e22e>bar</span>
+
+<span style=color:#75715e>// The `got_addr`function can also be used on the RHS, to access the
+</span><span style=color:#75715e>// address of the GOT entry of a symbol.
+</span><span style=color:#75715e>//
+</span><span style=color:#75715e>// In the below jitlink-check expression, the RHS is calculating the
+</span><span style=color:#75715e>// offset between the GOT entry for the symbol `named_data` and the
+</span><span style=color:#75715e>// GOT symbol itself.
+</span><span style=color:#75715e></span><span style=color:#960050;background-color:#1e0010>#</span> <span style=color:#a6e22e>jitlink</span><span style=color:#f92672>-</span><span style=color:#a6e22e>check</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>decode_operand</span>(<span style=color:#a6e22e>test_got</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>4</span>) <span style=color:#f92672>=</span> <span style=color:#a6e22e>got_addr</span>(<span style=color:#a6e22e>test_file_name</span>.<span style=color:#a6e22e>o</span><span style=color:#f92672>,</span> <span style=color:#a6e22e>named_data</span>) <span style=color:#f92672>-</span> <span style=color:#a6e22e>_GLOBAL_OFFSET_TABLE_</span>
+     .<span style=color:#a6e22e>globl</span> <span style=color:#a6e22e>test_got</span>
+     .<span style=color:#a6e22e>p2align</span> <span style=color:#ae81ff>4</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>0x90</span>
+     .<span style=color:#a6e22e>type</span> <span style=color:#a6e22e>test_got</span><span style=color:#f92672>,</span><span style=color:#960050;background-color:#1e0010>@</span><span style=color:#66d9ef>function</span>
+<span style=color:#a6e22e>test_got</span><span style=color:#f92672>:</span>
+    <span style=color:#a6e22e>leal</span> <span style=color:#a6e22e>named_data</span><span style=color:#960050;background-color:#1e0010>@</span><span style=color:#a6e22e>GOT</span><span style=color:#f92672>,</span> <span style=color:#f92672>%</span><span style=color:#a6e22e>eax</span>
+.<span style=color:#a6e22e>size</span> <span style=color:#a6e22e>test_got</span><span style=color:#f92672>,</span> .<span style=color:#f92672>-</span><span style=color:#a6e22e>test_got</span>
+
+<span style=color:#75715e>// The LHS of a jitlink-check expression, can also be constructed manually
+</span><span style=color:#75715e>// by &#34;casting&#34; a symbol, label or a function over a label to a machine register
+</span><span style=color:#75715e>// size pointer.
+</span><span style=color:#75715e>//
+</span><span style=color:#75715e>// In the below jitlink-check expression the LHS is constructed by casting the
+</span><span style=color:#75715e>// address of the GOT entry for `named_data` to a 32-bit pointer. The constructed
+</span><span style=color:#75715e>// pointer is then dereferenced and compared against the `named_data` label.
+</span><span style=color:#75715e></span><span style=color:#960050;background-color:#1e0010>#</span> <span style=color:#a6e22e>jitlink</span><span style=color:#f92672>-</span><span style=color:#a6e22e>check</span><span style=color:#f92672>:</span> <span style=color:#f92672>*</span>{<span style=color:#ae81ff>4</span>}(<span style=color:#a6e22e>got_addr</span>(<span style=color:#a6e22e>test_file_name</span>.<span style=color:#a6e22e>o</span><span style=color:#f92672>,</span> <span style=color:#a6e22e>named_data</span>)) <span style=color:#f92672>=</span> <span style=color:#a6e22e>named_data</span>
+    .<span style=color:#a6e22e>globl</span> <span style=color:#a6e22e>test_got</span>
+    .<span style=color:#a6e22e>p2align</span> <span style=color:#ae81ff>4</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>0x90</span>
+    .<span style=color:#a6e22e>type</span> <span style=color:#a6e22e>test_got</span><span style=color:#f92672>,</span><span style=color:#960050;background-color:#1e0010>@</span><span style=color:#66d9ef>function</span>
+<span style=color:#a6e22e>test_got</span><span style=color:#f92672>:</span>
+    <span style=color:#a6e22e>leal</span> <span style=color:#a6e22e>named_data</span><span style=color:#960050;background-color:#1e0010>@</span><span style=color:#a6e22e>GOT</span><span style=color:#f92672>,</span> <span style=color:#f92672>%</span><span style=color:#a6e22e>eax</span>
+.<span style=color:#a6e22e>size</span> <span style=color:#a6e22e>test_got</span><span style=color:#f92672>,</span> .<span style=color:#f92672>-</span><span style=color:#a6e22e>test_got</span>
+
+
+<span style=color:#75715e>// NOTE - The above presented flavors of jitlink-check expressions is not an
+</span><span style=color:#75715e>// exhaustive list of what&#39;s available. Rather it&#39;s just a summarization of some
+</span><span style=color:#75715e>// of the ways in which I used jitlink-check expressions.
+</span></code></pre></div><h2 id=recap-and-conveniences>Recap and conveniences</h2>
+<p>We covered a lot of ground there. Let’s quickly recap the things we talked about.</p>
+<ol>
+<li>We established the context required to understand the project. We defined basic concepts - linking and JIT
+linking, and talked about the need for JIT linking and LLVM JITLink.</li>
+<li>We established an understanding of what the project was.</li>
+<li>We went over the execution details of the project. We talked about important high level constructs, the high level JIT linking algorithm used by LLVM JITLink, setting up a testing loop for constant feedback and the details of each relocation that was added as part of the i386/ELF backend.</li>
+<li>Finally, we talked about the tools and utilities that can be used to write regression tests for the project.</li>
+</ol>
+<h3 id=resources>Resources</h3>
+<p>Below is an index of resources that I found useful (I may have mentioned them elsewhere in the post as well).</p>
+<ol>
+<li><a href="https://www.youtube.com/playlist?list=PLhy9gU5W1fvUND_5mdpbNVHC1WCIaABbP">Chris Kanich’s videos</a> for the systems programming course at University of Illinois, Chicago</li>
+<li>Lang Hames' videos (<a href="https://www.youtube.com/watch?v=hILdR8XRvdQ&t=2577s">1</a>, <a href="https://www.youtube.com/watch?v=MOQG5vkh9J8">2</a>, and <a href="https://www.youtube.com/watch?v=i-inxFudrgI&t=2243s">3</a>) on LLVM ORC APIs and JITLink. These
+videos were extremely valuable in understanding JITLink&rsquo;s raison d&rsquo;être and the context in which it is used.</li>
+<li>Linkers and Loaders by John R. Levine</li>
+<li><a href=https://docs.oracle.com/cd/E23824_01/html/819-0690/toc.html>Oracle’s Linker and Libraries guide</a></li>
+<li><a href=https://llvm.org/docs/JITLink.html>LLVM JITLink documentation</a></li>
+<li><a href=https://llvm.org/docs/TestingGuide.html>LLVM testing infrastructure guide</a></li>
+<li>Articles by Eli Bendersky on <a href=https://eli.thegreenplace.net/2011/11/03/position-independent-code-pic-in-shared-libraries/#id14>position-independent code</a> and <a href=https://eli.thegreenplace.net/2011/08/25/load-time-relocation-of-shared-libraries>load time relocation of shared
+libraries</a>.</li>
+</ol>
+<h3 id=development-conveniences>Development conveniences</h3>
+<ol>
+<li><strong>Dev setup</strong>
+<ol>
+<li>There’s detailed information about that on the <a href=https://llvm.org/docs/GettingStarted.html>getting started with LLVM page</a>.</li>
+<li>If you’re okay using AWS EC2 for development you can create an instance using my public machine image.
+<ol>
+<li>The image id is ami-00f1c534fe06c05a0. You can use the instructions <a href=https://aws.amazon.com/premiumsupport/knowledge-center/launch-instance-custom-ami/>here</a> to boot your instance using
+this image.</li>
+<li>The instance comes with all the basic tools and softwares that you need to start contributing to LLVM - Clang, CMake, Python, zlib, ninja, git, php, arc.</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><strong>Build system</strong>
+<ol>
+<li>Use <code>ninja</code>! It is way faster than <code>make</code>.</li>
+<li>If you want to build a <code>llvm-jitlink</code> binary, which you likely will for testing, just run <code>ninja llvm-jitlink</code>
+from your build folder’s root. This will avoid building other targets that you do not need and will complete much faster.</li>
+<li>Other than that I’m going to refrain from saying too much here because one’s build system configuration rarely works on another’s machine.</li>
+</ol>
+</li>
+<li><strong>Files you will be dealing with</strong>
+<ol>
+<li>You’ll likely be dealing with files under <a href=https://github.com/llvm/llvm-project/tree/main/llvm/lib/ExecutionEngine/JITLink>llvm/lib/ExecutionEngine/JITLink</a>.</li>
+<li>The introductory commit for the <a href=https://github.com/llvm/llvm-project/commit/29fe204b4e87dcd78bebd40df512e8017dffea8f>i386/ELF</a> and <a href=https://github.com/llvm/llvm-project/commit/2ed91da0f1f312aedcfa01786fe991e33c6cf1fe>AArch64/ELF</a> backends will give
+you a very good idea of what a
+minimal backend implementation looks like. Keep in mind that these first commits are for backends for an existing object format (ELF in this case). If you are adding support for a backend without an existing object format, you might need to ask for help (more on that in a bit).</li>
+</ol>
+</li>
+<li><strong>Code reviews</strong>
+<ol>
+<li>Install <a href=https://secure.phabricator.com/book/phabricator/article/arcanist_quick_start/>arcanist</a> - the tool for creating code reviews when contributing to LLVM.</li>
+<li>Once installed the main commands you will be using are (assuming you are using git as your version control) -
+<ol>
+<li>arc diff - To create code reviews and new revisions.</li>
+<li>arc land - To close code reviews once they are approved and push changes to remote.</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><strong>Asking for help</strong>
+<ol>
+<li><a href=https://discord.gg/9v3CBuKpbx>#jit</a> channel of the LLVM discord server.</li>
+</ol>
+</li>
+</ol>
+<h2 id=closing-thoughts>Closing thoughts</h2>
+<p>And that’s about it! I don’t have too much more to say on top of what’s already been said. It was a great learning
+experience contributing to LLVM JITLink. I’d recommend it to anyone who wants to understand the story after compilation
+and up until a program is run - come say hi on the #jit channel of the LLVM discord server!</p>
+<p>I’d also like to give a big shout out to the folks on the #jit channel for helping me understand things and answering my
+questions. And a special thanks to <a href=https://github.com/lhames>Lang Hames</a> for his help throughout the project and
+reviewing this post (thanks to <a href=https://github.com/weliveindetail>Stefan Gränitz</a> and <a href=https://github.com/vgvassilev>Vassil Vassilev</a>
+for reviewing as well)!</p>
+<p>I plan on continuing my involvement with LLVM and JITLink, and am excited to see what I pick up next!</p>
+<h2 id=appendix>Appendix</h2>
+<h3 id=what-are-got-and-plt>What are GOT and PLT?</h3>
+<p>The GLOBAL_OFFSET_TABLE (GOT) and PROCEDURE_LINKAGE_TABLE (PLT) are 2 tables used during the linking process that
+make dynamic linking work. Dynamically linked code needs to be position-independent<sup id=fnref:6><a href=#fn:6 class=footnote-ref role=doc-noteref>6</a></sup>, meaning that it should be
+able to be loaded at any address in memory and continue to work - all symbols that it references and all referenced
+symbols that it contains, must be resolvable. Dynamically linked shared libraries can fulfill this position independence
+requirement for internal symbols using pc-relative addressing, as the code of the shared libraries stays together in
+memory. However, these libraries may also refer to external symbols or contain symbols, referenced by other shared
+libraries or the main executable. And since the load address of shared libraries, in memory, is not fixed, they require
+another layer of abstraction for the resolution of external symbols, for both data and functions. GOT and PLT are those
+abstractions.</p>
+<p>Below are some simple visual examples to understand the GOT and PLT.</p>
+<ol>
+<li>Data symbol access through GOT</li>
+</ol>
+<div style="max-width:2000px;margin:0 auto">
+<img src=https://blog.llvm.org/img/jitlink-new-backend-GOT-2023-03-16.jpg><br>
+</div>
+<ol start=2>
+<li>
+<p>Function symbol access through PLT</p>
+<ol>
+<li>
+<p><strong>At load time</strong></p>
+<ol>
+<li>Call to x is generated via the PLT.</li>
+<li>There is also an entry for x in the GOT, whose purpose will become clear in a minute.</li>
+</ol>
+</li>
+</ol>
+<div style="max-width:2000px;margin:0 auto">
+<img src=https://blog.llvm.org/img/jitlink-new-backend-PLT-2023-03-16.png><br>
+</div><br>
+<ol start=2>
+<li>
+<p><strong>At first invocation time</strong></p>
+<ol>
+<li>Control jumps to PLT[1]</li>
+<li>First instr of PLT[1] transfers control to *GOT[3] (the address stored in GOT[3]).
+<ol>
+<li>Remember the address stored in GOT[3] is that of the 2nd instr of PLT[1].</li>
+<li>Wait, so we go all the way to the PLT, to then go all the way to the GOT only to come back to the next instr in PLT[1]. We would have come there anyways as the processor processed instructions sequentially. Why did we take this roundabout route?</li>
+<li>We’ll see in a second!</li>
+</ol>
+</li>
+<li>Once we’re on the 2nd instr of PLT we push a value on the stack (what this value means is not super important here).</li>
+<li>Then control jumps to PLT[0], from where you can see it eventually jumps to the address stored in GOT[2].
+<ol>
+<li>And whose address is stored in GOT[2]? The dynamic linker’s!</li>
+</ol>
+</li>
+<li>The dynamic linker then goes ahead and links x (the external lib function we called) into the process and fixes the address in GOT[3] (which was initially the address of the 2nd instr of PLT[1]) to the new address of x in the process.</li>
+<li>The dynamic linker then invokes x, which is what the user wanted to do in the first place.</li>
+</ol>
+</li>
+</ol>
+<div style="max-width:2000px;margin:0 auto">
+<img src=https://blog.llvm.org/img/jitlink-new-backend-PLT2-2023-03-16.png><br>
+</div><br>
+<ol start=3>
+<li><strong>Subsequent invocations</strong>
+<ol>
+<li>The first invocation of x looked like this -
+<ol>
+<li>PLT[1] → *GOT[3] → PLT[1] → PLT[0] → *GOT[2] → x()</li>
+</ol>
+</li>
+<li>However, since the dynamic linker now fixed the entry in GOT[3] to reflect x’s address, subsequent invocations of x look as below -
+<ol>
+<li>PLT[1] → *GOT[3] (which is essentially calling x, since that is what GOT[3] stores now)</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p>With the above process dynamic linking enables us to call a functions in position-independent code. Additionally, it
+makes the common case (every invocation of x other than the first) faster!</p>
+<h2 id=footnotes>Footnotes</h2>
+<section class=footnotes role=doc-endnotes>
+<hr>
+<ol>
+<li id=fn:1 role=doc-endnote>
+<p>AOT, statically compiled languages - C, C++, Rust, unlike interpreted languages, such as Java, do not have a
+runtime that can be extended to bring in new symbols at runtime and perform symbol resolution for them. Java, for
+instance, has the Java Virtual Machine (JVM) whose <a href=https://www.artima.com/insidejvm/ed2/lifetype.html>loading and linking</a> behavior can be customized to achieve
+the aforementioned task.&#160;<a href=#fnref:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
+</li>
+<li id=fn:2 role=doc-endnote>
+<p>JIT-linking is primarily useful in the context of linking in pre-compiled languages (that&rsquo;s certainly what
+inspired it), but it&rsquo;s not only useful in that context. In LLVM JITLink, through the <a href=https://github.com/llvm/llvm-project/blob/4cb0b7ce3b4987446264312d582dac9c9a98a488/llvm/include/llvm/ExecutionEngine/JITLink/JITLink.h#L1765>JITLinkContext</a> you can
+link against other (non-statically compiled) code, so it&rsquo;s useful for anyone who wants to interoperate with C/C++ that&rsquo;s linked at runtime. You could also theoretically bring up a purely JIT&rsquo;d language with it (and I think Julia does this). The advantages are interoperability with existing languages, compilers, tools, and the disadvantage is that it&rsquo;s heavyweight compared to a custom JIT that manages its own linking directly.&#160;<a href=#fnref:2 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
+</li>
+<li id=fn:3 role=doc-endnote>
+<p>Clang-REPL is an effort to move Cling, which is a standalone tool, into the LLVM infrastructure.&#160;<a href=#fnref:3 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
+</li>
+<li id=fn:4 role=doc-endnote>
+<p>In fact, given a suitable JITLinkContext, JITLink can even link objects into a different process. LLDB uses this
+capability (via LLVM’s older MCJIT APIs) to JIT-link expressions in the debugger, but run them in the process being debugged, which may be on a different machine.&#160;<a href=#fnref:4 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
+</li>
+<li id=fn:5 role=doc-endnote>
+<p>I found the following 2 resources very useful for understanding cross-compilation.</p>
+<ol>
+<li>“Cross-platform Compilation” chapter of the <a href="https://www.oreilly.com/library/view/getting-started-with/9781782166924/?_gl=1*142ghif*_ga*MTU5OTExNzkyNS4xNjc1MTc2MTkw*_ga_092EL089CH*MTY3Njc3NzE5MC4zLjEuMTY3Njc3NzMxMS42MC4wLjA.">Getting Started with LLVM Core Libraries</a> book.</li>
+<li>Clang <a href=https://clang.llvm.org/docs/CrossCompilation.html>documentation</a> for cross-compiling.</li>
+</ol>
+&#160;<a href=#fnref:5 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></li>
+<li id=fn:6 role=doc-endnote>
+<p>Dynamically linked code can actually use the &ldquo;static&rdquo; relocation model, but the position-independent model is
+generally preferred. In position-independent code you only need to fix up the GOT, whereas in static code you need to fix up every external reference, which can hurt launch times.&#160;<a href=#fnref:6 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p>
+</li>
+</ol>
+</section>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/posts/2022-12-21-compiler-research-internships/><i class="fa fa-chevron-circle-left"></i> Interactive programming in C++ internships — LLVM Blog Post</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts/2023-03-27-eurollvm2023-program/>The 2023 EuroLLVM Developers' Meeting Program <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
+Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>
