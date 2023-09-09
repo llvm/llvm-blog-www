@@ -343,7 +343,7 @@ After:
       |                            static_cast<long>( )
 ```
 
-Commit: https://github.com/llvm/llvm-project-release-prs/commit/3632e2f5179a420ea8ab84e6ca33747ff6130fa2 (Aaron Ballman)
+Commit: https://github.com/llvm/llvm-project/commit/3632e2f5179a420ea8ab84e6ca33747ff6130fa2 (Aaron Ballman)
 
 Commit: https://reviews.llvm.org/D153622 (Alex Brachet)
 
