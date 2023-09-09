@@ -11,7 +11,7 @@ The newly released Clang 17 brings several of these improvements to the forefron
 This blog post aims to provide a comprehensive overview of these diagnostic enhancements.
 We will employ simplified code examples and compare diagnostic outputs from Clang 16 and Clang 17 to illustrate how the latest updates can enhance the development experience for Clang users.
 
-### Multi-line printing of code snippet
+### Multi-line printing of code snippets
 One of the most anticipated diagnostic features of Clang 17 is its support for multi-line printing of code snippets.
 This marks a departure from the old single-line limit, which used to make it difficult to fully understand the context around a code issue.
 This new feature improves the readability and comprehensibility of diagnostic messages by displaying a more complete view of the code in question.
@@ -63,11 +63,11 @@ After:
       |   ~~~~~~~~~~~~~~~~~~~~
 ```
 
-In this example, the newly-covered source ranges make it easier to understand why the overload candidate is invalid.
+In this example, the newly covered source ranges make it easier to understand why the overload candidate is invalid.
 
 
 ### Preprocessor-related diagnostics
-- Clang warns on macro redefinitins. When the redefinition happens in assembly files and the previous definition of the macro comes from the command line, the previous definition is diagnosed as coming from `<command line>` instead of `<built-in>`.
+- Clang warns on macro redefinitions. When the redefinition happens in assembly files, and the previous definition of the macro comes from the command line, the last definition is now diagnosed as coming from `<command line>` instead of `<built-in>`.
 
 Assembly file:
 ```asm
@@ -114,7 +114,7 @@ After:
       |        ^
 ```
 
-Redefinition of compiler builtin macros usually leads to unintended results because library headers often rely on these macros and they do not
+Redefinition of compiler builtin macros usually leads to unintended results because library headers often rely on these macros, and they do not
 expect these macros to be modified by users.
 
 <br>
@@ -133,7 +133,7 @@ After:
 ```
 
 ### Attribute related diagnostics
-- Clang 17 generates notes and fix-its for `ifunc`/`alias` attributes which point to functions whose names are mangled.
+- Clang 17 generates notes and fix-its for `ifunc`/`alias` attributes which point to unmangled function names.
 ```c++
 __attribute__((used)) static void *resolve_foo() { return 0; }
 
@@ -157,10 +157,10 @@ After:
       |                ifunc("_ZL11resolve_foov")
 ```
 
-One needs to be aware of the C++ name mangling when using `ifunc` or `alias` attributes, but knowing the mangled name from function signature isn't
+One needs to be aware of the C++ name mangling when using `ifunc` or `alias` attributes, but knowing the mangled name from a function signature isn't
 an easy task for many people.
 This change makes the error message highly understandable by suggesting that the `ifunc` needs to refer to the mangled name,
-and it also makes this error more actionable by actually representing the mangled name.
+and it also makes this error more actionable by representing the mangled name.
 
 <br>
 
@@ -235,7 +235,7 @@ After: _No Warning_
 
 `cleanup` attribute is used to write RAII in C.
 Objects declared with this attribute are actually *used* as arguments to the function specified in `cleanup` attribute after its declaration,
-and thus it's considered better not to diagnose them as unused.
+and thus, it's considered better not to diagnose them as unused.
 
 ### `alignas` specifier
 
@@ -301,8 +301,8 @@ After:
 
 ### `-Wformat`
 
-- Clang 17 diagnoses invalid use of scoped enumeration types in format string, which is an Undefined Behavior.
-It also emits fix-it hint to suggest the use of `static_cast` to its underlying type to avoid the UB.
+- Clang 17 diagnoses invalid use of scoped enumeration types in format strings, which is an Undefined Behavior.
+Now it also emits a fix-it hint to suggest the use of `static_cast` to its underlying type to avoid the UB.
 
 ```c++
 #include <limits.h>
@@ -345,15 +345,15 @@ int main() { printf("%lb %lB", 10L, 10L); }
 
 After: _No Warning_
 
-`%b` and `%B` are new formats for printing of binary representation of integers that was specified in ISO C2X draft. 
+`%b` and `%B` are new formats for printing binary representations of integers specified in the ISO C23 draft.
 There are already several libc implementations available that support this format. (glibc >= 2.35, for example)
 
-Clang 17 recognizes this new format to be in line with those libc implementations.
+Clang 17 recognizes this new format to align with those libc implementations.
 
 ### Constexpr-related diagnostics
 - Clang often prints the subexpression values of binary operators such as `==`, `||`, and `&&` in static assertion failures to help users
 understand the cause of the failure.
-Clang 17 stops printing subexpression values if the binary operator is `||` because it is obvious that both subexpressions evaluate to `false` in that case.
+Clang 17 stops printing subexpression values if the binary operator is `||` because it is evident that both subexpressions evaluate to `false` in that case.
 
 - The error message for the failure of static assertion now points to the asserted expression instead of the `static_assert` token.
 
@@ -509,11 +509,11 @@ After:
     2 | template <typename T> constexpr double var_t = 0;
       |                                        ^~~~~
 ```
-Uninstanciated templates do not generate symbols, and thus the meaning of `unused` is wider than the usual
+Uninstantiated templates do not generate symbols, and thus, the meaning of _unused_ is broader than the usual
 unused variables or functions.
 
-For this reason, `-Wunused` does not include `-Wunused-template`.
-This change follows the rationale, and leads to less unwanted `Wunused-const-variable` warnings.
+For this reason, `-Wunused` omits `-Wunused-template`.
+This change follows the rationale and leads to fewer unwanted `Wunused-const-variable` warnings.
 
 ## Acknowledgements
 Special thanks are in order for Timm Bäder, my Google Summer of Code mentor, for his invaluable guidance and support throughout the project.
