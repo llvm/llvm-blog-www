@@ -349,7 +349,7 @@ Commit: https://reviews.llvm.org/D153622 (Alex Brachet)
 
 <br>
 
-- Clang 17's `-Wformat` recognizes ``%lb`` as a format specifier.
+- Clang 17's `-Wformat` recognizes `%lb` and `%lB` as format specifiers.
 
 ```c
 #include <cstdio>
@@ -371,7 +371,8 @@ After: _No Warning_
 `%b` and `%B` are new formats for printing binary representations of integers specified in the ISO C23 draft.
 There are already several libc implementations available that support this format. (glibc >= 2.35, for example)
 
-Clang 17 recognizes this new format to align with those libc implementations.
+Clang 16 already recognizes `%b` and `%llb` as valid format specifiers but handles `%lb` as invalid.
+Clang 17 recognizes `%lb` and `%lB` to avoid false positive warnings and to emit correct fix-it hints.
 
 Commit: https://reviews.llvm.org/D148779 (Fangrui Song)
 
