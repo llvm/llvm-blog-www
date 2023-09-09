@@ -65,6 +65,7 @@ After:
 
 In this example, the newly covered source ranges make it easier to understand why the overload candidate is invalid.
 
+Commit: https://reviews.llvm.org/D147875 (Timm Bäder)
 
 ### Preprocessor-related diagnostics
 - Clang warns on macro redefinitions. When the redefinition happens in assembly files, and the previous definition of the macro comes from the command line, the last definition is now diagnosed as coming from `<command line>` instead of `<built-in>`.
@@ -96,6 +97,7 @@ warning: 'MACRO' macro redefined [-Wmacro-redefined]
     1 | #define MACRO 1
       |         ^
 ```
+Commit: https://reviews.llvm.org/D145397 (John Brawn)
 
 <br>
 
@@ -117,6 +119,8 @@ After:
 Redefinition of compiler builtin macros usually leads to unintended results because library headers often rely on these macros, and they do not
 expect these macros to be modified by users.
 
+Commit: https://reviews.llvm.org/D144654 (John Brawn)
+
 <br>
 
 - Clang 17 diagnoses unexpected tokens after a `#pragma clang|GCC diagnostic push|pop` directive.
@@ -131,6 +135,7 @@ After:
     1 | #pragma clang diagnostic push ignored
       |                               ^
 ```
+Commit: https://github.com/llvm/llvm-project/commit/7ff507f1448bfdfcaa91d177d1f655dcb17557e7 (Aaron Ballman)
 
 ### Attribute related diagnostics
 - Clang 17 generates notes and fix-its for `ifunc`/`alias` attributes which point to unmangled function names.
@@ -161,6 +166,8 @@ One needs to be aware of the C++ name mangling when using `ifunc` or `alias` att
 an easy task for many people.
 This change makes the error message highly understandable by suggesting that the `ifunc` needs to refer to the mangled name,
 and it also makes this error more actionable by representing the mangled name.
+
+Commit: https://reviews.llvm.org/D143803 (Dhruv Chawla)
 
 <br>
 
@@ -193,6 +200,8 @@ After:
       |     ^
 ```
 
+Commit: https://reviews.llvm.org/D145842 (Takuya Shimizu)
+
 <br>
 
 - Clang 17 correctly emits diagnostics for `unavailable` attributes that were ignored in Clang 16.
@@ -215,6 +224,8 @@ After:
       |                                    ^
 ```
 
+Commit: https://reviews.llvm.org/D147495 (Shafik Yaghmour)
+
 <br>
 
 - Clang no longer emits `-Wunused-variable` warnings for variables declared with `__attribute__((cleanup(...)))` to match GCC's behavior.
@@ -236,6 +247,8 @@ After: _No Warning_
 `cleanup` attribute is used to write RAII in C.
 Objects declared with this attribute are actually *used* as arguments to the function specified in `cleanup` attribute after its declaration,
 and thus, it's considered better not to diagnose them as unused.
+
+Commit: https://reviews.llvm.org/D152180 (Nathan Chancellor)
 
 ### `alignas` specifier
 
@@ -260,6 +273,8 @@ After:
       |               ~^~~~~
 ```
 
+Commit: https://reviews.llvm.org/D150528 (yronglin)
+
 ### Shadowings
 - Clang 17 emits an error when lambda's captured variable shadows a template parameter.
 ```c++
@@ -277,6 +292,8 @@ After:
     1 | auto h = [y = 0]<typename y>(y) { return 0; };
       |                           ^
 ```
+
+Commit: https://reviews.llvm.org/D148712 (Mariya Podchishchaeva)
 
 <br>
 
@@ -298,6 +315,8 @@ After:
     1 | int var;
       |     ^
 ```
+
+Commit: https://reviews.llvm.org/D151214 (Takuya Shimizu)
 
 ### `-Wformat`
 
@@ -324,6 +343,10 @@ After:
       |                            static_cast<long>( )
 ```
 
+Commit: https://github.com/llvm/llvm-project-release-prs/commit/3632e2f5179a420ea8ab84e6ca33747ff6130fa2 (Aaron Ballman)
+
+Commit: https://reviews.llvm.org/D153622 (Alex Brachet)
+
 <br>
 
 - Clang 17's `-Wformat` recognizes ``%lb`` as a format specifier.
@@ -349,6 +372,8 @@ After: _No Warning_
 There are already several libc implementations available that support this format. (glibc >= 2.35, for example)
 
 Clang 17 recognizes this new format to align with those libc implementations.
+
+Commit: https://reviews.llvm.org/D148779 (Fangrui Song)
 
 ### Constexpr-related diagnostics
 - Clang often prints the subexpression values of binary operators such as `==`, `||`, and `&&` in static assertion failures to help users
@@ -378,6 +403,10 @@ After:
     3 | static_assert(a || b);
       |               ^~~~~~
 ```
+
+Commit: https://reviews.llvm.org/D147745 (Jorge Pinto Sousa)
+
+Commit: https://reviews.llvm.org/D146376 (Krishna Narayanan)
 
 <br>
 
@@ -413,6 +442,8 @@ After:
     4 | static_assert(call(nullptr));
       |               ^~~~~~~~~~~~~
 ```
+
+Commit: https://reviews.llvm.org/D145793 (Takuya Shimizu)
 
 <br>
 
@@ -454,6 +485,8 @@ After:
       |               ^~~~~~~~~~
 ```
 
+Commit: https://reviews.llvm.org/D151720 (Takuya Shimizu)
+
 <br>
 
 - When a constexpr variable's constructor call leaves its subobject uninitialized, Clang 17 prints the uninitialized subobject's name instead of its type.
@@ -487,6 +520,8 @@ After:
       |       ^
 ```
 
+Commit: https://reviews.llvm.org/D146358 (Takuya Shimizu)
+
 <br>
 
 - Clang 17 diagnoses unused const variable template as "unused variable template" instead of "unused variable".
@@ -514,6 +549,8 @@ unused variables or functions.
 
 For this reason, `-Wunused` omits `-Wunused-template`.
 This change follows the rationale and leads to fewer unwanted `Wunused-const-variable` warnings.
+
+Commit: https://reviews.llvm.org/D152796 (Takuya Shimizu)
 
 ## Acknowledgements
 Special thanks are in order for Timm Bäder, my Google Summer of Code mentor, for his invaluable guidance and support throughout the project.
