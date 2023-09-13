@@ -101,7 +101,7 @@ Commit: https://reviews.llvm.org/D145397 (John Brawn)
 
 <br>
 
-- Clang 17 emits a warning on any compiler-builtin macro being undefined or redefined, some of which were just ignored in Clang 16.
+- Clang 17 emits a warning on any language-defined builtin macro being undefined or redefined, some of which were just ignored in Clang 16.
 
 ```c++
 #undef __cplusplus
@@ -253,7 +253,7 @@ Commit: https://reviews.llvm.org/D152180 (Nathan Chancellor)
 ### `alignas` specifier
 
 - Clang 16 modeled `alignas(type-id)` as `alignas(alignof(type-id))`.
-Clang 17 fixes this modeling and thus fixes the wrong mention of `alignof` in diagnostics about `alignas` and `_Alignas`.
+  Clang 17 fixes this modeling and thus fixes the wrong mention of `alignof` in diagnostics about `alignas` and `_Alignas`.
 
 ```c++
 struct alignas(void) A {};
@@ -549,7 +549,7 @@ Uninstantiated templates do not generate symbols, and thus, the meaning of _unus
 unused variables or functions.
 
 For this reason, `-Wunused` omits `-Wunused-template`.
-This change follows the rationale and leads to fewer unwanted `Wunused-const-variable` warnings.
+This change follows the rationale and leads to fewer unwanted `-Wunused-const-variable` warnings.
 
 Commit: https://reviews.llvm.org/D152796 (Takuya Shimizu)
 
