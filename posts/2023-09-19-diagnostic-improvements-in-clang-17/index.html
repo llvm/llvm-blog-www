@@ -1,0 +1,517 @@
+<!doctype html><html lang=en>
+<head>
+<title>Diagnostic Improvements in Clang 17 - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Takuya Shimizu"><meta property="og:title" content="Diagnostic Improvements in Clang 17">
+<meta property="og:description" content="Introduction In the last few months, I have been a part of an ongoing effort to improve Clang&rsquo;s diagnostic capabilities. The newly released Clang 17 brings several of these improvements to the forefront.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/posts/2023-09-19-diagnostic-improvements-in-clang-17/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2023-09-19T00:00:00+00:00">
+<meta property="article:modified_time" content="2023-09-19T00:00:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Diagnostic Improvements in Clang 17">
+<meta name=twitter:description content="Introduction In the last few months, I have been a part of an ongoing effort to improve Clang&rsquo;s diagnostic capabilities. The newly released Clang 17 brings several of these improvements to the forefront.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>Diagnostic Improvements in Clang 17</h1>
+<aside>
+<ul>
+<li>By Takuya Shimizu</li>
+<li>
+<time class=post-date datetime=2023-09-19T00:00:00Z>Sep 19, 2023</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/clang>#clang</a>
+,
+<a href=https://blog.llvm.org/tags/frontend>#frontend</a>
+,
+<a href=https://blog.llvm.org/tags/gsoc>#gsoc</a>
+</em>
+</li>
+<li>10 minute read</li>
+</ul>
+</aside>
+<h2 id=introduction>Introduction</h2>
+<p>In the last few months, I have been a part of an ongoing effort to improve Clang&rsquo;s diagnostic capabilities.
+The newly released Clang 17 brings several of these improvements to the forefront.
+This blog post aims to provide a comprehensive overview of these diagnostic enhancements.
+We will employ simplified code examples and compare diagnostic outputs from Clang 16 and Clang 17 to illustrate how the latest updates can enhance the development experience for Clang users.</p>
+<h3 id=multi-line-printing-of-code-snippets>Multi-line printing of code snippets</h3>
+<p>One of the most anticipated diagnostic features of Clang 17 is its support for multi-line printing of code snippets.
+This marks a departure from the old single-line limit, which used to make it difficult to fully understand the context around a code issue.
+This new feature improves the readability and comprehensibility of diagnostic messages by displaying a more complete view of the code in question.
+Moreover, line numbers are now attached to the left of each line, allowing for quicker navigation and issue resolution.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>func</span>(
+  <span style=color:#66d9ef>int</span> a, <span style=color:#66d9ef>int</span> b, <span style=color:#66d9ef>int</span><span style=color:#f92672>&amp;</span> r);
+
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>test</span>(<span style=color:#66d9ef>int</span> <span style=color:#f92672>*</span>ptr) {
+  func(<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>5</span>);
+  func(<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>4</span>);
+}
+</code></pre></div><p>Before:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:5:3: error: no matching function for call to &#39;func&#39;
+  func(3, 4, 5);
+  ^~~~
+&lt;source&gt;:1:5: note: candidate function not viable: expects an lvalue for 3rd argument
+int func(
+    ^
+&lt;source&gt;:6:3: error: no matching function for call to &#39;func&#39;
+  func(3, 4);
+  ^~~~
+&lt;source&gt;:1:5: note: candidate function not viable: requires 3 arguments, but 2 were provided
+int func(
+    ^
+</code></pre></div><p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:5:3: error: no matching function for call to &#39;func&#39;
+    5 |   func(3, 4, 5);
+      |   ^~~~
+&lt;source&gt;:1:5: note: candidate function not viable: expects an lvalue for 3rd argument
+    1 | int func(
+      |     ^
+    2 |   int a, int b, int&amp; r);
+      |                 ~~~~~~
+&lt;source&gt;:6:3: error: no matching function for call to &#39;func&#39;
+    6 |   func(3, 4);
+      |   ^~~~
+&lt;source&gt;:1:5: note: candidate function not viable: requires 3 arguments, but 2 were provided
+    1 | int func(
+      |     ^
+    2 |   int a, int b, int&amp; r);
+      |   ~~~~~~~~~~~~~~~~~~~~
+</code></pre></div><p>In this example, the newly covered source ranges make it easier to understand why the overload candidate is invalid.</p>
+<p>Commit: <a href=https://reviews.llvm.org/D147875>https://reviews.llvm.org/D147875</a> (Timm Bäder)</p>
+<h3 id=preprocessor-related-diagnostics>Preprocessor-related diagnostics</h3>
+<ul>
+<li>Clang warns on macro redefinitions. When the redefinition happens in assembly files, and the previous definition of the macro comes from the command line, the last definition is now diagnosed as coming from <code>&lt;command line></code> instead of <code>&lt;built-in></code>.</li>
+</ul>
+<p>Assembly file:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-asm data-lang=asm><span style=color:#75715e>#define MACRO 3
+</span></code></pre></div><p>Clang invocation command:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>clang -DMACRO=1 file.S
+</code></pre></div><p>Before:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>warning: &#39;MACRO&#39; macro redefined [-Wmacro-redefined]
+#define MACRO <span style=color:#ae81ff>3</span>
+        ^
+&lt;built-in&gt;:362:9: note: previous definition is here
+#define MACRO <span style=color:#ae81ff>1</span>
+        ^
+</code></pre></div><p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>warning: &#39;MACRO&#39; macro redefined [-Wmacro-redefined]
+    1 | #define MACRO 3
+      |         ^
+&lt;command line&gt;:1:9: note: previous definition is here
+    1 | #define MACRO 1
+      |         ^
+</code></pre></div><p>Commit: <a href=https://reviews.llvm.org/D145397>https://reviews.llvm.org/D145397</a> (John Brawn)</p>
+<br>
+<ul>
+<li>Clang 17 emits a warning on any language-defined builtin macro being undefined or redefined, some of which were just ignored in Clang 16.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e>#undef __cplusplus
+</span></code></pre></div><p>Before: <em>No Warning</em></p>
+<p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:1:8: warning: undefining builtin macro [-Wbuiltin-macro-redefined]
+    1 | #undef __cplusplus
+      |        ^
+</code></pre></div><p>Redefinition of compiler builtin macros usually leads to unintended results because library headers often rely on these macros, and they do not
+expect these macros to be modified by users.</p>
+<p>Commit: <a href=https://reviews.llvm.org/D144654>https://reviews.llvm.org/D144654</a> (John Brawn)</p>
+<br>
+<ul>
+<li>Clang 17 diagnoses unexpected tokens after a <code>#pragma clang|GCC diagnostic push|pop</code> directive.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e>#pragma clang diagnostic push ignore
+</span></code></pre></div><p>Before: <em>No Warning</em></p>
+<p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:1:31: warning: unexpected token in pragma diagnostic [-Wunknown-pragmas]
+    1 | #pragma clang diagnostic push ignored
+      |                               ^
+</code></pre></div><p>Commit: <a href=https://github.com/llvm/llvm-project/commit/7ff507f1448bfdfcaa91d177d1f655dcb17557e7>https://github.com/llvm/llvm-project/commit/7ff507f1448bfdfcaa91d177d1f655dcb17557e7</a> (Aaron Ballman)</p>
+<h3 id=attribute-related-diagnostics>Attribute related diagnostics</h3>
+<ul>
+<li>Clang 17 generates notes and fix-its for <code>ifunc</code>/<code>alias</code> attributes which point to unmangled function names.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++>__attribute__((used)) <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#f92672>*</span>resolve_foo() { <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>; }
+
+__attribute__((ifunc(<span style=color:#e6db74>&#34;resolve_foo&#34;</span>))) <span style=color:#66d9ef>void</span> foo();
+</code></pre></div><p>Before:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:3:16: error: ifunc must point to a defined function
+__attribute__((ifunc(&#34;resolve_foo&#34;))) void foo();
+               ^
+</code></pre></div><p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:3:16: error: ifunc must point to a defined function
+    3 | __attribute__((ifunc(&#34;resolve_foo&#34;))) void foo();
+      |                ^
+&lt;source&gt;:3:16: note: the function specified in an ifunc must refer to its mangled name
+&lt;source&gt;:3:16: note: function by that name is mangled as &#34;_ZL11resolve_foov&#34;
+    3 | __attribute__((ifunc(&#34;resolve_foo&#34;))) void foo();
+      |                ^~~~~~~~~~~~~~~~~~~~
+      |                ifunc(&#34;_ZL11resolve_foov&#34;)
+</code></pre></div><p>One needs to be aware of the C++ name mangling when using <code>ifunc</code> or <code>alias</code> attributes, but knowing the mangled name from a function signature isn&rsquo;t
+an easy task for many people.
+This change makes the error message highly understandable by suggesting that the <code>ifunc</code> needs to refer to the mangled name,
+and it also makes this error more actionable by representing the mangled name.</p>
+<p>Commit: <a href=https://reviews.llvm.org/D143803>https://reviews.llvm.org/D143803</a> (Dhruv Chawla)</p>
+<br>
+<ul>
+<li>Clang 17 avoids duplicate warnings on unreachable <code>[[fallthrough]];</code> statements previously issued from <code>-Wunreachable-code</code> and <code>-Wunreachable-code-fallthrough</code> by prioritizing <code>-Wunreachable-code-fallthrough</code>.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>f</span>(<span style=color:#66d9ef>int</span> n) {
+  <span style=color:#66d9ef>switch</span> (n) {
+    <span style=color:#a6e22e>[[fallthrough]]</span>;
+  <span style=color:#66d9ef>case</span> <span style=color:#ae81ff>1</span><span style=color:#f92672>:</span>;
+  }
+}
+</code></pre></div><p>Clang invocation command:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>clang++ -Wunreachable file.cpp
+</code></pre></div><p>Before:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:3:5: warning: code will never be executed [-Wunreachable-code]
+    [[fallthrough]];
+    ^~~~~~~~~~~~~~~~
+&lt;source&gt;:3:5: warning: fallthrough annotation in unreachable code [-Wunreachable-code-fallthrough]
+</code></pre></div><p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:3:5: warning: fallthrough annotation in unreachable code [-Wunreachable-code-fallthrough]
+    3 |     [[fallthrough]];
+      |     ^
+</code></pre></div><p>Commit: <a href=https://reviews.llvm.org/D145842>https://reviews.llvm.org/D145842</a> (Takuya Shimizu)</p>
+<br>
+<ul>
+<li>Clang 17 correctly emits diagnostics for <code>unavailable</code> attributes that were ignored in Clang 16.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>_ValueType</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span>
+<span style=color:#66d9ef>class</span> <span style=color:#a6e22e>__attribute__</span>((unavailable)) polymorphic_allocator {};
+
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>f</span>() { polymorphic_allocator<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>void</span><span style=color:#f92672>&gt;</span> a; }
+</code></pre></div><p>Before:
+No diagnostics</p>
+<p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:4:12: error: &#39;polymorphic_allocator&lt;void&gt;&#39; is unavailable
+    4 | void f() { polymorphic_allocator&lt;void&gt; a; }
+      |            ^
+&lt;source&gt;:2:36: note: &#39;polymorphic_allocator&lt;void&gt;&#39; has been explicitly marked unavailable here
+    2 | class __attribute__((unavailable)) polymorphic_allocator {};
+      |                                    ^
+</code></pre></div><p>Commit: <a href=https://reviews.llvm.org/D147495>https://reviews.llvm.org/D147495</a> (Shafik Yaghmour)</p>
+<br>
+<ul>
+<li>Clang no longer emits <code>-Wunused-variable</code> warnings for variables declared with <code>__attribute__((cleanup(...)))</code> to match GCC&rsquo;s behavior.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>c</span>(<span style=color:#66d9ef>int</span> <span style=color:#f92672>*</span>);
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>f</span>(<span style=color:#66d9ef>void</span>) { <span style=color:#66d9ef>int</span> __attribute__((cleanup(c))) X1 <span style=color:#f92672>=</span> <span style=color:#ae81ff>4</span>; }
+</code></pre></div><p>Before:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:2:48: warning: unused variable &#39;X1&#39; [-Wunused-variable]
+void f(void) { int __attribute__((cleanup(c))) X1 = 4; }
+                                               ^
+</code></pre></div><p>After: <em>No Warning</em></p>
+<p><code>cleanup</code> attribute is used to write RAII in C.
+Objects declared with this attribute are actually <em>used</em> as arguments to the function specified in <code>cleanup</code> attribute after its declaration,
+and thus, it&rsquo;s considered better not to diagnose them as unused.</p>
+<p>Commit: <a href=https://reviews.llvm.org/D152180>https://reviews.llvm.org/D152180</a> (Nathan Chancellor)</p>
+<h3 id=alignas-specifier><code>alignas</code> specifier</h3>
+<ul>
+<li>Clang 16 modeled <code>alignas(type-id)</code> as <code>alignas(alignof(type-id))</code>.
+Clang 17 fixes this modeling and thus fixes the wrong mention of <code>alignof</code> in diagnostics about <code>alignas</code> and <code>_Alignas</code>.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>alignas</span>(<span style=color:#66d9ef>void</span>) A {};
+</code></pre></div><p>Before:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:1:16: error: invalid application of &#39;alignof&#39; to an incomplete type &#39;void&#39;
+struct alignas(void) A {};
+              ~^~~~~
+</code></pre></div><p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:1:16: error: invalid application of &#39;alignas&#39; to an incomplete type &#39;void&#39;
+    1 | struct alignas(void) A {};
+      |               ~^~~~~
+</code></pre></div><p>Commit: <a href=https://reviews.llvm.org/D150528>https://reviews.llvm.org/D150528</a> (yronglin)</p>
+<h3 id=shadowings>Shadowings</h3>
+<ul>
+<li>Clang 17 emits an error when lambda&rsquo;s captured variable shadows a template parameter.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>auto</span> h <span style=color:#f92672>=</span> [y <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>]<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> y<span style=color:#f92672>&gt;</span>(y) { <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>; }
+</code></pre></div><p>Before: <em>No Error</em></p>
+<p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:1:11: error: declaration of &#39;y&#39; shadows template parameter
+    1 | auto h = [y = 0]&lt;typename y&gt;(y) { return 0; };
+      |           ^
+&lt;source&gt;:1:27: note: template parameter is declared here
+    1 | auto h = [y = 0]&lt;typename y&gt;(y) { return 0; };
+      |                           ^
+</code></pre></div><p>Commit: <a href=https://reviews.llvm.org/D148712>https://reviews.llvm.org/D148712</a> (Mariya Podchishchaeva)</p>
+<br>
+<ul>
+<li>Clang 17&rsquo;s <code>-Wshadow</code> diagnoses shadowings by static local variables.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>int</span> var;
+<span style=color:#66d9ef>void</span> <span style=color:#a6e22e>f</span>() { <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>int</span> var <span style=color:#f92672>=</span> <span style=color:#ae81ff>42</span>; }
+</code></pre></div><p>Before: <em>No Warning</em></p>
+<p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:2:23: warning: declaration shadows a variable in the global namespace [-Wshadow]
+    2 | void f() { static int var = 42; }
+      |                       ^
+&lt;source&gt;:1:5: note: previous declaration is here
+    1 | int var;
+      |     ^
+</code></pre></div><p>Commit: <a href=https://reviews.llvm.org/D151214>https://reviews.llvm.org/D151214</a> (Takuya Shimizu)</p>
+<h3 id=-wformat><code>-Wformat</code></h3>
+<ul>
+<li>Clang 17 diagnoses invalid use of scoped enumeration types in format strings, which is an Undefined Behavior.
+Now it also emits a fix-it hint to suggest the use of <code>static_cast</code> to its underlying type to avoid the UB.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;limits.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;stdio.h&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>
+<span style=color:#66d9ef>enum</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Foo</span> <span style=color:#f92672>:</span> <span style=color:#66d9ef>long</span> {
+  Bar <span style=color:#f92672>=</span> LONG_MAX,
+};
+
+<span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() { printf(<span style=color:#e6db74>&#34;%ld&#34;</span>, Foo<span style=color:#f92672>::</span>Bar); }
+</code></pre></div><p>Before: <em>No Warning</em></p>
+<p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:8:28: warning: format specifies type &#39;long&#39; but the argument has type &#39;Foo&#39; [-Wformat]
+    8 | int main() { printf(&#34;%ld&#34;, Foo::Bar); }
+      |                      ~~~   ^~~~~~~~
+      |                            static_cast&lt;long&gt;( )
+</code></pre></div><p>Commit: <a href=https://github.com/llvm/llvm-project/commit/3632e2f5179a420ea8ab84e6ca33747ff6130fa2>https://github.com/llvm/llvm-project/commit/3632e2f5179a420ea8ab84e6ca33747ff6130fa2</a> (Aaron Ballman)</p>
+<p>Commit: <a href=https://reviews.llvm.org/D153622>https://reviews.llvm.org/D153622</a> (Alex Brachet)</p>
+<br>
+<ul>
+<li>Clang 17&rsquo;s <code>-Wformat</code> recognizes <code>%lb</code> and <code>%lB</code> as format specifiers.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;cstdio&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() { printf(<span style=color:#e6db74>&#34;%lb %lB&#34;</span>, <span style=color:#ae81ff>10L</span>, <span style=color:#ae81ff>10L</span>); }
+</code></pre></div><p>Before:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:2:23: warning: length modifier &#39;l&#39; results in undefined behavior or no effect with &#39;b&#39; conversion specifier [-Wformat]
+int main() { printf(&#34;%lb %lB&#34;, 10L, 10L); }
+                     ~^~
+&lt;source&gt;:2:27: warning: length modifier &#39;l&#39; results in undefined behavior or no effect with &#39;B&#39; conversion specifier [-Wformat]
+int main() { printf(&#34;%lb %lB&#34;, 10L, 10L); }
+                         ~^~
+</code></pre></div><p>After: <em>No Warning</em></p>
+<p><code>%b</code> and <code>%B</code> are new formats for printing binary representations of integers specified in the ISO C23 draft.
+There are already several libc implementations available that support this format. (glibc >= 2.35, for example)</p>
+<p>Clang 16 already recognizes <code>%b</code> and <code>%llb</code> as valid format specifiers but handles <code>%lb</code> as invalid.
+Clang 17 recognizes <code>%lb</code> and <code>%lB</code> to avoid false positive warnings and to emit correct fix-it hints.</p>
+<p>Commit: <a href=https://reviews.llvm.org/D148779>https://reviews.llvm.org/D148779</a> (Fangrui Song)</p>
+<h3 id=constexpr-related-diagnostics>Constexpr-related diagnostics</h3>
+<ul>
+<li>
+<p>Clang often prints the subexpression values of binary operators such as <code>==</code>, <code>||</code>, and <code>&&</code> in static assertion failures to help users
+understand the cause of the failure.
+Clang 17 stops printing subexpression values if the binary operator is <code>||</code> because it is evident that both subexpressions evaluate to <code>false</code> in that case.</p>
+</li>
+<li>
+<p>The error message for the failure of static assertion now points to the asserted expression instead of the <code>static_assert</code> token.</p>
+</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>constexpr</span> <span style=color:#66d9ef>bool</span> a <span style=color:#f92672>=</span> false;
+<span style=color:#66d9ef>constexpr</span> <span style=color:#66d9ef>bool</span> b <span style=color:#f92672>=</span> false;
+<span style=color:#66d9ef>static_assert</span>(a <span style=color:#f92672>||</span> b);
+</code></pre></div><p>Before:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:3:1: error: static assertion failed due to requirement &#39;a || b&#39;
+static_assert(a || b);
+^             ~~~~~~
+&lt;source&gt;:3:17: note: expression evaluates to &#39;false || false&#39;
+static_assert(a || b);
+              ~~^~~~
+</code></pre></div><p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:3:15: error: static assertion failed due to requirement &#39;a || b&#39;
+    3 | static_assert(a || b);
+      |               ^~~~~~
+</code></pre></div><p>Commit: <a href=https://reviews.llvm.org/D147745>https://reviews.llvm.org/D147745</a> (Jorge Pinto Sousa)</p>
+<p>Commit: <a href=https://reviews.llvm.org/D146376>https://reviews.llvm.org/D146376</a> (Krishna Narayanan)</p>
+<br>
+<ul>
+<li>Clang 17 diagnoses calls to a null function pointer in constexpr evaluation as such instead of just saying it is invalid.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>constexpr</span> <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>call</span>(<span style=color:#66d9ef>int</span> (<span style=color:#f92672>*</span>F)()) {
+    <span style=color:#66d9ef>return</span> F();
+}
+<span style=color:#66d9ef>static_assert</span>(call(<span style=color:#66d9ef>nullptr</span>));
+</code></pre></div><p>Before:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:4:15: error: static assertion expression is not an integral constant expression
+static_assert(call(nullptr));
+              ^~~~~~~~~~~~~
+&lt;source&gt;:2:12: note: subexpression not valid in a constant expression
+    return F();
+           ^
+&lt;source&gt;:4:15: note: in call to &#39;call(nullptr)&#39;
+static_assert(call(nullptr));
+              ^
+</code></pre></div><p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:4:15: error: static assertion expression is not an integral constant expression
+    4 | static_assert(call(nullptr));
+      |               ^~~~~~~~~~~~~
+&lt;source&gt;:2:12: note: &#39;F&#39; evaluates to a null function pointer
+    2 |     return F();
+      |            ^
+&lt;source&gt;:4:15: note: in call to &#39;call(nullptr)&#39;
+    4 | static_assert(call(nullptr));
+      |               ^~~~~~~~~~~~~
+</code></pre></div><p>Commit: <a href=https://reviews.llvm.org/D145793>https://reviews.llvm.org/D145793</a> (Takuya Shimizu)</p>
+<br>
+<ul>
+<li>Member function calls are displayed more true to the user-written code.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>Foo</span> {
+  <span style=color:#66d9ef>constexpr</span> <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>div</span>(<span style=color:#66d9ef>int</span> i) <span style=color:#66d9ef>const</span> { <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>1</span> <span style=color:#f92672>/</span> i; }
+};
+
+<span style=color:#66d9ef>constexpr</span> Foo obj;
+<span style=color:#66d9ef>constexpr</span> <span style=color:#66d9ef>const</span> Foo <span style=color:#f92672>&amp;</span>ref <span style=color:#f92672>=</span> obj;
+<span style=color:#66d9ef>static_assert</span>(ref.div(<span style=color:#ae81ff>0</span>));
+</code></pre></div><p>Before:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:7:15: error: static assertion expression is not an integral constant expression
+static_assert(ref.div(0));
+              ^~~~~~~~~~
+&lt;source&gt;:2:45: note: division by zero
+  constexpr int div(int i) const { return 1 / i; }
+                                            ^
+&lt;source&gt;:7:19: note: in call to &#39;&amp;obj-&gt;div(0)&#39;
+static_assert(ref.div(0));
+                  ^
+</code></pre></div><p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:7:15: error: static assertion expression is not an integral constant expression
+    7 | static_assert(ref.div(0));
+      |               ^~~~~~~~~~
+&lt;source&gt;:2:45: note: division by zero
+    2 |   constexpr int div(int i) const { return 1 / i; }
+      |                                             ^ ~
+&lt;source&gt;:7:15: note: in call to &#39;ref.div(0)&#39;
+    7 | static_assert(ref.div(0));
+      |               ^~~~~~~~~~
+</code></pre></div><p>Commit: <a href=https://reviews.llvm.org/D151720>https://reviews.llvm.org/D151720</a> (Takuya Shimizu)</p>
+<br>
+<ul>
+<li>When a constexpr variable&rsquo;s constructor call leaves its subobject uninitialized, Clang 17 prints the uninitialized subobject&rsquo;s name instead of its type.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>Foo</span> {
+  <span style=color:#66d9ef>constexpr</span> <span style=color:#a6e22e>Foo</span>() {}
+  <span style=color:#66d9ef>int</span> val;
+};
+<span style=color:#66d9ef>constexpr</span> Foo ff;
+</code></pre></div><p>Before:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:5:15: error: constexpr variable &#39;ff&#39; must be initialized by a constant expression
+constexpr Foo ff;
+              ^~
+&lt;source&gt;:5:15: note: subobject of type &#39;int&#39; is not initialized
+&lt;source&gt;:3:7: note: subobject declared here
+  int val;
+      ^
+</code></pre></div><p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:5:15: error: constexpr variable &#39;ff&#39; must be initialized by a constant expression
+    5 | constexpr Foo ff;
+      |               ^~
+&lt;source&gt;:5:15: note: subobject &#39;val&#39; is not initialized
+&lt;source&gt;:3:7: note: subobject declared here
+    3 |   int val;
+      |       ^
+</code></pre></div><p>Commit: <a href=https://reviews.llvm.org/D146358>https://reviews.llvm.org/D146358</a> (Takuya Shimizu)</p>
+<br>
+<ul>
+<li>Clang 17 diagnoses unused const variable template as &ldquo;unused variable template&rdquo; instead of &ldquo;unused variable&rdquo;.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c++ data-lang=c++><span style=color:#66d9ef>namespace</span> {
+<span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> T<span style=color:#f92672>&gt;</span> <span style=color:#66d9ef>constexpr</span> <span style=color:#66d9ef>double</span> var_t <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+}
+</code></pre></div><p>Before:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:2:40: warning: unused variable &#39;var_t&#39; [-Wunused-const-variable]
+template &lt;typename T&gt; constexpr double var_t = 0;
+                                       ^
+</code></pre></div><p>After:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-console data-lang=console>&lt;source&gt;:2:40: warning: unused variable template &#39;var_t&#39; [-Wunused-template]
+    2 | template &lt;typename T&gt; constexpr double var_t = 0;
+      |                                        ^~~~~
+</code></pre></div><p>Uninstantiated templates do not generate symbols, and thus, the meaning of <em>unused</em> is broader than the usual
+unused variables or functions.</p>
+<p>For this reason, <code>-Wunused</code> omits <code>-Wunused-template</code>.
+This change follows the rationale and leads to fewer unwanted <code>-Wunused-const-variable</code> warnings.</p>
+<p>Commit: <a href=https://reviews.llvm.org/D152796>https://reviews.llvm.org/D152796</a> (Takuya Shimizu)</p>
+<h2 id=acknowledgements>Acknowledgements</h2>
+<p>Special thanks are in order for Timm Bäder, my Google Summer of Code mentor, for his invaluable guidance and support throughout the project.</p>
+<p>Further gratitude is extended to my regular reviewers: Aaron Ballman, Christopher Di Bella, and Shafik Yaghmour, for their insightful and constructive feedback
+that greatly improved my codes.</p>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/posts/2023-03-16-adding-new-llvm-jitlink-target-object-backend/><i class="fa fa-chevron-circle-left"></i> Adding a new target/object backend to LLVM JITLink</a>
+</li>
+<li>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
+Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>
