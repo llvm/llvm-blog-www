@@ -361,18 +361,18 @@ class A {
 }
 def a : A;
 
-dump "The Value of A is: \n" # !repr(a);
+dump "The Value of a is: \n" # !repr(a);
 ```
 
 `dump` prints to `stderr`:
 ```
-<source>:8:1: note: The Value of A is:
+<source>:8:1: note: The Value of a is:
 a {	// A
   string A = "some text";
   dag X = (op op);
 }
 
-dump "The Value of A is: \n" # !repr(a);
+dump "The Value of a is: \n" # !repr(a);
 ^
 ```
 
@@ -383,7 +383,7 @@ by [Francesco Petrogalli](https://github.com/fpetrogalli) and
 released version 18.0 or greater (which is unreleased at time of writing).
 
 Of course you can try this
-[on Compiler Explorer](https://godbolt.org/z/3nvGcfvv1) right now!
+[on Compiler Explorer](https://godbolt.org/z/Ta6jb19hr) right now!
 
 # Find In Files
 
