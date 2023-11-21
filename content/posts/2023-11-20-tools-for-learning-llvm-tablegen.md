@@ -354,33 +354,37 @@ TableGen’s equivalent is
 [dump](https://llvm.org/docs/TableGen/ProgRef.html#dump-print-messages-to-stderr),
 and its companion `repr`.
 ```
-class Register<int _size, string _alias=""> {
-   int size = _size;
-   string alias = _alias;
-   dump "size is " # !repr(size) # " and alias is " # !repr(alias);
+def op;
+class A {
+  string A = "some text";
+  dag X =(op op);
 }
+def a : A;
 
-def X0: Register<8> {}
-def X29: Register<8, "frame pointer"> {}
+dump "The Value of A is: \n" # !repr(a);
 ```
 
 `dump` prints to `stderr`:
 ```
-<source>:4:5: note: size is 8 and alias is ""
-   dump "size is " # !repr(size) # " and alias is " # !repr(alias);
-   ^
-<source>:4:5: note: size is 8 and alias is "frame pointer"
-   dump "size is " # !repr(size) # " and alias is " # !repr(alias);
-   ^
+<source>:8:1: note: The Value of A is:
+a {	// A
+  string A = "some text";
+  dag X = (op op);
+}
+
+dump "The Value of A is: \n" # !repr(a);
+^
 ```
 
 Note: This was added
 [recently](https://github.com/llvm/llvm-project/commit/411c4edeef076bd2e01b104fe095ba381600a3d3)
-by Francesco Petrogalli and Adam Nemet. So you will need a recent build, or a
-released version 18.0 or greater (which is unreleased at time of writing).
+by [Francesco Petrogalli](https://github.com/fpetrogalli) and
+[Adam Nemet](https://github.com/anemet) by Francesco Petrogalli and Adam Nemet.
+So you will need a recent build, or a released version 18.0 or greater (which is
+unreleased at time of writing).
 
 Of course you can try this
-[on Compiler Explorer](https://godbolt.org/z/555n19qMK) right now!
+[on Compiler Explorer](https://godbolt.org/z/3nvGcfvv1) right now!
 
 # Find In Files
 
