@@ -379,9 +379,8 @@ dump "The Value of A is: \n" # !repr(a);
 Note: This was added
 [recently](https://github.com/llvm/llvm-project/commit/411c4edeef076bd2e01b104fe095ba381600a3d3)
 by [Francesco Petrogalli](https://github.com/fpetrogalli) and
-[Adam Nemet](https://github.com/anemet) by Francesco Petrogalli and Adam Nemet.
-So you will need a recent build, or a released version 18.0 or greater (which is
-unreleased at time of writing).
+[Adam Nemet](https://github.com/anemet). So you will need a recent build, or a
+released version 18.0 or greater (which is unreleased at time of writing).
 
 Of course you can try this
 [on Compiler Explorer](https://godbolt.org/z/3nvGcfvv1) right now!
