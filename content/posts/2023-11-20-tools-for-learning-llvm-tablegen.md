@@ -10,9 +10,9 @@ is a language used within the LLVM project for generating a variety of files,
 when manual maintenance would be very difficult.
 
 For example, it is used to define all of the instructions that can be used on a
-particular architecture. The information is defined once in TableGen and we can
-produce many things based on it. C++ code, documentation, command line options,
-and so on.
+particular architecture. The information is defined in TableGen and we can
+produce many things based on that single source file. C++ code, documentation,
+command line options, and so on.
 
 TableGen has been in existence
 [before](https://github.com/llvm/llvm-project/commit/a6240f6b1a34f9238cbe8bc8c9b6376257236b0a)
@@ -72,7 +72,9 @@ def X29: Register<8, "frame pointer"> {}
 // ...a lot more registers omitted.
 ```
 
-By default the TableGen compiler produces what are called “records”:
+By default, the TableGen compiler `llvm-tblgen` creates “records” - which are
+shown below.
+
 ```bash
 $ ./bin/llvm-tblgen register.td
 
@@ -128,7 +130,7 @@ is the backends included in each one, the language is the same.
 
 You might take your register definitions and produce C++ code to initialise them
 in some kind of bootloader. Perhaps you also document it and produce a diagram
-to illustrate it. With enough backends, you could do all that from the same
+of the process. With enough backends, you could do all that from the same
 TableGen source code.
 
 You would write these backends either in C++ within the TableGen compiler,
@@ -152,8 +154,8 @@ This is more a mindset than a tool. It’s summed up best by a quote from the
 > basic concepts via custom-made backends, which can pervert the original design
 > and make it very hard for newcomers to understand the evil TableGen file.”
 
-This means that you'll be tackling the language itself, and the things built
-with it. Which are often more complicated than the language.
+This means that you'll be tackling TableGen, and things built with TableGen.
+Which are often more complicated than the language.
 
 It’s like learning C++ and struggling to use [Boost](https://www.boost.org/).
 Someone might say to you, “Boost isn’t required, why not remove it and save
@@ -281,9 +283,10 @@ lines of output (before you have added any of your own code). This is more than
 a default notebook will accept from a kernel and when I removed that limit, the
 browser tab crashed.
 
-It’s not a problem in most cases and the possible solutions have big trade offs
-so we are not rushing into fixing it. If it does affect you, please post your
-feedback on the [tracking issue](https://github.com/llvm/llvm-project/issues/72856).
+This is not a problem in most cases and the possible solutions have big
+trade-offs, so we are not rushing into fixing this. If it does affect you,
+please post your feedback on the
+[tracking issue](https://github.com/llvm/llvm-project/issues/72856).
 
 # TableGen Language Server
 
@@ -294,9 +297,11 @@ Which supports TableGen and
 
 The language server protocol is an editor agnostic means of providing
 information to an editor about the structure of a language and project. For
-instance, where are the include files, where is the definition of this type? If
-you have used an editor like Visual Studio Code, you’ve probably used this
-without knowing it. “Go To Definition” is the classic use case.
+instance, where are the include files, where is the definition of this type?
+
+If you have used a LSP compatible editor (like Visual Studio Code), you have
+probably used a language server without knowing. “Go To Definition” is the
+most common feature they provide.
 
 It means you can open a project, go to the code you want to change and jump
 directly to the relevant parts of the repository. With 500,000+ lines of
