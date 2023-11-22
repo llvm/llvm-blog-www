@@ -109,7 +109,7 @@ C header files and [reStructuredText](https://docutils.sourceforge.io/rst.html d
                                |
  +--llvm-tblgen----------------|------------------------+
  |                             v                        |
- |              ------ Expanded records -----           |
+ |              +----- Expanded records ----+           |
  |              |                           |           |
  |              v                           v           |
  | +-------------------------+    +-------------------+ |
