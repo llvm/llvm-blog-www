@@ -347,8 +347,8 @@ the compilation database. Configuring is all that’s needed.
 
 Next, install the MLIR
 [extension](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-mlir)
-into Visual Studio Code (the language server can work with other but setup will
-differ).
+into Visual Studio Code (the language server can work with other editors but
+setup will differ).
 
 Then follow the setup instructions
 [here](https://mlir.llvm.org/docs/Tools/MLIRLSP/#td---tablegen-files) to tell
