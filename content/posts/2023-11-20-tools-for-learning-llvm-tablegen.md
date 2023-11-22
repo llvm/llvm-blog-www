@@ -57,7 +57,7 @@ Imagine you wanted to represent the registers of an architecture. I’m going to
 use Arm's AArch64 in particular here.
 
 You could describe them in TableGen as:
-```
+```bash
 $ cat register.td
 
 class Register<int _size, string _alias=""> {
@@ -73,7 +73,7 @@ def X29: Register<8, "frame pointer"> {}
 ```
 
 By default the TableGen compiler produces what are called “records”:
-```
+```bash
 $ ./bin/llvm-tblgen register.td
 
 ------------- Classes -----------------
