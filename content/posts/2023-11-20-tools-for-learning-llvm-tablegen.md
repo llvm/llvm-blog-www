@@ -175,8 +175,8 @@ For any task there are probably one or two "things built with TableGen" that you
 need to understand, and even then not entirely.
 
 Do not think that your TableGen journey must end with understanding its many
-uses. That's one possible goal, but it is not rquired, and hardly anyone
-achieves it. Instead put your energy into the things that really interest you.
+uses. That is one possible destination, but it is not rquired, and hardly anyone
+reaches it. Instead put your energy into the things that really interest you.
 
 # Compiler Explorer
 
