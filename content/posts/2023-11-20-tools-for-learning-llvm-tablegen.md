@@ -183,8 +183,8 @@ energy into the things that really interest you.
 Of course we have TableGen in Compiler Explorer! Is a language even real if it’s
 not in Compiler Explorer?
 
-(Of course it is, but if you’re favourite language isn’t, Compiler Explorer has
-[excellent documentation](https://github.com/compiler-explorer/compiler-explorer/blob/main/docs/AddingALanguage.md)
+(Of course it is, but if your favourite language isn’t there, Compiler Explorer
+has [excellent documentation](https://github.com/compiler-explorer/compiler-explorer/blob/main/docs/AddingALanguage.md)
 and friendly maintainers)
 
 Compiler Explorer is a whole bunch of different versions of compilers for
