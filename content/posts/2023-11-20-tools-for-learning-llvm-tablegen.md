@@ -18,9 +18,9 @@ TableGen has been in existence
 [before](https://github.com/llvm/llvm-project/commit/a6240f6b1a34f9238cbe8bc8c9b6376257236b0a)
 the first official release of LLVM, over 20 years ago.
 
-Today in the monorepo there are over a thousand TableGen source files totalling
-over 500,000 lines of code. Making it the 5th most popular language in the
-monorepo.
+Today in the [LLVM monorepo](https://github.com/llvm/llvm-project) there are
+over a thousand TableGen source files totalling over 500,000 lines of code.
+Making it the 5th most popular language in the monorepo.
 
 | Language     | files | blank  | comment   | code     |
 | ------------ | ------| -------| --------- | -------- |
@@ -94,17 +94,18 @@ def X29 {       // Register
 }
 ```
 
-This is the intermediate representation of the TableGen compiler, similar to
-LLVM's LLVM IR.
+This is the intermediate representation (IR) of the TableGen compiler, similar
+to LLVM's LLVM IR.
 
-When using LLVM you would select a "target" which is the CPU architecture you
-want to generate instructions for. TableGen's equivalent is a "backend". These
-backends do not generate instructions, but instead output a format for that
-backend's specific use case.
+When using LLVM you would select a "target" which is the processor architecture
+you want to generate instructions for. TableGen's equivalent is a "backend".
+These backends do not generate instructions, but instead output a format for
+that backend's specific use case.
 
 For example, there is a backend that generates C++ code for 
 [searching](https://godbolt.org/z/5c696j1f9) data tables. Other examples are 
-C header files and [reStructuredText](https://docutils.sourceforge.io/rst.html documentation.
+C header files and [reStructuredText](https://docutils.sourceforge.io/rst.html)
+documentation.
 
 ```
                        TableGen source
@@ -170,13 +171,12 @@ I mention this so that you can draw a distinction between not understanding
 one or the other. Knowing which one is confusing you is a big advantage
 to finding help.
 
-For any given task there are probably one or two "things built with" you need to
-understand and even then not entirely.
+For any task there are probably one or two "things built with TableGen" that you
+need to understand, and even then not entirely.
 
-Do not think that the TableGen journey (for lack of a less grand term) ends with
-understanding its many uses. If you could get there it would be an end of a
-sort, but you really do not need to and hardly anyone does. Instead put your
-energy into the things that really interest you.
+Do not think that your TableGen journey must end with understanding its many
+uses. That's one possible goal, but it is not rquired, and hardly anyone
+achieves it. Instead put your energy into the things that really interest you.
 
 # Compiler Explorer
 
@@ -295,13 +295,13 @@ feedback on the
 # TableGen Language Server
 
 The MLIR project has implemented a server for the
-[Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol/).
-Which supports TableGen and
+[Language Server Protocol](https://microsoft.github.io/language-server-protocol/)
+(LSP). Which supports TableGen and
 [2 other languages](https://mlir.llvm.org/docs/Tools/MLIRLSP/) used within MLIR.
 
-The language server protocol is an editor agnostic means of providing
-information to an editor about the structure of a language and project. For
-instance, where are the include files, where is the definition of this type?
+The language server protocol provides information to compatible editors about
+the structure of a language and project. For example, where are the included
+files? Where is the definition of a particular type?
 
 If you have used a LSP compatible editor (such as Visual Studio Code), you have
 probably used a language server without knowing. “Go To Definition” is the
@@ -325,7 +325,7 @@ $ cmake -G Ninja <path-to>/llvm-project/llvm -DCMAKE_BUILD_TYPE=Release -DLLVM_E
 $ ninja tblgen-lsp-server
 ```
 
-Having run those commands, `tblgen-lsp-server` is in `<build-dir>/bin/`.
+Having run those commands, `tblgen-lsp-server` is found in `<build-dir>/bin/`.
 
 The server reads a compilation database file `tablegen_compile_commands.yml`,
 which is made for you when you configure LLVM using CMake. This serves a similar
@@ -375,12 +375,35 @@ This example assumes you have configured LLVM with the `AArch64` target enabled.
 The language server highlights an anti-pattern in the way some LLVM targets
 (AArch64 is one example) use TableGen.
 
-You may find yourself in a file that uses a class but does not define it, or
-include any files which do. This is because this file is intended to be included
-in another file, which does include a definition of that class.
+You may find yourself in a file that uses a class but does not define it or
+include any files which define it. This is because this file is intended to be
+included in another file, which does include a definition of that class.
+
+```
+example.td:
+  class Example {}
+
+uses_example.td:
+  def example: Example {}
+
+main.td:
+  include "example.td"
+  include "uses_example.td"
+```
+
+The example above shows this:
+
+* The file `example.td` defines the class `Example`.
+* `uses_example.td` uses the class `Example`, but does not include `example.td`.
+* `main.td` includes both `example.td` and `uses_example.td`.
+* `main.td` is the file that is compiled.
+* When you are in `uses_example.td`, the language server does not know where
+  `Example` is defined,
+* When you are in `main.td`, the language server does know where `Example` is
+  defined.
 
 Perhaps we can address this by improving the language server, or reorganising
-the includes so we do not have these seemingly isolated files.
+the includes so we do not have files that appear to be isolated.
 
 # Dump
 
@@ -431,7 +454,7 @@ language syntax.
 Why should I mention such an obvious idea? Well, obvious is subjective, and
 there is a special situation that makes it more effective than usual.
 
-In the LLVM project repo we have the vast majority of TableGen code in use today.
+In the LLVM project monorepo we have the vast majority of TableGen code in use today.
 Would you like to know how to use a particular feature? It’s all there,
 somewhere in 500,000+ lines of source code. You would be surprised by what a
 simple query can find despite that.
@@ -459,7 +482,7 @@ favourite languages.
 
 Keep in mind that TableGen is also a tool, not a goal in itself. If you can
 achieve your goals with a limited but accurate understanding of TableGen and its
-backends, that is ok. Learn as much as you want or need.
+backends, that is great. Learn as much as you want or need.
 
 In addition to the tools, there is an active community ready to answer your
 questions on [Discord](https://discord.com/invite/xS7Z362) or the
