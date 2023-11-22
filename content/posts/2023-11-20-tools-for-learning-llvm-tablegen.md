@@ -18,9 +18,9 @@ TableGen has been in existence
 [before](https://github.com/llvm/llvm-project/commit/a6240f6b1a34f9238cbe8bc8c9b6376257236b0a)
 the first official release of LLVM, over 20 years ago.
 
-Today in the [LLVM monorepo](https://github.com/llvm/llvm-project) there are
+Today in the [LLVM project repository](https://github.com/llvm/llvm-project) there are
 over a thousand TableGen source files totalling over 500,000 lines of code.
-Making it the 5th most popular language in the monorepo.
+Making it the 5th most popular language in the repository.
 
 | Language     | files | blank  | comment   | code     |
 | ------------ | ------| -------| --------- | -------- |
@@ -207,11 +207,11 @@ what will be in the source code. Almost as if you had a C++ compiler that
 wouldn’t compile for Arm unless it saw the symbol `arm_is_cool` somewhere in the
 source code.
 
-In the LLVM monorepo all the required classes are set up for you, but in
+In the LLVM repository all the required classes are set up for you, but in
 Compiler Explorer they are not. So, if you would like to experiment with an
 existing backend, I suggest you provide stub implementations of the classes, or
-copy some from the LLVM project. You can also use standard includes from
-`include/llvm/*.td`.
+copy some from the LLVM project repository. You can also use standard includes
+from `include/llvm/*.td`.
 
 It is not possible at this time to develop a backend within Compiler Explorer,
 but you can select the JSON backend and copy that JSON to give to local scripts.
@@ -262,7 +262,7 @@ the ones that you find interesting.
 This notebook uses Python instead of TableGen, and it shows you how to write a
 backend.
 
-The 2021 LLVM dev talk
+The 2021 EU LLVM Developer's Meeting talk
 [“How to write a TableGen backend”](https://www.youtube.com/watch?v=UP-LBRbvI_U)
 by Min-Yih Hsu is the basis for this. The
 [notebook](https://github.com/llvm/llvm-project/blob/main/llvm/utils/TableGen/jupyter/sql_query_backend.ipynb)
@@ -309,7 +309,7 @@ most common feature they provide.
 
 The Language Server Protocol allows you to open a project, go to the code you
 want to change and jump from there directly to the other relevant parts of the
-repository. With 500,000+ lines of TableGen in the LLVM Project, that’s a lot of
+repository. With 500,000+ lines of TableGen in the LLVM project, that’s a lot of
 code you get to ignore!
 
 # Setup
@@ -454,7 +454,7 @@ language syntax.
 Why should I mention such an obvious idea? Well, obvious is subjective, and
 there is a special situation that makes it more effective than usual.
 
-In the LLVM project monorepo we have the vast majority of TableGen code in use today.
+In the LLVM project repository we have the vast majority of TableGen code in use today.
 Would you like to know how to use a particular feature? It’s all there,
 somewhere in 500,000+ lines of source code. You would be surprised by what a
 simple query can find despite that.
