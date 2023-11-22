@@ -56,8 +56,10 @@ brought you to LLVM in the first place.
 Imagine you wanted to represent the registers of an architecture. I’m going to
 use Arm's AArch64 in particular here.
 
-You could describe them in TableGen like this:
+You could describe them in TableGen as:
 ```
+$ cat register.td
+
 class Register<int _size, string _alias=""> {
    int size = _size;
    string alias = _alias;
@@ -70,14 +72,10 @@ def X29: Register<8, "frame pointer"> {}
 // ...a lot more registers omitted.
 ```
 
-By default the TableGen compiler `llvm-tblgen` produces what are called
-“records”, which are shown below.
-
-**Note:** There are other compilers e.g. `clang-tblgen` and `lldb-tblgen`.
-The difference between them is the backends that they include. The language is
-the same.
-
+By default the TableGen compiler produces what are called “records”:
 ```
+$ ./bin/llvm-tblgen register.td
+
 ------------- Classes -----------------
 class Register<int Register:_size = ?, string Register:_alias = ""> {
  int size = Register:_size;
@@ -102,14 +100,37 @@ instead whatever output format the selected “backend” produces. For example
 there is one that generates C++ code that implements
 [searching](https://godbolt.org/z/5c696j1f9) of data tables.
 
+```
+                       TableGen source
+                               |
+ +--llvm-tblgen----------------|------------------------+
+ |                             v                        |
+ |              ------ Expanded records -----           |
+ |              |                           |           |
+ |              v                           v           |
+ | +-------------------------+    +-------------------+ |
+ | | --gen-searchable-tables |    | Other backends... | |
+ | +-------------------------+    +-------------------+ |
+ |             |                            |           |
+ +-------------|----------------------------|-----------+
+               v                            v
+    .inc file with C++ code       Other output formats...
+    for table searching.
+```
+
+The main compiler is `llvm-tblgen`, but there are others specific to
+sub-projects e.g. `clang-tblgen` and `lldb-tblgen`. The only difference is the
+backends included in each one, the language is the same.
+
 You might take your register definitions and produce C++ code to initialise them
 in some kind of bootloader. Perhaps you also document it and produce a diagram
 to illustrate it. With enough backends, you could do all that from the same
 TableGen source code.
 
 You would write these backends either in C++ within the TableGen compiler,
-or you can use the compiler’s [JSON output](https://godbolt.org/z/vre845e77)
-(`--dump-json`) and write them in any language with a JSON parser (e.g.
+or as an external backend using the compiler’s
+[JSON output](https://godbolt.org/z/vre845e77) (`--dump-json`). So you can use
+any language with a JSON parser (e.g.
 [Python](https://github.com/llvm/llvm-project/blob/main/llvm/utils/TableGen/jupyter/sql_query_backend.ipynb)).
 
 # There is TableGen and There Are Things Built With TableGen
@@ -348,7 +369,7 @@ the includes so we do not have these seemingly isolated files.
 
 # Dump
 
-What about printf? The best debugging tool of them all.
+What about `printf`? The best debugging tool of them all.
 
 TableGen’s equivalent is
 [dump](https://llvm.org/docs/TableGen/ProgRef.html#dump-print-messages-to-stderr),
