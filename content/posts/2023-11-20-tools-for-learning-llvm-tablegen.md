@@ -14,7 +14,7 @@ particular architecture. The information is defined in TableGen and we can
 produce many things based on that single source file. C++ code, documentation,
 command line options, and so on.
 
-TableGen has been in existence
+TableGen has been in existence since
 [before](https://github.com/llvm/llvm-project/commit/a6240f6b1a34f9238cbe8bc8c9b6376257236b0a)
 the first official release of LLVM, over 20 years ago.
 
@@ -36,24 +36,24 @@ rest of table omitted)
 
 With projects such as MLIR
 [embracing TableGen](https://mlir.llvm.org/docs/DefiningDialects/Operations/)
-it is only going to grow. So if you’re contributing to LLVM, you will encounter
+it is only going to grow. So if you are contributing to LLVM, you will encounter
 it at some point.
 
 Which might be a problem as TableGen only exists within LLVM. Unlike a language
-such as C++, TableGen does not have an array of resources.
+such as C++, TableGen does not have a large array of resources.
 
 So, as well as joining a new project, you also now need to learn a new
-Domain Specific Language (DSL). You didn’t come to LLVM to learn a DSL, you
+Domain Specific Language (DSL). You did not come to LLVM to learn a DSL, you
 probably came here to write a compiler.
 
-I can’t say when this problem might be solved, but the situation isn’t as
+I cannnot say when this problem might be solved, but the situation is not as
 bleak as it appears. There have been big improvements in TableGen tools
 recently, which means you can put more of your energy into the goals that
 brought you to LLVM in the first place.
 
 # A Brief Introduction to TableGen
 
-Imagine you wanted to represent the registers of an architecture. I’m going to
+Imagine you wanted to represent the registers of an architecture. I am going to
 use Arm's AArch64 in particular here.
 
 You could describe them in TableGen as:
@@ -69,7 +69,7 @@ class Register<int _size, string _alias=""> {
 def X0: Register<8> {}
 // Some have special alternate names.
 def X29: Register<8, "frame pointer"> {}
-// ...a lot more registers omitted.
+// Some registers omitted...
 ```
 
 By default, the TableGen compiler `llvm-tblgen` creates “records” - which are
@@ -95,7 +95,7 @@ def X29 {       // Register
 ```
 
 This is the intermediate representation (IR) of the TableGen compiler, similar
-to LLVM's LLVM IR.
+to LLVM's "LLVM IR".
 
 When using LLVM you would select a "target" which is the processor architecture
 you want to generate instructions for. TableGen's equivalent is a "backend".
@@ -126,8 +126,8 @@ documentation.
 ```
 
 The main compiler is `llvm-tblgen`, but there are others specific to
-sub-projects. For example `clang-tblgen` and `lldb-tblgen`. The only difference
-is the backends included in each one, the language is the same.
+sub-projects of LLVM. For example `clang-tblgen` and `lldb-tblgen`. The only
+difference is the backends included in each one, the language is the same.
 
 You might take your register definitions and produce C++ code to initialise them
 in some kind of bootloader. Perhaps you also document it and produce a diagram
@@ -135,14 +135,14 @@ of the process. With enough backends, you could do all that from the same
 TableGen source code.
 
 You would write these backends either in C++ within the TableGen compiler,
-or as an external backend using the compiler’s
+or as an external backend using the compiler's
 [JSON output](https://godbolt.org/z/vre845e77) (`--dump-json`). So you can use
 any language with a JSON parser (such as
 [Python](https://github.com/llvm/llvm-project/blob/main/llvm/utils/TableGen/jupyter/sql_query_backend.ipynb)).
 
 # There is TableGen and There Are Things Built With TableGen
 
-This is more a mindset than a tool. It’s summed up best by a quote from the
+This is more a mindset than a tool. It is summed up best by a quote from the
 [documentation](https://llvm.org/docs/TableGen/index.html#tablegen-deficiencies):
 
 > Despite being very generic, TableGen has some deficiencies that have been
@@ -158,8 +158,8 @@ This is more a mindset than a tool. It’s summed up best by a quote from the
 This means that you will be tackling TableGen, and things built with TableGen.
 Which are often more complicated than the language.
 
-It’s like learning C++ and struggling to use [Boost](https://www.boost.org/).
-Someone might say to you, “Boost isn’t required, why not remove it and save
+It is like learning C++ and struggling to use [Boost](https://www.boost.org/).
+Someone might say to you, “Boost is not required, why not remove it and save
 yourself the hassle?”. As someone new to C++, you might not be aware of the
 boundary between the two of them.
 
@@ -172,18 +172,18 @@ one or the other. Knowing which one is confusing you is a big advantage
 to finding help.
 
 For any task there are probably one or two "things built with TableGen" that you
-need to understand, and even then not entirely.
+need to understand and even then, not entirely.
 
-Do not think that your TableGen journey must end with understanding its many
-uses. That is one possible destination, but it is not rquired, and hardly anyone
-reaches it. Instead put your energy into the things that really interest you.
+Do not think that your TableGen journey must end with understanding all the ways
+it is used. That is possible, but it is not rquired, and hardly anyone learns
+everything. Instead put your energy into the things that really interest you.
 
 # Compiler Explorer
 
-Of course we have TableGen in Compiler Explorer! Is a language even real if it’s
+Of course we have TableGen in Compiler Explorer! Is a language even real if it is
 not in Compiler Explorer?
 
-(Of course it is, but if your favourite language isn’t there, Compiler Explorer
+(Of course it is, but if your favourite language is not there, Compiler Explorer
 has [excellent documentation](https://github.com/compiler-explorer/compiler-explorer/blob/main/docs/AddingALanguage.md)
 and friendly maintainers)
 
@@ -191,20 +191,20 @@ Compiler Explorer is a whole bunch of different versions of compilers for
 different languages and different architectures that you can access with just a
 browser tab.
 
-It’s an incredible tool for learning, teaching, triaging, optimising and
-[many more](https://www.youtube.com/watch?v=O5sEug_iaf4) things. I won’t go into
-detail about it here, just a few things about TableGen’s inclusion.
+It is an incredible tool for learning, teaching, triaging, optimising and
+[many more](https://www.youtube.com/watch?v=O5sEug_iaf4) things. I will not go into
+detail about it here, just a few things about TableGen's inclusion.
 
-The obvious thing is that `llvm-tblgen` doesn’t emit machine code (though a
+The obvious thing is that `llvm-tblgen` does not emit instructions (though a
 hypothetical backend could) so there is no option to compile to binary or
 execute code.
 
 By default, records printed as plain text. You can choose a backend by adding a
-compiler option, or as an “Action” from the “Overrides” menu.
+compiler option, or by opening the "Overrides" menu and selecting an "Action".
 
-It’s important to note that TableGen backends have very specific expectations of
-what will be in the source code. Almost as if you had a C++ compiler that
-wouldn’t compile for Arm unless it saw the symbol `arm_is_cool` somewhere in the
+It is important to note that TableGen backends have very specific expectations of
+what will be in the source code. As if you had a C++ compiler that
+would not compile for Arm unless it saw `arm_is_cool` somewhere in the
 source code.
 
 In the LLVM repository all the required classes are set up for you, but in
@@ -231,11 +231,10 @@ This enables you to edit the code and rerun it to update the results in the
 notebook.
 
 This is great for taking notes or building up large examples from small chunks
-of code. Then you can export your notes as a notebook that anyone can edit, or
+of code. You can export the document as a notebook that anyone can edit, or
 in noninteractive formats such as PDF or Markdown.
 
-
-TableGen can be used in one of these notebooks via the TableGen Jupyter Kernel.
+TableGen can be used in notebooks by using the TableGen Jupyter Kernel.
 Installation instructions are available [here](https://github.com/llvm/llvm-project/tree/main/llvm/utils/TableGen/jupyter) and you can watch me talk more about it
 [here](https://www.youtube.com/watch?v=Gf0FUiY2TRo).
 
@@ -244,7 +243,7 @@ Installation instructions are available [here](https://github.com/llvm/llvm-proj
 for Jupyter, along with many others.
 
 We have aimed to give the same experience as other languages, so I will focus
-not on how to use a notebook, but instead on what we’ve been able to make with
+not on how to use a notebook, but instead on what we have been able to make with
 them.
 
 ## TableGen Tutorial Notebook
@@ -266,13 +265,13 @@ The 2021 EU LLVM Developer's Meeting talk
 [“How to write a TableGen backend”](https://www.youtube.com/watch?v=UP-LBRbvI_U)
 by Min-Yih Hsu is the basis for this. The
 [notebook](https://github.com/llvm/llvm-project/blob/main/llvm/utils/TableGen/jupyter/sql_query_backend.ipynb)
-is in fact a Python port of Min’s own
+is in fact a Python port of Min's own
 [C++](https://github.com/mshockwave/SQLGen) implementation.
 
 It shows you how to take the JSON output of `llvm-tblgen` and process it with
 Python to create SQL queries.
 
-What’s unique here is we now have the same content in multiple media forms and
+What is unique here is we now have the same content in multiple media forms and
 multiple programming languages. Choose the ones that suit you best.
 
 Referring back to “There is TableGen and There are Things Built With TableGen”
@@ -288,8 +287,8 @@ a default notebook accepts from a kernel and when I removed that limit, the
 browser tab crashed.
 
 This is not a problem in most cases and the possible solutions have big
-trade-offs, so we are not rush a fix. If it does affect you, please post your
-feedback on the
+trade-offs, so we are not going to rush a fix. If it does affect you, please add your
+feedback to the
 [tracking issue](https://github.com/llvm/llvm-project/issues/72856).
 
 # TableGen Language Server
@@ -309,7 +308,7 @@ most common feature they provide.
 
 The Language Server Protocol allows you to open a project, go to the code you
 want to change and jump from there directly to the other relevant parts of the
-repository. With 500,000+ lines of TableGen in the LLVM project, that’s a lot of
+repository. With 500,000+ lines of TableGen in the LLVM project, that is a lot of
 code you get to ignore!
 
 # Setup
@@ -319,7 +318,7 @@ from the
 [release package](https://github.com/llvm/llvm-project/releases) for your
 platform, or you can build it yourself.
 
-This is the minimal set of commands to build it yourself:
+This is how to build it yourself:
 ```bash
 $ cmake -G Ninja <path-to>/llvm-project/llvm -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="mlir"
 $ ninja tblgen-lsp-server
@@ -328,8 +327,9 @@ $ ninja tblgen-lsp-server
 Having run those commands, `tblgen-lsp-server` is found in `<build-dir>/bin/`.
 
 The server reads a compilation database file `tablegen_compile_commands.yml`,
-which is made for you when you configure LLVM using CMake. This serves a similar
-purpose to the `compile_commands.json` file generated when using
+which is made for you when you configure LLVM using CMake.
+
+This serves a similar purpose to the `compile_commands.json` file generated when using
 `CMAKE_EXPORT_COMPILE_COMMANDS`, but the two files are not related.
 
 As long as your checkout of llvm-project includes
@@ -337,7 +337,7 @@ As long as your checkout of llvm-project includes
 the compilation database includes TableGen files from all enabled
 projects (prior to that commit it was MLIR only).
 
-For example this configure includes information about TableGen files from the
+For example this configure command includes information about TableGen files from the
 LLVM, Clang, MLIR and LLDB subprojects:
 
 ```bash
@@ -352,7 +352,7 @@ the compilation database. Configuring is all that is needed.
 
 Next, install the MLIR
 [extension](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-mlir)
-into Visual Studio Code (the language server works with other IDEs but their
+into Visual Studio Code (the language server works with other editors but their
 setup will be different).
 
 Then follow the setup instructions
@@ -373,7 +373,7 @@ This example assumes you have configured LLVM with the `AArch64` target enabled.
 ## Limitations
 
 The language server highlights an anti-pattern in the way some LLVM targets
-(AArch64 is one example) use TableGen.
+such as AArch64 use TableGen.
 
 You may find yourself in a file that uses a class but does not define it or
 include any files which define it. This is because this file is intended to be
@@ -391,7 +391,7 @@ main.td:
   include "uses_example.td"
 ```
 
-The example above shows this:
+The example above shows this anti-pattern:
 
 * The file `example.td` defines the class `Example`.
 * `uses_example.td` uses the class `Example`, but does not include `example.td`.
@@ -409,7 +409,7 @@ the includes so we do not have files that appear to be isolated.
 
 What about `printf`? The best debugging tool of them all.
 
-TableGen’s equivalent is
+TableGen's equivalent is
 [dump](https://llvm.org/docs/TableGen/ProgRef.html#dump-print-messages-to-stderr),
 and its companion `repr`.
 ```
@@ -435,7 +435,7 @@ dump "The Value of a is: \n" # !repr(a);
 ^
 ```
 
-Note: This was added
+This was added
 [recently](https://github.com/llvm/llvm-project/commit/411c4edeef076bd2e01b104fe095ba381600a3d3)
 by [Francesco Petrogalli](https://github.com/fpetrogalli) and
 [Adam Nemet](https://github.com/anemet). So you will need a recent build, or a
@@ -446,8 +446,8 @@ Of course you can try this
 
 # Find In Files
 
-This is last because in an ideal world it would be the last option, but it’s
-often not the least of them. Grep, ack, Find In Files, whatever you call it,
+This is last because in an ideal world it would be the last option, but it is
+often not the least of the options. Grep, ack, Find In Files, whatever you call it,
 searching text is unreasonably effective if you have a little knowledge of the
 language syntax.
 
@@ -455,17 +455,17 @@ Why should I mention such an obvious idea? Well, obvious is subjective, and
 there is a special situation that makes it more effective than usual.
 
 In the LLVM project repository we have the vast majority of TableGen code in use today.
-Would you like to know how to use a particular feature? It’s all there,
+Would you like to know how to use a particular feature? It is all there,
 somewhere in 500,000+ lines of source code. You would be surprised by what a
 simple query can find despite that.
 
 Think about the thing you are trying to find. What do you think its source
 code would look like? If it is a class would it have template arguments or not
-and so would there be a `<` after the name? If it’s an error message, what parts
+and so would there be a `<` after the name? If it is an error message, what parts
 would be constant and what parts would be inserted into a template message?
 
 `Expected end of line` is likely to be a static string so you can search for the
-message text. In contrast, `class Foo has no attribute Bar` is more likely to
+message itself. In contrast, `class Foo has no attribute Bar` is more likely to
 be created by substituting in the name of the class and attribute. So a good
 search term for this would be `has no attribute`. 
 
@@ -476,8 +476,8 @@ your search to this location.
 
 # Conclusion
 
-Learning TableGen doesn’t have to be scary. Don’t think that because it’s an
-isolated DSL that it doesn’t have what you’ve come to expect from your
+Learning TableGen does not have to be scary. Do not think that because it is an
+isolated DSL that it does not have what you have come to expect from your
 favourite languages.
 
 Keep in mind that TableGen is also a tool, not a goal in itself. If you can
