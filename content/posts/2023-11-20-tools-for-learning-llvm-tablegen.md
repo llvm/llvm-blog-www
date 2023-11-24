@@ -436,10 +436,9 @@ dump "The Value of a is: \n" # !repr(a);
 ```
 
 This was added
-[recently](https://github.com/llvm/llvm-project/commit/411c4edeef076bd2e01b104fe095ba381600a3d3)
-by [Francesco Petrogalli](https://github.com/fpetrogalli) and
-[Adam Nemet](https://github.com/anemet). So you will need a recent build, or a
-released version 18.0 or newer (which is unreleased at time of writing).
+[recently](https://github.com/llvm/llvm-project/commit/411c4edeef076bd2e01b104fe095ba381600a3d3).
+So you will need a recent build, or a released version 18.0 or newer (which is unreleased
+at time of writing).
 
 Of course you can try this
 [on Compiler Explorer](https://godbolt.org/z/Ta6jb19hr) right now!
