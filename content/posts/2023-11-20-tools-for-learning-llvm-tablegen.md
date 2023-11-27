@@ -61,8 +61,8 @@ You could describe them in TableGen as:
 $ cat register.td
 
 class Register<int _size, string _alias=""> {
-   int size = _size;
-   string alias = _alias;
+  int size = _size;
+  string alias = _alias;
 }
 
 // 64 bit general purpose registers are X<N>.
@@ -442,6 +442,50 @@ at time of writing).
 
 Of course you can try this
 [on Compiler Explorer](https://godbolt.org/z/Ta6jb19hr) right now!
+
+# Assertions
+
+An assertion checks that a condition is true at a specific point in your
+program. An assertion consists of:
+* The keyword `assert`.
+* A condition (usually a call to one of the
+  [bang operators](https://llvm.org/docs/TableGen/ProgRef.html#bang-operators)).
+* A message.
+
+If the condition is false, a compiler error is generated with the message you
+provided.
+
+For example, the code below checks that you have not tried to make a register
+with a size that is less than 0.
+
+```
+class Register<int _size> {
+  assert !gt(_size, 0),
+       "Register size must be > 0, not " # _size # "." ;
+  int size = _size;
+}
+
+def X0: Register<8> {}
+def X1: Register<-8> {}
+```
+([Try this on Compiler Explorer](https://godbolt.org/z/e4GzvhEeh))
+
+The register `X0` has `_size=8`, so the condition `!gt(_size, 0)` (which would
+be  `_size > 0` in C syntax) is true and therefore no error is generated.
+
+The register `X1` has `_size=-8`, so the conditon is false and an error is
+generated. The compiler output is shown below:
+```
+<source>:2:11: error: assertion failed
+   assert !gt(_size, 0),
+          ^
+note: Register size must be > 0, not -8.
+```
+
+While learning new code it is helpful to add your own asserts to validate your
+assumptions. In addition, adding asserts to code written to be used by other
+people is a good way to stop them using it incorrectly. Unlike documentation,
+you cannot miss an assertion error.
 
 # Find In Files
 
