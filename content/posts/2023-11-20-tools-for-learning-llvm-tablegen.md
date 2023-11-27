@@ -473,7 +473,7 @@ def X1: Register<-8> {}
 The register `X0` has `_size=8`, so the condition `!gt(_size, 0)` (which would
 be  `_size > 0` in C syntax) is true and therefore no error is generated.
 
-The register `X1` has `_size=-8`, so the conditon is false and an error is
+The register `X1` has `_size=-8`, so the condition is false and an error is
 generated. The compiler output is shown below:
 ```
 <source>:2:11: error: assertion failed
@@ -482,8 +482,8 @@ generated. The compiler output is shown below:
 note: Register size must be > 0, not -8.
 ```
 
-While learning new code it is helpful to add your own asserts to validate your
-assumptions. In addition, adding asserts to code written to be used by other
+While learning new code it is helpful to add your own assertions to check your
+assumptions. In addition, adding assertions to code written to be used by other
 people is a good way to stop them using it incorrectly. Unlike documentation,
 you cannot miss an assertion error.
 
