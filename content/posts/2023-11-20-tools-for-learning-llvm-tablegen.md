@@ -350,14 +350,17 @@ that the compilation database only has files relevant to that target.
 **Note:** You do not need to build a project to include its TableGen files in
 the compilation database. Configuring is all that is needed.
 
-Next, install the MLIR
-[extension](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-mlir)
-into Visual Studio Code (the language server works with other editors but their
-setup will be different).
+Next, configure the LSP client for your editor.
 
-Then follow the setup instructions
+If you are using Visual Studio Code, install the MLIR
+[extension](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-mlir). Then follow the setup instructions
 [here](https://mlir.llvm.org/docs/Tools/MLIRLSP/#td---tablegen-files) to tell
 the extension where the server and compilation database are.
+
+If you are using a different editor, refer to its documentation to learn how to
+set up a language server. Setting the path to the compilation database may require
+the use of the server's command line options. Run `tblgen-lsp-server --help` to
+see all available options.
 
 ## Example
 
