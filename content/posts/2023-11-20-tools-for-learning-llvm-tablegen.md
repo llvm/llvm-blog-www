@@ -46,7 +46,7 @@ So, as well as joining a new project, you also now need to learn a new
 Domain Specific Language (DSL). You did not come to LLVM to learn a DSL, you
 probably came here to write a compiler.
 
-I cannnot say when this problem might be solved, but the situation is not as
+I cannot say when this problem might be solved, but the situation is not as
 bleak as it appears. There have been big improvements in TableGen tools
 recently, which means you can put more of your energy into the goals that
 brought you to LLVM in the first place.
@@ -175,7 +175,7 @@ For any task there are probably one or two "things built with TableGen" that you
 need to understand and even then, not entirely.
 
 Do not think that your TableGen journey must end with understanding all the ways
-it is used. That is possible, but it is not rquired, and hardly anyone learns
+it is used. That is possible, but it is not required, and hardly anyone learns
 everything. Instead put your energy into the things that really interest you.
 
 # Compiler Explorer
@@ -199,7 +199,7 @@ The obvious thing is that `llvm-tblgen` does not emit instructions (though a
 hypothetical backend could) so there is no option to compile to binary or
 execute code.
 
-By default, records printed as plain text. You can choose a backend by adding a
+By default, records are printed as plain text. You can choose a backend by adding a
 compiler option, or by opening the "Overrides" menu and selecting an "Action".
 
 It is important to note that TableGen backends have very specific expectations of
