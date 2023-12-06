@@ -35,14 +35,14 @@ Making it the 5th most popular language in the repository.
 rest of table omitted)
 
 With projects such as MLIR
-[embracing TableGen](https://mlir.llvm.org/docs/DefiningDialects/Operations/)
+[embracing TableGen](https://mlir.llvm.org/docs/DefiningDialects/Operations/),
 it is only going to grow. So if you are contributing to LLVM, you will encounter
 it at some point.
 
 Which might be a problem as TableGen only exists within LLVM. Unlike a language
 such as C++, TableGen does not have a large array of resources.
 
-So, as well as joining a new project, you also now need to learn a new
+So, as well as joining a new project, you also need to learn a new
 Domain Specific Language (DSL). You did not come to LLVM to learn a DSL, you
 probably came here to write a compiler.
 
