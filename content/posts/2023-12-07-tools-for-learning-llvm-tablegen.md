@@ -2,7 +2,7 @@
 author: "David Spickett"
 date: "2023-12-07"
 tags: ["TableGen"]
-title: "Tools for Learning LLVM TableGen"
+title: "Tools For Learning LLVM TableGen"
 ---
 
 [TableGen](https://github.com/llvm/llvm-project/tree/main/llvm/utils/TableGen)
