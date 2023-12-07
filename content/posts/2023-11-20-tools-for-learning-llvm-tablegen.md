@@ -543,4 +543,4 @@ might be the difference between frustration and your new favourite language.
 
 # Acknowledgements
 
-TODO!
+Thank you to Andrzej Warzyński, Francesco Petrogalli, Min-Yih Hsu and Sally Neale (Arm) for reviewing this article.
