@@ -1,29 +1,22 @@
 ---
 author: "QuillPusher (Saqib)"
 date: "2023-12-31"
-tags: ["gsoc", "summerofcode"]
-title: "Google Summer of Code 2023 Contributions for LLVM"
+tags: ["clang-repl"]
+title: "Another step forward towards interactive programming"
 ---
 
+The [Compiler Research] team is pleased to announce the successful completion
+of another round of internships focused on enhancements in interactive
+programming, specifically in relation to the [Clang-REPL] component in LLVM. 
 
-This was an eventful year for LLVM in terms of student contributions. Several
-students that qualified to GSoC’23 contributed some exciting features. We
-talked to some of the contributors to the LLVM GSoC program who contributed to
-Clang-Repl and related components, to highlight their accomplishments. A more
-complete list of contributors is available in the [LLVM archive] on the Google
-Summer Of Code website if you’d like to explore other great projects that were
-completed this year.
+The Compiler Research team includes researchers located at Princeton University
+and CERN. Our primary goal is best described as follows: 
 
-## What is Google Summer of Code?
+>To establish a proficient workflow in LLVM, where [interactive development] in
+>C++ is possible, and exploratory C++ becomes an accessible experience to a
+>wider audience.
 
-Google Summer of Code (GSoC) is a program that introduces students to open
-source software development. Students work on a 3 month project with an open
-source organisation during their summer break, gaining real-world experience
-and getting paid a stipend. The program benefits both students and LLVM by
-bringing new developers into the project and addressing bugs or adding new
-features.
-
-# Showcased Contributors
+Following are some notable contributions by our interns this year.
 
 ## Yuquan Fu - Autocompletion in Clang-REPL
 
@@ -41,7 +34,9 @@ Mentors: Vassil Vassilev ([Princeton.edu]) & David Lange ([Princeton.edu])
 
 Project Details: [Autocompletion in Clang-REPL]
 
-### Example 1 – avoiding tedious typing
+Funding: Google Summer of Code 2023
+
+### Example – avoiding tedious typing
 
 ```
 clang-repl> struct WhateverMeaningfulLoooooooooongName{ int field;};
@@ -52,27 +47,6 @@ With code completion, hitting tab completes the entity name:
 
 ```
 clang-repl>  WhateverMeaningfulLoooooooooongName
-```
-
-### Example 2 – Semantic Completion (work in progress)
-
-Code completion can offer context-aware information, for example if we have two
-structures and two instances of those structures, and a function that takes
-‘Apple’ and a parameter.
-
-```
-clang-repl> struct Apple{ int price;};
-clang-repl> struct Banana{ int StoreID;};
-clang-repl> void getApple(Apple &a) {};
-clang-repl> Apple fruitIsApple(10);
-clang-repl> Banana fruitIsBanana(42);
-clang-repl> getApple(f<tab>
-```
-
-Hitting tab should lead to the following completion:
-
-```
-clang-repl> getApple(fruitIsApple
 ```
 
 > For implementation details, please see the respective [slides] and the
@@ -108,6 +82,8 @@ to load this library.
 Mentors: Vassil Vassilev ([Princeton.edu]) & Alexander Penev ([Uni-Plovdiv.bg])
 
 Project Details: [WebAssembly Support for Clang-Repl]
+
+Funding: Google Summer of Code 2023
 
 ### Example:
 
@@ -171,6 +147,8 @@ Mentors: Vassil Vassilev ([Princeton.edu]) & Lang Hames/ lhames ([Apple])
 
 Project Details: [Re-optimization using JITLink]
 
+Funding: Google Summer of Code 2023
+
 ### Example: Doing the -O2 optimization if function was called more than 10 times
 
 The following example builds a PassManager using the LLVM library and then runs
@@ -209,16 +187,11 @@ Mentors: Vassil Vassilev ([Princeton.edu]) & David Lange ([Princeton.edu])
 
 Project Details: [Tutorial development with clang-repl]
 
-### Examples
+Funding: Google Summer of Code 2023
+
+### Example
 
 ```
-// Function Definitions and Calls
-clang-repl> #include <iostream>
-clang-repl> int sum(int a, int b){ return a+b; };
-clang-repl> int c = sum(9,10);
-clang-repl> std::cout << c << std::endl;
-19
- 
 // Classes and Structures
 clang-repl> #include <iostream>
 clang-repl> class Rectangle {int width, height; public: void set_values (int,int);\
@@ -231,13 +204,13 @@ clang-repl> main();
 area: 12
 ```
 
-### Further reading:
-
-For a complete list of GSoC 2023 LLVM Contributors, please visit the LLVM
-archive on the [Google Summer Of Code website].
 
 
-[LLVM archive]: https://summerofcode.withgoogle.com/archive/2023/organizations/llvm-compiler-infrastructure
+[Compiler Research]: https://compiler-research.org
+
+[Clang-REPL]: https://clang.llvm.org/docs/ClangRepl.html
+
+[interactive development]: https://compiler-research.org/interactive_cpp
 
 [Princeton.edu]: https://www.princeton.edu/
 
