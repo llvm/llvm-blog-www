@@ -1,0 +1,218 @@
+<!doctype html><html lang=en>
+<head>
+<title>Tutorial Development with Clang-Repl - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Krishna Narayanan"><meta property="og:title" content="Tutorial Development with Clang-Repl">
+<meta property="og:description" content="Introduction I&rsquo;m Krishna Narayanan, a final undergraduate at Veermata Jijabai Technological Institute, Mumbai and I am talking about my GSoC project in this blog post which mentions the goals, tasks we have accomplished during this summer tenure.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/posts/2023-10-5-tutorial-development-with-clang-repl/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2023-10-05T00:00:00+00:00">
+<meta property="article:modified_time" content="2023-10-05T00:00:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Tutorial Development with Clang-Repl">
+<meta name=twitter:description content="Introduction I&rsquo;m Krishna Narayanan, a final undergraduate at Veermata Jijabai Technological Institute, Mumbai and I am talking about my GSoC project in this blog post which mentions the goals, tasks we have accomplished during this summer tenure.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>Tutorial Development with Clang-Repl</h1>
+<aside>
+<ul>
+<li>By Krishna Narayanan</li>
+<li>
+<time class=post-date datetime=2023-10-05T00:00:00Z>Oct 5, 2023</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/clang>#Clang</a>
+,
+<a href=https://blog.llvm.org/tags/clang-repl>#Clang-repl</a>
+,
+<a href=https://blog.llvm.org/tags/tutorial>#Tutorial</a>
+,
+<a href=https://blog.llvm.org/tags/gsoc>#GSoC</a>
+,
+<a href=https://blog.llvm.org/tags/compiler-research>#Compiler Research</a>
+</em>
+</li>
+<li>4 minute read</li>
+</ul>
+</aside>
+<h2 id=introduction>Introduction</h2>
+<p>I&rsquo;m Krishna Narayanan, a final undergraduate at Veermata Jijabai Technological
+Institute, Mumbai and I am talking about my GSoC project in this blog post
+which mentions the goals, tasks we have accomplished during this summer tenure.
+My GSoC project aims to develop tutorials demonstrating the current capabilities of
+Clang-repl. The need for Clang-repl is that it presents opportunities for rigorous
+open-source development. However, even though it is inspired by cling, not all of
+Clang-repl and Cling are the same, i.e., they are similar, but work needs to be done to
+add Xeus protocol support for Clang-repl.
+In a similar convention, tutorials were demonstrated for CppInterOp (clang-based C++),
+Xeus-cpp (interactive programming environment for C++) and Xeus-clang-repl.</p>
+<h2 id=contributions>Contributions:</h2>
+<p>This is the list of contributions according to the pull requests I have sent:</p>
+<h3 id=1-update-clang-repl-documentation>1. Update Clang-Repl Documentation</h3>
+<ul>
+<li><a href=https://reviews.llvm.org/D152109>https://reviews.llvm.org/D152109</a></li>
+<li><a href=https://reviews.llvm.org/D156858>https://reviews.llvm.org/D156858</a></li>
+<li><a href=https://github.com/llvm/llvm-project/pull/65650>https://github.com/llvm/llvm-project/pull/65650</a></li>
+</ul>
+<p>This patch adds support for Clang-Repl documentation, basically, it provides all
+details regarding the usage of Clang-Repl. It emphasises the features of Clang-Repl
+that it offers to the user. The REPL nature enables users to prototype,
+experiment and gives a user-friendly experience. Similarly, the second patch
+adds Clang-Repl Execution Handling Results by Saqib in which we enabled the
+graphviz extension for the llvm/clang documents to support the graphviz convention
+for pictorial representation (under review).</p>
+<h3 id=2-add-c-interop-documentation-setup>2. Add C++ InterOp Documentation Setup</h3>
+<ul>
+<li><a href=https://github.com/compiler-research/CppInterOp/pull/87>https://github.com/compiler-research/CppInterOp/pull/87</a></li>
+<li><a href=https://github.com/compiler-research/CppInterOp/pull/99>https://github.com/compiler-research/CppInterOp/pull/99</a></li>
+<li><a href=https://github.com/compiler-research/CppInterOp/pull/105>https://github.com/compiler-research/CppInterOp/pull/105</a></li>
+<li><a href=https://github.com/compiler-research/CppInterOp/pull/121>https://github.com/compiler-research/CppInterOp/pull/121</a></li>
+<li><a href=https://github.com/compiler-research/CppInterOp/pull/134>https://github.com/compiler-research/CppInterOp/pull/134</a></li>
+</ul>
+<p><strong>CppInterOp</strong> is a clang-based C++ Interoperability library, which enables interoperability
+with C++ code to more interactive languages like Python. The above patch adds
+documentation setup for CppInterOp consisting of both sphinx and doxygen
+documentations. The above patches have covered all topics, points catering to the
+development and usage of CppInterOp which include building from source(installation)
+, usage, FAQs, developer’s documentation, tutorials and references. The tutorials in
+the docs give a detailed understanding of C++ InterOp usage, which includes C-C++
+interoperability and C++-python interoperability.</p>
+<h3 id=3-add-xeus-clang-repl-documentation-setup>3. Add xeus-clang-repl Documentation Setup</h3>
+<ul>
+<li><a href=https://github.com/compiler-research/xeus-clang-repl/pull/33>https://github.com/compiler-research/xeus-clang-repl/pull/33</a></li>
+<li><a href=https://github.com/compiler-research/xeus-clang-repl/pull/34>https://github.com/compiler-research/xeus-clang-repl/pull/34</a></li>
+<li><a href=https://github.com/compiler-research/xeus-clang-repl/pull/35>https://github.com/compiler-research/xeus-clang-repl/pull/35</a></li>
+</ul>
+<p><strong>Xeus-clang-repl</strong> integrates clang-repl with the xeus protocol and is a platform
+for C++ usage in Jupyter Notebooks. The above patch adds a documentation setup
+for xeus-clang-repl consisting of both sphinx and doxygen documentations. The
+documentation covers all information regarding installation, usage, importance
+and references for xeus-clang-repl. It includes tutorials portraying the different
+features that can be used in xeus-clang-repl, especially the C++-python integration
+executing simultaneously in the Jupyter cell with the help of magic commands( %%python).</p>
+<h3 id=4-add-xeus-cpp-documentation-setup>4. Add xeus-cpp Documentation Setup</h3>
+<ul>
+<li><a href=https://github.com/compiler-research/xeus-cpp/pull/13>https://github.com/compiler-research/xeus-cpp/pull/13</a></li>
+</ul>
+<p><strong>Xeus-cpp</strong> is an interactive programming environment that allows you to
+execute C++ code in a Jupyter Notebook. The above patch adds a documentation setup
+for xeus-cpp consisting of both sphinx and doxygen documentations.The documentation
+covers all information regarding installation, usage, importance and references
+for xeus-cpp.
+It includes tutorials portraying the different features that can be used in xeus-cpp,
+especially the C++-python integration executing simultaneously in the Jupyter cell
+with the help of magic commands(%%python).</p>
+<h3 id=5-others>5. Others</h3>
+<ul>
+<li><a href=https://github.com/compiler-research/xeus-cpp/pull/12>https://github.com/compiler-research/xeus-cpp/pull/12</a></li>
+<li><a href=https://github.com/vgvassilev/clad/pull/610>https://github.com/vgvassilev/clad/pull/610</a></li>
+</ul>
+<p>These are miscellaneous patches contributing to the development of current
+documentation setup and content. It includes migration from the v1 to the v2 configuration
+for readthedocs setup.</p>
+<h2 id=acknowledgements>Acknowledgements</h2>
+<p>All the goals that were originally proposed have been completed to the best of my
+abilities (the xeus-cpp setup has not been merged yet). I will be working on improving
+these things after suggestions in the upcoming weeks to make tutorials and documentation
+more understandable for users. I will keep working with the compiler research group
+even after the GSoC period, contributing to tutorials and landing other development
+patches.</p>
+<p>I am extremely grateful to my mentors, Vassil and David, for their constant
+help and support in the last two months. Many thanks to Vassil for providing help
+and reviewing the code promptly and guiding me towards the final goal, special
+thanks to Parth and Baidyanath for guiding me during the initial phase of GSoC.
+The journey has been quite full of learning, experiencing new techstack and realising
+the importance of documentation and tutorials for a better user experience. I thank
+Vassil and all LLVM community members for giving me this great opportunity to work
+with such an evergreen and interesting community.</p>
+<p>Finally, thanking everyone at the compiler research group for assisting throughout
+the GSoC period with many new concepts and help I needed. I am also thankful to
+Google for providing me the opportunity to work on this project during the summer,
+which helped me learn a lot and will also surely help in my career in the future.</p>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/posts/2023-09-19-diagnostic-improvements-in-clang-17/><i class="fa fa-chevron-circle-left"></i> Diagnostic Improvements in Clang 17</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts/2023-12-07-tools-for-learning-llvm-tablegen/>Tools for Learning LLVM TableGen <i class="fa fa-chevron-circle-right"></i> </a>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
+Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>
