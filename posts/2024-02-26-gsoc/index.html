@@ -1,0 +1,184 @@
+<!doctype html><html lang=en>
+<head>
+<title>LLVM Google Summer of Code 2024 & 2023 - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Anton Korobeynikov"><meta property="og:title" content="LLVM Google Summer of Code 2024 & 2023">
+<meta property="og:description" content="The LLVM organization was accepted to participate in Google Summer of Code in 2024. Soon, prospective participants will begin submitting their project proposals, and mentors will review them to select those who will spend a significant amount of time this year contributing to various parts of LLVM.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/posts/2024-02-26-gsoc/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2024-03-14T00:00:00+00:00">
+<meta property="article:modified_time" content="2024-03-14T00:00:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="LLVM Google Summer of Code 2024 & 2023">
+<meta name=twitter:description content="The LLVM organization was accepted to participate in Google Summer of Code in 2024. Soon, prospective participants will begin submitting their project proposals, and mentors will review them to select those who will spend a significant amount of time this year contributing to various parts of LLVM.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>LLVM Google Summer of Code 2024 & 2023</h1>
+<aside>
+<ul>
+<li>By Anton Korobeynikov</li>
+<li>
+<time class=post-date datetime=2024-03-14T00:00:00Z>Mar 14, 2024</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/gsoc>#GSoC</a>
+</em>
+</li>
+<li>4 minute read</li>
+</ul>
+</aside>
+<p>The LLVM organization was accepted to participate in Google Summer of Code in 2024. Soon, prospective participants will begin submitting their project proposals, and mentors will review them to select those who will spend a significant amount of time this year contributing to various parts of LLVM.</p>
+<p>But first, let&rsquo;s look back and see what we had in 2023. The Google Summer of Code 2023 was very successful for the LLVM project. Overall, we received 54 proposals for 24 open projects. Out of this set of proposals, 20 projects were successfully completed and covered many different aspects of LLVM and its subprojects.</p>
+<ul>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/lAxUTgOM>ExtractAPI while building</a> by Ankur Saini, mentored by Daniel Grumberg</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/X0cFgJkY>WebAssembly Support for clang-repl</a> by Anubhab Ghosh, mentored by Vassil Vassilev and Alexander Penev</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/XvbLGMbT>Modules Build Daemon: Build System Agnostic Support for Explicitly Built Modules</a> by Connor Sughrue, mentored by Jan Svoboda, Michael Spencer</li>
+<li>[Interactive MLIR query tool to make exploring the IR easier] (<a href=https://summerofcode.withgoogle.com/archive/2023/projects/bdePp9VD>https://summerofcode.withgoogle.com/archive/2023/projects/bdePp9VD</a>) by Devajith Valaparambil Sreeramaswamy, mentored by Jacques Pienaar</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/JdqGUwNq>Improving Compile Times</a> by Dhruv Chawla, mentored by Nikita Popov</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/uBg3dUrw>Adding C++ Support to Clang&rsquo;s ExtractAPI</a> by Erick Velez, mentored by Daniel Grumberg</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/AtKA6GoV>Optimizing MLIR’s Presburger library</a> by gilsaia, mentored by Kunwar Grover</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/sc4OauXM>Adapting IR Load Semantics to Freeze All or Freeze Only Uninitialized Data</a> by John McIver, mentored by Nuno Lopes</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/a16FfPnb>Addressing Rust optimization failures in LLVM</a> by Kohei Asano, mentored by Nikita Popov</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/qxuEqL8W>Tutorial development with clang-repl</a> by Krishna Narayanan, mentored by Vassil Vassilev</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/oQUfcx89>Fix Handling of Undefined Behavior in NewGVN</a> by Manuel Brito, mentored by Nuno Lopes</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/JToY28Mf>Map LLVM values to corresponding source-level expressions</a> by phyBrackets, mentored by Satish Guggilla and Karthik Senthil</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/T8rB84Sr>Machine Learning Guided Ordering of Compiler Optimization Passes</a> by Puneeth A R, mentored by Tarindu Jayatilaka, Johannes Doerfert, and Mircea Trofin</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/TMnF4MqC>Patch based test coverage for quick test feedback</a> by ShivamGupta123, mentored by Henrik Olsson</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/4vqXC8Ez>Re-optimization using JITLink</a> by Sunho Kim, mentored by Vassil Vassilev, Stefan Gränitz, and Lang Hames</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/wxRFR261>Improvements in Clang Diagnostics</a> by Takuya Shimizu, mentored by Timm Bäder</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/Yofn8VfG>Build & Run SingleSource Benchmarks with ClangIR</a> by Vinicius Espindola, mentored by Bruno Cardoso Lopes and Nathan Lanza</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/wiTzRdnV>Better Performance Models for MLGO Training</a> by Viraj Shah, mentored by Mircea Trofin, Aiden Grossman, and Ondrej Sykora</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/ghJRTsUJ>Enhancing llvm-cov to Generate Hierarchical Coverage Reports</a> by Yuhao Gu, mentored by Petr Hosek and Gulfem Savrun Yeniceri</li>
+<li><a href=https://summerofcode.withgoogle.com/archive/2023/projects/Gxg82Pvd>Autocompletion in Clang-REPL</a> by Yuquan Fu, mentored by Vassil Vassilev</li>
+</ul>
+<p>Some projects also provided detailed end-of-project reports or project diaries that are outstanding on their own:</p>
+<ul>
+<li><a href=https://blog.llvm.org/posts/2023-10-5-tutorial-development-with-clang-repl/>Tutorial Development with Clang-Repl</a></li>
+<li><a href=ttps://blog.llvm.org/posts/2023-09-19-diagnostic-improvements-in-clang-17/>Diagnostic Improvements in Clang 17</a></li>
+<li><a href=https://dc03.github.io/>Improving Compile Times</a></li>
+<li><a href=https://khei4.github.io/gsoc2023/>Addressing Rust optimization failures in LLVM</a></li>
+<li><a href=https://blog.llvm.org/posts/2023-09-19-gsoc-2023-blog-post/>Map LLVM Values to corresponding source level expression</a></li>
+<li><a href=https://blog.llvm.org/posts/2023-12-31-compiler-research-internships-2023/>Another step forward towards interactive programming</a> - covers <em>Autocompletion in Clang-REPL</em>, <em>WebAssembly Support for Clang-Repl</em>, <em>Re-optimization using JITLink</em> and <em>Tutorial development with clang-repl</em> projects.</li>
+</ul>
+<h2 id=gsoc-2024>GSoC 2024</h2>
+<p>With a successful end to 2023, the LLVM Project is excited to participate in GSOC 2024. If you are interested in participating, here are some guidelines:</p>
+<h3 id=1-project-ideas>1. Project ideas</h3>
+<p>Please take a look on list of projects at <a href=https://llvm.org/OpenProjects.html#gsoc24>Open Projects</a> page. Projects also have topics below on <a href=https://discourse.llvm.org/tag/gsoc2024>LLVM Discourse</a> having #gsoc24 tag, so you can ask mentors about details of the project, skills required, etc.</p>
+<h3 id=2-way-to-submitting-a-proposal>2. Way to submitting a proposal</h3>
+<p>We encourage you to discuss your proposal before submitting to GSoC system. Having your proposal discussed ensures that your proposal will be well aligned with the project. Please do not hijack other threads (e.g. with mentor Q&A) and create a separate new thread to discuss your proposal. The ideal proposal will contain:</p>
+<ul>
+<li>A descriptive title</li>
+<li>Information about you, including contact information. Please do not forget to include:
+<ul>
+<li>Your prior compiler and compiler-related experience, if any (e.g. studies at the University, prior contributions)</li>
+<li>Whether you have any prior contributions to LLVM. If yes, please provide links to these contributions.</li>
+<li>Your past open source participation and contributions, if any</li>
+<li>Your knowledge of programming languages (e.g. C, C++, Python, Rust, etc.) and your estimate of your level of experience</li>
+</ul>
+</li>
+<li>Information about your proposed project. This should be fairly detailed and include a timeline.</li>
+<li>Information about other commitments that might affect your ability to work during the GSoC period (exams, classes, holidays, other jobs, weddings, etc.). Also, if the project allows both medium- and large-size participation, indicate the intended size of the project and the timeframe of your participation.</li>
+</ul>
+<h3 id=3-useful-links>3. Useful links</h3>
+<p><a href=https://llvm.org/docs/Contributing.html>LLVM Contribution Guidelines</a>
+<a href=https://llvm.org/docs/DeveloperPolicy.html>LLVM Developer Policy</a>
+<a href=https://discord.gg/ezbevd7tJC>GSoC channel on LLVM Discord</a>
+<a href=https://llvm.org/docs/GettingInvolved.html>Other documents</a>
+<a href=https://llvm.org/docs/CodeOfConduct.html>LLVM Community Code of Conduct</a>
+<a href=https://google.github.io/gsocguides/student/>GSoC Contributor Guide</a>
+<a href=https://developers.google.com/open-source/gsoc/help/%5Bstudent-advice>Advice for People Applying for GSoC</a>
+<a href=https://summerofcode.withgoogle.com/>GSoC Program Website</a>
+<a href=https://llvm.org/docs/GettingInvolved.html#office-hours>LLVM Office Hours</a></p>
+<h3 id=4-deadlines>4. Deadlines</h3>
+<ul>
+<li>Submission to GSoC system opens on March 18th at 18:00 UTC.</li>
+<li>Submission to GSoC system ends on April 2nd at 18:00 UTC.</li>
+<li>Results to be announced on May 1st at 18:00 UTC.</li>
+</ul>
+<p>Welcome to the 20th Google Summer of Code!</p>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/posts/2023-12-31-compiler-research-internships-2023/><i class="fa fa-chevron-circle-left"></i> Another step forward towards interactive programming</a>
+</li>
+<li>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
+Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>
