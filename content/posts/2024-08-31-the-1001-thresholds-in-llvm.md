@@ -9,7 +9,7 @@ Hey everyone! My name is Shourya and I worked on LLVM this summer through GSoC. 
 
 # Background
 
-LLVM has lots of thresholds and flags to avoid “costly cases”. However, it is unclear if these thresholds are useful, their value is reasonable, and what impact they really have. Since there are a lot, one cannot do a simple exhaustive search. An example of work in this direction includes the introduction of a C++ class that can replace hardcoded values which offers control over the threshold, e.g., one can increase the recursion limit via a command line flag from the hardcoded “6” to a different number. 
+LLVM has lots of thresholds and flags to avoid "costly cases". However, it is unclear if these thresholds are useful, their value is reasonable, and what impact they really have. Since there are a lot, one cannot do a simple exhaustive search. An example of work in this direction includes the introduction of a C++ class that can replace hardcoded values which offers control over the threshold, e.g., one can increase the recursion limit via a command line flag from the hardcoded "6" to a different number. As such there is a need to explore different thresholds in llvm, understand what it means for a threshold to be hit, profile different thresholds and select optimal values for different thresholds.
 
 # What We Did
 
@@ -49,7 +49,7 @@ In this project, we explored various thresholds in LLVM—specifically, 93 thres
 
 We also experimented with varying thresholds cumulatively by leveraging file-specific information through an LLVM pass. However, after discussions with the mentors, this approach was set aside due to the significant changes it would necessitate across other parts of the LLVM codebase.
 
-As a result, we have not yet categorized different thresholds, such as identifying optimal threshold values for specific file types (e.g., I/O-intensive files). Nonetheless, we provide substantial [statistical evidence](https://sh0g0-1758.github.io/GSOC-X-LLVM/) in the form of LLVM statistics, bitcode size, and compile-time graphs, as well as histograms that examine these variations on a per-file basis. Additionally, a correlation table between knob values and performance metrics further illustrates the significant impact this study could have on improving LLVM's overall performance.
+As a result, we have not yet categorized different thresholds, such as identifying optimal threshold values for specific file types (e.g., I/O-intensive files). Nonetheless, we provide substantial [statistical evidence](https://sh0g0-1758.github.io/GSOC-X-LLVM/oracle.html) in the form of LLVM statistics, bitcode size, and compile-time graphs, as well as histograms that examine these variations on a per-file basis. Additionally, a correlation table between knob values and performance metrics further illustrates the significant impact this study could have on improving LLVM's overall performance.
 
 # Future Work
 
@@ -61,6 +61,6 @@ This project would not have been possible without my amazing mentors, Jan Hücke
 # Links
 [Code](https://github.com/Sh0g0-1758/GSOC-X-LLVM/tree/oracle)
 
-[Graphs](https://sh0g0-1758.github.io/GSOC-X-LLVM/)
+[Studies](https://sh0g0-1758.github.io/GSOC-X-LLVM/)
 
 [GSoC Project Page](https://summerofcode.withgoogle.com/programs/2024/projects/MnheN07A)
