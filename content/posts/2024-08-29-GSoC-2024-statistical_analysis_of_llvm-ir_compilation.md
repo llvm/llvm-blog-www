@@ -9,15 +9,15 @@ Welcome! My name is Andrew and I contributed to LLVM through the 2024 Google Sum
 
 # Background
 
-In principle, an LLVM IR bitcode file, or module, contains IR features that determine the behavior of the compiler optimization pipeline. By varying these features, the optimization pipeline, opt, can perform better or worse. More specifically, optimizations succeed in less or more time; the user can wait for a microsecond or a few minutes. LLVM compiler developers constantly edit the pipeline, so the performance of these optimizations can vary by time (sometimes by seconds).
+In principle, an LLVM IR bitcode file, or module, contains IR features that determine the behavior of the compiler optimization pipeline. By varying these features, the optimization pipeline, opt, can perform better or worse. More specifically, optimizations succeed in less or more time; the user can wait for a microsecond or a few minutes. LLVM compiler developers constantly edit the pipeline, so the performance of these optimizations can vary by time (sometimes by several seconds).
 
-Having a large IR dataset such as ComPile (linked below) allows for testing the LLVM compilation pipeline on a varied sample of IR. The size of this sample is sufficient to determine outlying IR modules. By identifying and examining such files using utilities which are being added to the LLVM IR Dataset Utils Repo (linked below), the causes of unexpected compilation times can be determined. Developers can then modify and improve the compilation pipeline accordingly.
+Having a large IR dataset such as [ComPile](https://huggingface.co/datasets/llvm-ml/ComPile) allows for testing the LLVM compilation pipeline on a varied sample of IR. The size of this sample is sufficient to determine outlying IR modules. By identifying and examining such files using utilities which are being added to the [LLVM IR Dataset Utils Repo](https://github.com/llvm-ml/llvm-ir-dataset-utils), the causes of unexpected compilation times can be determined. Developers can then modify and improve the compilation pipeline accordingly.
 
 # Summary of Work
 
-The utilities added in PR37 (linked below) are intended to write each IR module to a tar file corresponding to a programming language. This is designed to be a multithreaded process that is agnostic to the number of files per language or the type of language. Executing the scripts correctly results in a file containing index values. Each file written to the tar files is indexed by its location in the HF dataset. The first file index begins at 1, so for N files, there are IR files from file1.bc to fileN.bc. 
+The utilities added in [PR37](https://github.com/llvm-ml/llvm-ir-dataset-utils/pull/37) are intended to write each IR module to a tar file corresponding to a programming language. This is designed to be a multithreaded process that is agnostic to the number of files per language or the type of language. Executing the scripts correctly results in a file containing index values. Each file written to the tar files is indexed by its location in the HF dataset. The first file index begins at 1, so for N files, there are IR files from file1.bc to fileN.bc. 
 
-The Makefile from PR36 (linked below) is responsible for carrying out the data collection. This data includes text segment size, user CPU instruction counts during compile time, IR feature counts sourced from LLVM function_analysis_properties, and maximum relative time pass names and percentage counts. The data can be extracted in parallel or serially, and is stored in a CSV file.
+The Makefile from [PR36](https://github.com/llvm-ml/llvm-ir-dataset-utils/pull/36) is responsible for carrying out the data collection. This data includes text segment size, user CPU instruction counts during compile time, IR feature counts sourced from LLVM function_analysis_properties, and maximum relative time pass names and percentage counts. The data can be extracted in parallel or serially and is stored in a CSV file.
 
 Below is a modified version of code taken from the Makefile, which specifically illustrates what and how data is generated from the IR files:
 
@@ -67,7 +67,7 @@ The visualization of this output can be filtered to the passes of interest as in
 # Current Status 
 
 Currently, there are three PRs that require approval to be merged. There has been ongoing discussion on their contents, so few steps should be left to merge them.
-In the current state, users of the dataset utils repository should be able to readily reproduce the quantitative results I had obtained for my midterm presentation graphs. Users can easily perform outlier analysis as well on the IR files (excluding Julia IR). Some of the results include the following:
+In the current state, users of the utilities in [PR38](https://github.com/llvm-ml/llvm-ir-dataset-utils/pull/38) should be able to readily reproduce the quantitative results I had obtained for my GSoC midterm presentation graphs. Users can easily perform outlier analysis as well on the IR files (excluding Julia IR). Some of the results include the following:
 
 Scatter Plot of C IR Files:
 
