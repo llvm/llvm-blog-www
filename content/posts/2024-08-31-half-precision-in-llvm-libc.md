@@ -35,11 +35,17 @@ The exact goals of this project were to:
 1. The `_Float16` type can now be used in generated headers, and declarations of
    `_Float16` math functions are generated with `#ifdef` guards to enable them
    when they are supported.
+   - https://github.com/llvm/llvm-project/pull/93567
 2. All 70 planned `_Float16` basic operations have been merged.
-3. The `double`, `float`, and `_Float16` type variants of various basic
-   operations have been optimized on certain architectures:
+   - https://github.com/llvm/llvm-project/issues/93566
+3. The `_Float16`, `float` and `double` variants of various basic operations
+   have been optimized on certain architectures.
+   - https://github.com/llvm/llvm-project/pull/98376
+   - https://github.com/llvm/llvm-project/pull/99037
+   - https://github.com/llvm/llvm-project/pull/100002
 4. Out of the 54 planned `_Float16` higher math functions, 8 have been merged
    and 9 have an open pull request.
+   - https://github.com/llvm/llvm-project/issues/95250
 
 We ran into unexpected issues, such as:
 
