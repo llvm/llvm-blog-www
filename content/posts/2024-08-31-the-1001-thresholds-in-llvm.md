@@ -45,6 +45,12 @@ We further show that the presence of an oracle that can tell the best knob value
   <img src="/img/the-1001-thresholds-in-llvm-2024-08-31-figure4.png"><br />
 </div>
 
+In this project, we explored various thresholds in LLVM—specifically, 93 thresholds using the Clang matcher—and observed that these thresholds are largely file-specific. This indicates that there is no universally optimal value, or even a set of values, that can be applied across different scenarios. Instead, what is needed is an adaptive mechanism within LLVM, an oracle, that can dynamically determine the appropriate threshold values during compilation.
+
+We also experimented with varying thresholds cumulatively by leveraging file-specific information through an LLVM pass. However, after discussions with the mentors, this approach was set aside due to the significant changes it would necessitate across other parts of the LLVM codebase.
+
+As a result, we have not yet categorized different thresholds, such as identifying optimal threshold values for specific file types (e.g., I/O-intensive files). Nonetheless, we provide substantial statistical evidence in the form of LLVM statistics, bitcode size, and compile-time graphs, as well as histograms that examine these variations on a per-file basis. Additionally, a correlation table between knob values and performance metrics further illustrates the significant impact this study could have on improving LLVM's overall performance.
+
 # Future Work
 
 The early results show that we need a better understanding of knob values to maximise various objectives. Our results will provide the community with the first step in developing a guided compilation model attune to the file that is being compiled. We further intend to show how these knobs interact with each other and whether modifying multiple knobs together compounds the benefits or not. One more area of work could be on [input-gen](https://llvm.org/devmtg/2024-04/slides/LightningTalks/Ivanov-AutomaticProxyAppGeneration.pdf) that would enable us to collect and study execution-time in our performance parameters.
