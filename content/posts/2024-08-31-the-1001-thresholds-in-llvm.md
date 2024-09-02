@@ -24,11 +24,11 @@ We built a clang matcher for which we looked for the following patterns :
 to first identify the knobs in the codebase and then use a custom python tool (optimised to deal with I/O and cache bottlenecks) to collect the different stat values in parallel and store them in a json file. After manual selection of interesting knobs, we have so far conducted three studies in which we measure compile-time and bitcode-size along with various other statistics, and present them in the form of interactive graphs. Two of them  (on 10,000 and 100 bitcode files) look at average statistics for each knob value while the third one (on 10,000 bitcode files) studies how each file is affected individually by changing knob values. We see some very interesting patterns in these graphs, for instance in the following two graphs, representing the jump-threading-threshold, we can observe improved statistics (top graph) and decreased average compile time (bottom graph) if the knob value is increased.
 
 <div style="max-width:600px; margin:0 auto;">
-  <img src="../../static/img/the-1001-thresholds-in-llvm-2024-08-31-figure1.png"><br />
+  <img src="/img/the-1001-thresholds-in-llvm-2024-08-31-figure1.png"><br />
 </div>
 
 <div style="max-width:600px; margin:0 auto;">
-  <img src="../../static/img/the-1001-thresholds-in-llvm-2024-08-31-figure2.png"><br />
+  <img src="/img/the-1001-thresholds-in-llvm-2024-08-31-figure2.png"><br />
 </div>
 
 # Results
@@ -36,13 +36,13 @@ to first identify the knobs in the codebase and then use a custom python tool (o
 The per file study proves that there is no one single magic knob value and the optimum, with regards to compile time or code size, depends on the file that is currently being compiled. For instance here we can see that different knob values (for the knob licm-mssa-optimization-cap) give good cumulative compile time improvements for different files. In detail, most files benefit from a knob value of 300 while 60 is the best knob value for the second most files.  
 
 <div style="max-width:600px; margin:0 auto;">
-  <img src="../../static/img/the-1001-thresholds-in-llvm-2024-08-31-figure3.png"><br />
+  <img src="/img/the-1001-thresholds-in-llvm-2024-08-31-figure3.png"><br />
 </div>
 
 We further show that the presence of an oracle that can tell the best knob value for each file can significantly improve the cumulative compile time. 
 
 <div style="max-width:600px; margin:0 auto;">
-  <img src="../../static/img/the-1001-thresholds-in-llvm-2024-08-31-figure4.png"><br />
+  <img src="/img/the-1001-thresholds-in-llvm-2024-08-31-figure4.png"><br />
 </div>
 
 # Future Work
