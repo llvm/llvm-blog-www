@@ -15,7 +15,7 @@ Hello everyone! I'm 7mile. My GSoC project this summer is [Compile GPU kernels u
 
 Our work involved several key areas:
 
-1. **Address Space Support**: One of the fundamental tasks was teaching ClangIR to handle address spaces, a vital feature for languages like OpenCL. Initially, we considered mimicking LLVM's approach, but this proved inadequate for ClangIR's goals. After thorough discussion and an RFC, we implemented a unified address space design that aligns with ClangIR's objectives, ensuring a clean and maintainable code structure.
+1. **Address Space Support**: One of the fundamental tasks was teaching ClangIR to handle address spaces, a vital feature for languages like OpenCL. Initially, we considered mimicking LLVM's approach, but this proved inadequate for ClangIR's goals. After thorough discussion and an [RFC](https://discourse.llvm.org/t/rfc-clangir-unified-address-space-design-in-clangir/79728), we implemented a unified address space design that aligns with ClangIR's objectives, ensuring a clean and maintainable code structure.
 
 2. **OpenCL Language and SPIR-V Target Integration**: We extended ClangIR to support the OpenCL language and the SPIR-V target. This involved enhancing the pipeline to accommodate the latest OpenCL 3.0 specification and implementing hooks for language-specific and target-specific customizations.
 
