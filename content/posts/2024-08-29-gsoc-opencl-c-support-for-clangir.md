@@ -1,6 +1,6 @@
 ---
 author: "Zhi Ma (7mile)"
-date: "2024-08-29"
+date: "2024-09-09"
 tags: ["GSoC", "OpenCL", "ClangIR"]
 title: "GSoC 2024: Compile GPU kernels using ClangIR"
 ---
