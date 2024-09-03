@@ -33,7 +33,7 @@ Our work involved several key areas:
 
 The project successfully met its primary goals. OpenCL kernels from the Polybench-GPU benchmark suite can now be compiled using ClangIR into LLVM IR for SPIR-V. All patches have been merged into the main ClangIR repository, and the project’s progress has been well-documented in the [overview issue](https://github.com/llvm/clangir/issues/689). I believe the work not only advanced OpenCL support but also laid a solid foundation for future enhancements, such as SYCL and CUDA support in ClangIR.
 
-We have successfully compiled and passed all 20 OpenCL C test cases from the [polybenchGpu](https://github.com/sgrauerg/polybenchGpu) repository. Please refer to our [artifact evaluation repository](https://github.com/seven-mile/clangir-ocl-ae) for detailed instructions on how to experiment with our work.
+We have successfully compiled and executed all 20 OpenCL C benchmarks from the [polybenchGpu](https://github.com/sgrauerg/polybenchGpu) repository, passing the built-in result validation. Please refer to our [artifact evaluation repository](https://github.com/seven-mile/clangir-ocl-ae) for detailed instructions on how to experiment with our work.
 
 # Future Works
 
