@@ -1,6 +1,6 @@
 ---
 author: "Manuel Brito"
-date: "2024-09-01"
+date: "2024-09-16"
 tags: ["GSoC", "optimization"]
 title: "GSoC 2024: Reviving NewGVN"
 ---
