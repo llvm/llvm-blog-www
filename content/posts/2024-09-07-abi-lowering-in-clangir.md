@@ -6,10 +6,10 @@ title: "GSoC 2024: ABI Lowering in ClangIR"
 ---
 
 ClangIR is an ongoing effort to build a high-level intermediate representation
-(IR) for C++ within the LLVM ecosystem. Its key advantage lies in its ability to
-retain more source code information. While ClangIR is making progress, it still
-lacks certain features, notably ABI handling. Currently, ClangIR lowers most
-functions without accounting for ABI-specific calling convention details.
+(IR) for C/C++ within the LLVM ecosystem. Its key advantage lies in its ability
+to retain more source code information. While ClangIR is making progress, it
+still lacks certain features, notably ABI handling. Currently, ClangIR lowers
+most functions without accounting for ABI-specific calling convention details.
 
 ## Goals
 
@@ -91,6 +91,6 @@ including:
 
 ## Acknowledgements
 
-I would like to thank my Google Summer of Code mentors, Bruno Cardoso and Nathan
-Lanza, for another great GSoC experience. I also want to thank the LLVM
+I would like to thank my Google Summer of Code mentors, Bruno Cardoso Lopes and
+Nathan Lanza, for another great GSoC experience. I also want to thank the LLVM
 community and Google for organizing the program.
