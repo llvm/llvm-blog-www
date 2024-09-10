@@ -17,14 +17,14 @@ Over the course of the project I have added two new intrinsics to the LLVM IR: `
 
 In the middle-end the following passes received some support for these intrinsics:
 
-  * InstSimplify
-  * InstCombine
-  * CorrelatedValuePropagation
-  * ConstraintElimination
+  * InstSimplify ([#1](https://github.com/llvm/llvm-project/pull/93730), [#2](https://github.com/llvm/llvm-project/pull/95601))
+  * InstCombine ([#1](https://github.com/llvm/llvm-project/pull/96118), [#2](https://github.com/llvm/llvm-project/pull/98360), [#3](https://github.com/llvm/llvm-project/pull/101049), [#4](https://github.com/llvm/llvm-project/pull/105272), [#5](https://github.com/llvm/llvm-project/pull/105583))
+  * [CorrelatedValuePropagation](https://github.com/llvm/llvm-project/pull/97235)
+  * [ConstraintElimination](https://github.com/llvm/llvm-project/pull/97974)
 
 I have also added folds of idiomatic ways that a 3-way comparison can be expressed to a call to the corresponding intrinsic.
 
-In the backend there are two different ways of expanding the intrinsics: as a nested select (i.e. `(x < y) ? -1 : (x > y ? 1 : 0)`) or as a subtraction of zero-extended comparisons (`zext(x > y) - zext(x < y)`). The first option is the default one, but targets can choose to use the second one through a TLI hook.
+In the backend there are two different ways of expanding the intrinsics: [as a nested select](https://github.com/llvm/llvm-project/pull/91871) (i.e. `(x < y) ? -1 : (x > y ? 1 : 0)`) or [as a subtraction of zero-extended comparisons](https://github.com/llvm/llvm-project/pull/98774) (`zext(x > y) - zext(x < y)`). The first option is the default one, but targets can choose to use the second one through a TLI hook.
 
 # Results
 
