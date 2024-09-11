@@ -5,43 +5,21 @@ tags: ["GSoC", "llvm-ir-dataset-utils", "ComPile", "analysis"]
 title: "GSoC 2024: Statistical Analysis of LLVM-IR Compilation"
 ---
 
-Welcome! My name is Andrew and I contributed to LLVM through the 2024 Google Summer of Code Program. My project is called [Statistical Analysis of LLVM-IR Compilation](https://summerofcode.withgoogle.com/programs/2024/projects/hquDyVBK). The objective of this project is to provide an analysis of the causes of unexpected compilation times.
+Welcome! My name is Andrew and I contributed to LLVM through the 2024 Google Summer of Code Program. My project is called [Statistical Analysis of LLVM-IR Compilation](https://summerofcode.withgoogle.com/programs/2024/projects/hquDyVBK). The objective of this project is to provide an analysis of how time is spent in the optimization pipeline. Generally, drastic differences in the percentage of time spent by a pass in the pipeline is considered abnormal.
 
 # Background
 
-In principle, an LLVM IR bitcode file, or module, contains IR features that determine the behavior of the compiler optimization pipeline. By varying these features, the optimization pipeline, opt, can perform better or worse. More specifically, optimizations succeed in less or more time; the user can wait for a microsecond or a few minutes. LLVM compiler developers constantly edit the pipeline, so the performance of these optimizations can vary by time (sometimes by several seconds).
+In principle, an LLVM IR bitcode file, or module, contains IR features that determine the behavior of the compiler optimization pipeline. By varying these features, the optimization pipeline, opt, can add significantly to the compilation time or marginally. More specifically, optimizations succeed in less or more time; the user can wait for a microsecond or a few minutes. LLVM compiler developers constantly edit the pipeline, so the performance of these optimizations can vary by compiler version (sometimes significantly).
 
 Having a large IR dataset such as [ComPile](https://huggingface.co/datasets/llvm-ml/ComPile) allows for testing the LLVM compilation pipeline on a varied sample of IR. The size of this sample is sufficient to determine outlying IR modules. By identifying and examining such files using utilities which are being added to the [LLVM IR Dataset Utils Repo](https://github.com/llvm-ml/llvm-ir-dataset-utils), the causes of unexpected compilation times can be determined. Developers can then modify and improve the compilation pipeline accordingly.
 
 # Summary of Work
 
-The utilities added in [PR37](https://github.com/llvm-ml/llvm-ir-dataset-utils/pull/37) are intended to write each IR module to a tar file corresponding to a programming language. This is designed to be a multithreaded process that is agnostic to the number of files per language or the type of language. Executing the scripts correctly results in a file containing index values. Each file written to the tar files is indexed by its location in the HF dataset. The first file index begins at 1, so for N files, there are IR files from file1.bc to fileN.bc. 
+The utilities added in [PR37](https://github.com/llvm-ml/llvm-ir-dataset-utils/pull/37) are intended to write each IR module to a tar file corresponding to a programming language. Each file written to the tar files is indexed by its location in the HF dataset. This allows easy identification of files for tools which can be used for data extraction and analysis in the shell, notably clang. Tar file creation allows for potentially using less storage space then downloading the HF dataset to disk, and it allows code to be written which does not depend on the Python interpreter to load the dataset for access.
 
-The Makefile from [PR36](https://github.com/llvm-ml/llvm-ir-dataset-utils/pull/36) is responsible for carrying out the data collection. This data includes text segment size, user CPU instruction counts during compile time, IR feature counts sourced from LLVM function_analysis_properties, and maximum relative time pass names and percentage counts. The data can be extracted in parallel or serially and is stored in a CSV file.
+The Makefile from [PR36](https://github.com/llvm-ml/llvm-ir-dataset-utils/pull/36) is responsible for carrying out the data collection. This data includes text segment size, user CPU instruction counts during compile time (analogous to time), IR feature counts sourced from the LLVM pass `print<func-properties>`, and maximum relative time pass names and percentage counts. The data can be extracted in parallel or serially and is stored in a CSV file.
 
-Below is a modified version of code taken from the Makefile, which specifically illustrates what and how data is generated from the IR files:
-
-```shell
-#file$@.bc means fileX.bc, where is X is a positive integer.
-#$(lang) is the directory name for the given IR language (e.g., rust)
-perf stat --no-big-num -e instructions:u -o \
-		$(lang)/perf_stat_files/file$@.txt \
-		clang -O3 -c $(lang)/bc_files/file$@.bc \
-		-o $(lang)/object_files/file$@.o
-
-awk '/instructions/ {print $$1}' \
-		$(lang)/perf_stat_files/file$@.txt
-
-llvm-size $(lang)/object_files/file$@.o | awk 'NR==2 {print $$1}'
-
-python3 -m llvm_ir_dataset_utils.compile_time_analysis_tools.write_ir_counts \
-		$(lang)/bc_files/file$@.bc
-
-clang -w -c -ftime-report $(lang)/bc_files/file$@.bc -o /dev/null 2>&1 | \
-		awk '!/ignoring feature/' | awk 'NR==7 {print $$(NF-1) ", " $$NF}' | sed 's/%)//'
-```
-
-The last data collection command includes `clang -w -c -ftime-report $(lang)/bc_files/file$@.bc -o /dev/null`. The output from the command is large, but the part of interest is the first `Pass execution timing report`: 
+An important data collection command in the Makefile is `clang -w -c -ftime-report $(lang)/bc_files/file$@.bc -o /dev/null`. The output from the command is large, but the part of interest is the first `Pass execution timing report`: 
 
 ```text
 ===-------------------------------------------------------------------------===
@@ -63,6 +41,8 @@ A user can visually see the distribution of these passes by using a profiling to
 The visualization of this output can be filtered to the passes of interest as in the following image:
 
 {{< figure src="/img/file4504_pass_trace.png" alt="ftime-trace of C IR Outlier" >}}
+
+The CoroConditionalWrapper pass is accounted by the "Total CoroConditionalWrapper" block. Clearly, that pass takes a far smaller amount of time than the others, as accounted for by the pass execution timing report. However, instead of seeing the pass as an insignificant percentage of time, the visualization allows for additional comparisons of the relative timings of each pass. The example image has the optimization passes of interest selected, but the .json file provides information on the entire compilation pipeline as well. Thus, the entire pipeline execution flow can be visualized.
 
 # Current Status 
 
