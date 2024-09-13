@@ -64,6 +64,8 @@ It was discussed in PR 37 to consolidate the tar file creation into the dataset 
 As mentioned, Julia IR was not analyzed. Modifying the scripts to include Julia IR results is desirable to make complete use of the dataset.
 Adding additional documentation for demonstration-of-use purposes could help clarify ways to use the tools.
 
+Additionally, outlier analysis can be expanded upon by using more advanced outlier detection methods. Not all the data collected in the CSV files was used, so using those extra features--in particular the `print<func-properties>` pass--can allow for improved accuracy in outlier detection.
+
 
 # Acknowledgements
 
