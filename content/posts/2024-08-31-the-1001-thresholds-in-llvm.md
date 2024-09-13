@@ -49,7 +49,7 @@ In this project, we explored various thresholds in LLVM—specifically, 93 thres
 
 We also experimented with varying thresholds cumulatively by leveraging file-specific information through an LLVM pass. However, after discussions with the mentors, this approach was set aside due to the significant changes it would necessitate across other parts of the LLVM codebase.
 
-As a result, we have not yet categorized different thresholds, such as identifying optimal threshold values for specific file types (e.g., I/O-intensive files). Nonetheless, we provide substantial [statistical evidence](https://sh0g0-1758.github.io/GSOC-X-LLVM/oracle.html) in the form of LLVM statistics, bitcode size, and compile-time graphs, as well as histograms that examine these variations on a per-file basis. Additionally, a correlation table between knob values and performance metrics further illustrates the significant impact this study could have on improving LLVM's overall performance.
+As a result, we have not yet categorized different thresholds, such as identifying optimal threshold values for specific file types (e.g., I/O-intensive files). Nonetheless, we provide a tool that can efficiently collect this data (LLVM statistics, bitcode-size and compile-time) and help visualize it with the help of interactive graphs as well as histograms that examine these variations on a per-file basis. Additionally, a correlation table between knob values and performance metrics further illustrates the significant impact this study could have on improving LLVM's overall performance.
 
 # Future Work
 
