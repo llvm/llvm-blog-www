@@ -45,7 +45,7 @@ We further show that the presence of an oracle that can tell the best knob value
   <img src="/img/the-1001-thresholds-in-llvm-2024-08-31-figure4.png"><br />
 </div>
 
-In this project, we explored various thresholds in LLVM—specifically, 93 thresholds using the Clang matcher—and observed that these thresholds are largely file-specific. This indicates that there is no universally optimal value, or even a set of values, that can be applied across different scenarios. Instead, what is needed is an adaptive mechanism within LLVM, an oracle, that can dynamically determine the appropriate threshold values during compilation.
+In this project, we explored various thresholds in LLVM—specifically, 93 thresholds (a 100 file study for each can be found [here](https://sh0g0-1758.github.io/GSOC-X-LLVM/100.html)) using the Clang matcher—and observed that these thresholds are largely file-specific. This indicates that there is no universally optimal value, or even a set of values, that can be applied across different scenarios. Instead, what is needed is an adaptive mechanism within LLVM, an oracle, that can dynamically determine the appropriate threshold values during compilation.
 
 We also experimented with varying thresholds cumulatively by leveraging file-specific information through an LLVM pass. However, after discussions with the mentors, this approach was set aside due to the significant changes it would necessitate across other parts of the LLVM codebase.
 
