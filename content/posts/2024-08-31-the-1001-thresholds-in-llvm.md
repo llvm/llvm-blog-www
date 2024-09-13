@@ -13,15 +13,15 @@ LLVM has lots of thresholds and flags to avoid "costly cases". However, it is un
 
 # What We Did
 
-This work explores these knobs, when they are hit, what it means if they are hit, how we should select their values, and if we need more than one value to maximise an object function, e.g., metrics like compile time, size of the generated program, or any statistic that LLVM emits like “Number of loops vectorized”. (Note that execution-time is currently not evaluated because input-gen does not work on optimized IR and is thus part of future work.)
+This work provides a tool that can efficiently explore these knobs and understand how modifying them affects metrics like compile time, size of the generated program, or any statistic that LLVM emits like “Number of loops vectorized”. (Note that execution-time is currently not evaluated because input-gen does not work on optimized IR and is thus part of future work.)
 
-We built a clang matcher for which we looked for the following patterns : 
+We first built a clang matcher for which we looked for the following patterns : 
 
 1. Const knob_name = knob_val
 2. Cl::init
 3. Enum {knob_name = knob_val} 
 
-to first identify the knobs in the codebase and then use a custom python tool (optimised to deal with I/O and cache bottlenecks) to collect the different stat values in parallel and store them in a json file. After manual selection of interesting knobs, we have so far conducted three studies in which we measure compile-time and bitcode-size along with various other statistics, and present them in the form of interactive graphs. Two of them  (on 10,000 and 100 bitcode files) look at average statistics for each knob value while the third one (on 10,000 bitcode files) studies how each file is affected individually by changing knob values. We see some very interesting patterns in these graphs, for instance in the following two graphs, representing the jump-threading-threshold, we can observe improved statistics (top graph) and decreased average compile time (bottom graph) if the knob value is increased.
+to first identify the knobs in the codebase and then used a custom python tool (optimised to deal with I/O and cache bottlenecks) to collect the different stat values in parallel and stored them in a json file. After manual selection of interesting knobs, we have so far conducted three studies in which we measure compile-time and bitcode-size along with various other statistics, and present them in the form of interactive graphs. Two of them  (on 10,000 and 100 bitcode files) look at average statistics for each knob value while the third one (on 10,000 bitcode files) studies how each file is affected individually by changing knob values. We see some very interesting patterns in these graphs, for instance in the following two graphs, representing the jump-threading-threshold, we can observe improved statistics (top graph) and decreased average compile time (bottom graph) if the knob value is increased.
 
 <div style="max-width:600px; margin:0 auto;">
   <img src="/img/the-1001-thresholds-in-llvm-2024-08-31-figure1.png"><br />
