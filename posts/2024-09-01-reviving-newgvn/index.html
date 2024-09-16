@@ -1,0 +1,215 @@
+<!doctype html><html lang=en>
+<head>
+<title>GSoC 2024: Reviving NewGVN - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Manuel Brito"><meta property="og:title" content="GSoC 2024: Reviving NewGVN">
+<meta property="og:description" content="This summer I participated in GSoC under the LLVM Compiler Infrastructure. The goal of the project was to improve the NewGVN pass so that it can replace GVN as the main value numbering pass in LLVM.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/posts/2024-09-01-reviving-newgvn/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2024-09-16T00:00:00+00:00">
+<meta property="article:modified_time" content="2024-09-16T00:00:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="GSoC 2024: Reviving NewGVN">
+<meta name=twitter:description content="This summer I participated in GSoC under the LLVM Compiler Infrastructure. The goal of the project was to improve the NewGVN pass so that it can replace GVN as the main value numbering pass in LLVM.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>GSoC 2024: Reviving NewGVN</h1>
+<aside>
+<ul>
+<li>By Manuel Brito</li>
+<li>
+<time class=post-date datetime=2024-09-16T00:00:00Z>Sep 16, 2024</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/gsoc>#GSoC</a>
+,
+<a href=https://blog.llvm.org/tags/optimization>#optimization</a>
+</em>
+</li>
+<li>6 minute read</li>
+</ul>
+</aside>
+<p>This summer I participated in GSoC under the LLVM Compiler Infrastructure. The goal of the project was to improve the NewGVN pass so that it can replace GVN as the main value numbering pass in LLVM.</p>
+<h1 id=background>Background</h1>
+<p>Global Value Numbering (GVN) consists of assigning value numbers such that instructions with the same value number are equivalent. NewGVN was introduced in 2016 to replace GVN. We now highlight a few aspects in which NewGVN is better than GVN.</p>
+<p>A key advantage of NewGVN over GVN is that it is complete for loops, while GVN is only complete for acyclical code. NewGVN is complete for loops because when it first processes loops, it assumes that only the first iteration will be executed, later corroborating these assumptions—this is known as the optimistic assumption. In practice, the optimistic assumption boils down to assuming that backedges are unreachable and, consequently, that when evaluating phi instructions, the values carried by them can be ignored. For instance, in the example below, <code>%a</code> is optimistically evaluated to <code>0</code>. This leads to evaluating <code>%c</code> to <code>%x</code>, which in turn leads to evaluating <code>%a.i</code> to <code>0</code>. At this point, there are two possibilities: either the assumption was correct and the loop actually only executes once, and the value numbers computed so far are correct, or the instructions in the loop need to be reevaluated. Assume, for this example, that NewGVN could not prove that only one iteration is executed. Then <code>%a</code> once again evaluates to <code>0</code>, and all other registers also evaluate to the same. Thanks to the optimistic assumption, we were able to discover that <code>%a</code> is loop-invariant and, moreover, that it is equal to <code>0</code>.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-llvm data-lang=llvm><span style=color:#66d9ef>define</span> <span style=color:#66d9ef>i32</span> @optimistic(<span style=color:#66d9ef>i32</span> %x, <span style=color:#66d9ef>i32</span> %y){
+entry:
+  <span style=color:#66d9ef>br</span> <span style=color:#66d9ef>label</span> %loop
+loop:
+  %a = <span style=color:#66d9ef>phi</span> <span style=color:#66d9ef>i32</span> [<span style=color:#ae81ff>0</span>, %entry], [%a.i, %loop]
+  ...
+  %c = <span style=color:#66d9ef>xor</span> <span style=color:#66d9ef>i32</span> %x, %a
+  %a.i = <span style=color:#66d9ef>sub</span> <span style=color:#66d9ef>i32</span> %x, %c
+  <span style=color:#66d9ef>br</span> <span style=color:#66d9ef>i1</span> ..., <span style=color:#66d9ef>label</span> %loop,<span style=color:#66d9ef>label</span> %exit
+exit:
+  <span style=color:#66d9ef>ret</span> <span style=color:#66d9ef>i32</span> %a
+}
+</code></pre></div><p>On the other hand, GVN fails to detect this equivalence because it would pessimistically evaluate <code>%a</code> to itself, and the previously described evaluation steps would never take place.</p>
+<p>Another advantage of NewGVN is the value numbering of memory operations using <a href=https://releases.llvm.org/14.0.0/docs/MemorySSA.html>MemorySSA</a>. It provides a functional view of memory where instructions that can modify memory produce a new memory version, which is then used by other memory operations. This greatly simplifies the detection of redundancies among memory operations. For example, two loads of the same type from equivalent pointers and memory versions are trivially equivalent.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-llvm data-lang=llvm><span style=color:#66d9ef>define</span> <span style=color:#66d9ef>i32</span> @foo(<span style=color:#66d9ef>i32</span> %v, <span style=color:#960050;background-color:#1e0010>ptr</span> %p) {
+entry:
+<span style=color:#75715e>; 1 = MemoryDef(liveOnEntry)
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>store</span> <span style=color:#66d9ef>i32</span> %v, <span style=color:#960050;background-color:#1e0010>ptr</span> %p, <span style=color:#66d9ef>align</span> <span style=color:#ae81ff>4</span>
+<span style=color:#75715e>; MemoryUse(1)
+</span><span style=color:#75715e></span>  %a = <span style=color:#66d9ef>load</span> <span style=color:#66d9ef>i32</span>, <span style=color:#960050;background-color:#1e0010>ptr</span> %p, <span style=color:#66d9ef>align</span> <span style=color:#ae81ff>4</span>
+<span style=color:#75715e>; MemoryUse(1)
+</span><span style=color:#75715e></span>  %b = <span style=color:#66d9ef>load</span> <span style=color:#66d9ef>i32</span>, <span style=color:#960050;background-color:#1e0010>ptr</span> %p, <span style=color:#66d9ef>align</span> <span style=color:#ae81ff>4</span>
+<span style=color:#75715e>; 2 = MemoryDef(1)
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>call</span> <span style=color:#66d9ef>void</span> @f(<span style=color:#66d9ef>i32</span> %a)
+<span style=color:#75715e>; MemoryUse(2)
+</span><span style=color:#75715e></span>  %c = <span style=color:#66d9ef>load</span> <span style=color:#66d9ef>i32</span>, <span style=color:#960050;background-color:#1e0010>ptr</span> %p, <span style=color:#66d9ef>align</span> <span style=color:#ae81ff>4</span>
+  %d = <span style=color:#66d9ef>sub</span> <span style=color:#66d9ef>i32</span> %b, %c
+  <span style=color:#66d9ef>ret</span> <span style=color:#66d9ef>i32</span> %d
+}
+</code></pre></div><p>In the example above (annotated with MemorySSA), <code>%a</code> and <code>%b</code> are equivalent, while <code>%c</code> is not. All three loads are of the same type from the same pointer, but they don&rsquo;t all load from the same memory state. Loads <code>%a</code> and <code>%b</code> load from the memory defined by the store (Memory <code>1</code>), while <code>%c</code> loads from the memory defined by the function call (Memory <code>2</code>). GVN can also detect these redundancies, but it relies on the more expensive and less general MemoryDependenceAnalysis.</p>
+<p>Despite these and other improvements NewGVN is still not widely used, mainly because it lacks partial redundancy elimination (PRE) and because it is bug-ridden.</p>
+<h1 id=implementing-pre>Implementing PRE</h1>
+<p>Our main contribution was the development of a PRE stage for NewGVN (<a href=https://github.com/ManuelJBrito/llvm-project/tree/Benchmarks>found here</a>). Our solution relied on generalizing Phi-of-Ops. It performs a special case of PRE where the instruction depends on a phi instruction, and an equivalent value is available on every reaching path. This is achieved in two steps: phi-translation and phi-insertion.</p>
+<p>Phi-translation consists of evaluating the original instruction in the context of each of its block&rsquo;s predecessors. Phi operands are replaced by the value incoming from the predecessor. The value is available in the predecessor if the translated instruction is equivalent to a constant, function argument, or another instruction that dominates the predecessor.</p>
+<p>Phi-insertion occurs after phi-translation if the value is available in every predecessor. At that point, a phi of the equivalent values is constructed and used to replace the original instruction. The full process is illustrated in the following example.</p>
+<div style="margin:0 auto">
+<img src=https://blog.llvm.org/img/reviving-newgvn-phiofops.png><br>
+</div>
+<p>Our generalization eliminated the need for a dependent phi and introduced the ability to insert the missing values in cases where the instruction is partially redundant. To prevent increases in code size (ignoring the inserted phi instructions), the insertion is only made if it’s the only one required. The full process is illustrated in the following example.</p>
+<div style="margin:0 auto">
+<img src=https://blog.llvm.org/img/reviving-newgvn-pre.png><br>
+</div>
+<p>Integrating PRE into the existing framework also allowed us to gain loop-invariant code motion (LICM) for free. The optimistic assumption, combined with PRE, allows NewGVN to speculatively hoist instructions out of loops. On the other hand, LICM in GVN relies on using LoopInfo and can only handle very specific cases.</p>
+<h1 id=missing-features>Missing Features</h1>
+<p>The two main features our PRE implementation lacks are critical edge splitting and load coercion. Critical edge splitting is required to ensure that we do not insert instructions into paths where they won&rsquo;t be used. Currently, our implementation simply bails in such cases. Load coercion allows us to detect equivalences of loaded values with different types, such as loads of <code>i32</code> and <code>float</code>, and then coerce the loaded type using conversion operations.</p>
+<p>The difficulty in implementing these features is that NewGVN is designed to perform analysis and transformation in separate steps, while these features involve modifying the function during the analysis phase.</p>
+<h1 id=results>Results</h1>
+<p>We evaluated our implementation using the automated benchmarking tool <a href=https://www.phoronix-test-suite.com/>Phoronix Test Suite</a> from which we selected a set of 20 C/C++ applications (listed below).</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aircrack-ng</td>
+<td>encode-flac</td>
+<td>luajit</td>
+<td>scimark2</td>
+</tr>
+<tr>
+<td>botan</td>
+<td>espeak</td>
+<td>mafft</td>
+<td>simdjson</td>
+</tr>
+<tr>
+<td>zstd</td>
+<td>fftw</td>
+<td>ngspice</td>
+<td>sqlite-speedtest</td>
+</tr>
+<tr>
+<td>crafty</td>
+<td>john-the-ripper</td>
+<td>quantlib</td>
+<td>tjbench</td>
+</tr>
+<tr>
+<td>draco</td>
+<td>jpegxl</td>
+<td>rnnoise</td>
+<td>graphics-magick</td>
+</tr>
+</tbody>
+</table>
+<p>The default <code>-O2</code> pipeline was used. The only change betweeen compilations was the value numbering pass used.</p>
+<p>Despite the missing features, we observed that our implementation, on average, performs 0.4% better than GVN. However, it is important to mention that our solution hasn&rsquo;t been fine-tuned to consider the rest of the optimization pipeline, which resulted in some cases where our implementation regressed compared to both GVN and the existing NewGVN. The most severe case was with jpegxl, where our implementation, on average, performed 10% worse than GVN. It&rsquo;s important to note that this was an outlier; excluding jpegxl, most regressions were at most 2%. Unfortunately, due to time constraints, we were unable to study these cases in more detail.</p>
+<h1 id=future-work>Future Work</h1>
+<p>In the future, we plan to implement the aforementioned missing features and fine-tune the heuristics for when to perform PRE to prevent the regressions discussed in the results section. Once these issues are addressed, we&rsquo;ll upstream our implementation, bringing us a step closer to reviving NewGVN.</p>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/posts/2024-08-29-gsoc-opencl-c-support-for-clangir/><i class="fa fa-chevron-circle-left"></i> GSoC 2024: Compile GPU kernels using ClangIR</a>
+</li>
+<li>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
+Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>
