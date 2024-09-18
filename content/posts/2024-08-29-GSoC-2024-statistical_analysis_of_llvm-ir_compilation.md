@@ -1,6 +1,6 @@
 ---
 author: "Andrew Kallai"
-date: "2024-08-29"
+date: "2024-09-23"
 tags: ["GSoC", "llvm-ir-dataset-utils", "ComPile", "analysis"]
 title: "GSoC 2024: Statistical Analysis of LLVM-IR Compilation"
 ---
