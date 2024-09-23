@@ -9,11 +9,11 @@ Hello everyone! My name is Volodymyr, and in this post I would like to talk abou
 
 # Background
 
-Three-way comparison is an operation present in many high-level languages, such as C++ and its starhip operator or Rust and the `Ord` trait. It operates on two values for which there is a defined comparison operation and returns `-1` if the first operand is less than the second, `0` if they are equal, and `1` otherwise. At the moment, compilers that use LLVM express this operation using different sequences of instructions which are optimized and lowered individually rather than as a single operation. Adding an intrinsic for this operation would therefore help us generate better machine code on some targets, as well as potentially optimize patterns in the middle-end that we didn't optimize before.
+Three-way comparison is an operation present in many high-level languages, such as C++ and its spaceship operator or Rust and the `Ord` trait. It operates on two values for which there is a defined comparison operation and returns `-1` if the first operand is less than the second, `0` if they are equal, and `1` otherwise. At the moment, compilers that use LLVM express this operation using different sequences of instructions which are optimized and lowered individually rather than as a single operation. Adding an intrinsic for this operation would therefore help us generate better machine code on some targets, as well as potentially optimize patterns in the middle-end that we didn't optimize before.
 
 # What was done
 
-Over the course of the project I have added two new intrinsics to the LLVM IR: `llvm.ucmp` for an unsigned 3-way comparison and `llvm.scmp` for a signed comparison. They both take two arguments that must be integers or vectors of integers and return an integer or a vector of integers with the same number of elements. The  arguments and the result do not need to have the same type.
+Over the course of the project I have added two new intrinsics to the LLVM IR: `llvm.ucmp` for an unsigned 3-way comparison and `llvm.scmp` for a signed comparison. They both take two arguments that must be integers or vectors of integers and return an integer or a vector of integers with the same number of elements. The arguments and the result do not need to have the same type.
 
 In the middle-end the following passes received some support for these intrinsics:
 
@@ -24,11 +24,11 @@ In the middle-end the following passes received some support for these intrinsic
 
 I have also added folds of idiomatic ways that a 3-way comparison can be expressed to a call to the corresponding intrinsic.
 
-In the backend there are two different ways of expanding the intrinsics: [as a nested select](https://github.com/llvm/llvm-project/pull/91871) (i.e. `(x < y) ? -1 : (x > y ? 1 : 0)`) or [as a subtraction of zero-extended comparisons](https://github.com/llvm/llvm-project/pull/98774) (`zext(x > y) - zext(x < y)`). The first option is the default one, but targets can choose to use the second one through a TLI hook.
+In the backend there are two different ways of expanding the intrinsics: [as a nested select](https://github.com/llvm/llvm-project/pull/91871) (i.e. `(x < y) ? -1 : (x > y ? 1 : 0)`) or [as a subtraction of zero-extended comparisons](https://github.com/llvm/llvm-project/pull/98774) (`zext(x > y) - zext(x < y)`). The second option is the default one, but targets can choose to use the second one through a TLI hook.
 
 # Results
 
-I think that overall the project was succesful and brought a small positive change to LLVM. To demonstrate its impact in a small test case, the following function in C was compiled twice, first with Clang 18.1 and then with Clang built from the main branch of LLVM repository:
+I think that overall the project was successful and brought a small positive change to LLVM. To demonstrate its impact in a small test case, the following function in C was compiled twice, first with Clang 18.1 and then with Clang built from the main branch of LLVM repository:
 
 ```C
 unsigned char ucmp_32_8(unsigned int a, unsigned int b) {
