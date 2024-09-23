@@ -1,0 +1,180 @@
+<!doctype html><html lang=en>
+<head>
+<title>GSoC 2024: Statistical Analysis of LLVM-IR Compilation - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Andrew Kallai"><meta property="og:title" content="GSoC 2024: Statistical Analysis of LLVM-IR Compilation">
+<meta property="og:description" content="Welcome! My name is Andrew and I contributed to LLVM through the 2024 Google Summer of Code Program. My project is called Statistical Analysis of LLVM-IR Compilation. The objective of this project is to provide an analysis of how time is spent in the optimization pipeline.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/posts/2024-08-29-gsoc-2024-statistical_analysis_of_llvm-ir_compilation/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2024-09-23T00:00:00+00:00">
+<meta property="article:modified_time" content="2024-09-23T00:00:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="GSoC 2024: Statistical Analysis of LLVM-IR Compilation">
+<meta name=twitter:description content="Welcome! My name is Andrew and I contributed to LLVM through the 2024 Google Summer of Code Program. My project is called Statistical Analysis of LLVM-IR Compilation. The objective of this project is to provide an analysis of how time is spent in the optimization pipeline.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>GSoC 2024: Statistical Analysis of LLVM-IR Compilation</h1>
+<aside>
+<ul>
+<li>By Andrew Kallai</li>
+<li>
+<time class=post-date datetime=2024-09-23T00:00:00Z>Sep 23, 2024</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/gsoc>#GSoC</a>
+,
+<a href=https://blog.llvm.org/tags/llvm-ir-dataset-utils>#llvm-ir-dataset-utils</a>
+,
+<a href=https://blog.llvm.org/tags/compile>#ComPile</a>
+,
+<a href=https://blog.llvm.org/tags/analysis>#analysis</a>
+</em>
+</li>
+<li>5 minute read</li>
+</ul>
+</aside>
+<p>Welcome! My name is Andrew and I contributed to LLVM through the 2024 Google Summer of Code Program. My project is called <a href=https://summerofcode.withgoogle.com/programs/2024/projects/hquDyVBK>Statistical Analysis of LLVM-IR Compilation</a>. The objective of this project is to provide an analysis of how time is spent in the optimization pipeline. Generally, drastic differences in the percentage of time spent by a pass in the pipeline is considered abnormal.</p>
+<h1 id=background>Background</h1>
+<p>In principle, an LLVM IR bitcode file, or module, contains IR features that determine the behavior of the compiler optimization pipeline. By varying these features, the optimization pipeline, opt, can add significantly to the compilation time or marginally. More specifically, optimizations succeed in less or more time; the user can wait for a microsecond or a few minutes. LLVM compiler developers constantly edit the pipeline, so the performance of these optimizations can vary by compiler version (sometimes significantly).</p>
+<p>Having a large IR dataset such as <a href=https://huggingface.co/datasets/llvm-ml/ComPile>ComPile</a> allows for testing the LLVM compilation pipeline on a varied sample of IR. The size of this sample is sufficient to determine outlying IR modules. By identifying and examining such files using utilities which are being added to the <a href=https://github.com/llvm-ml/llvm-ir-dataset-utils>LLVM IR Dataset Utils Repo</a>, the causes of unexpected compilation times can be determined. Developers can then modify and improve the compilation pipeline accordingly.</p>
+<h1 id=summary-of-work>Summary of Work</h1>
+<p>The utilities added in <a href=https://github.com/llvm-ml/llvm-ir-dataset-utils/pull/37>PR37</a> are intended to write each IR module to a tar file corresponding to a programming language. Each file written to the tar files is indexed by its location in the HF dataset. This allows easy identification of files for tools which can be used for data extraction and analysis in the shell, notably clang. Tar file creation allows for potentially using less storage space then downloading the HF dataset to disk, and it allows code to be written which does not depend on the Python interpreter to load the dataset for access.</p>
+<p>The Makefile from <a href=https://github.com/llvm-ml/llvm-ir-dataset-utils/pull/36>PR36</a> is responsible for carrying out the data collection. This data includes text segment size, user CPU instruction counts during compile time (analogous to time), IR feature counts sourced from the LLVM pass <code>print&lt;func-properties></code>, and maximum relative time pass names and percentage counts. The data can be extracted in parallel or serially and is stored in a CSV file.</p>
+<p>An important data collection command in the Makefile is <code>clang -w -c -ftime-report $(lang)/bc_files/file$@.bc -o /dev/null</code>. The output from the command is large, but the part of interest is the first <code>Pass execution timing report</code>:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text>===-------------------------------------------------------------------------===
+                          Pass execution timing report
+===-------------------------------------------------------------------------===
+  Total Execution Time: 2.2547 seconds (2.2552 wall clock)
+
+   ---User Time---   --System Time--   --User+System--   ---Wall Time---  --- Name ---
+   2.1722 ( 96.5%)   0.0019 ( 47.5%)   2.1741 ( 96.4%)   2.1745 ( 96.4%)  VerifierPass
+   0.0726 (  3.2%)   0.0000 (  0.0%)   0.0726 (  3.2%)   0.0726 (  3.2%)  AlwaysInlinerPass
+   0.0042 (  0.2%)   0.0015 ( 39.2%)   0.0058 (  0.3%)   0.0058 (  0.3%)  AnnotationRemarksPass
+   0.0014 (  0.1%)   0.0005 ( 13.3%)   0.0019 (  0.1%)   0.0020 (  0.1%)  EntryExitInstrumenterPass
+   0.0003 (  0.0%)   0.0000 (  0.0%)   0.0003 (  0.0%)   0.0003 (  0.0%)  CoroConditionalWrapper
+   2.2507 (100.0%)   0.0039 (100.0%)   2.2547 (100.0%)   2.2552 (100.0%)  Total
+</code></pre></div><p>A user can visually see the distribution of these passes by using a profiling tool for .json files. The .json file for a given bitcode file is obtained by <code>clang -c -ftime-trace &lt;file></code>.</p>
+<p>The visualization of this output can be filtered to the passes of interest as in the following image:</p>
+<figure><img src=https://blog.llvm.org/img/file4504_pass_trace.png alt="ftime-trace of C IR Outlier">
+</figure>
+<p>The CoroConditionalWrapper pass is accounted by the &ldquo;Total CoroConditionalWrapper&rdquo; block. Clearly, that pass takes a far smaller amount of time than the others, as accounted for by the pass execution timing report. However, instead of seeing the pass as an insignificant percentage of time, the visualization allows for additional comparisons of the relative timings of each pass. The example image has the optimization passes of interest selected, but the .json file provides information on the entire compilation pipeline as well. Thus, the entire pipeline execution flow can be visualized.</p>
+<h1 id=current-status>Current Status</h1>
+<p>Currently, there are three PRs that require approval to be merged. There has been ongoing discussion on their contents, so few steps should be left to merge them.
+In the current state, users of the utilities in <a href=https://github.com/llvm-ml/llvm-ir-dataset-utils/pull/38>PR38</a> should be able to readily reproduce the quantitative results I had obtained for my GSoC midterm presentation graphs. Users can easily perform outlier analysis as well on the IR files (excluding Julia IR). Some of the results include the following:</p>
+<p>Scatter Plot of C IR Files:</p>
+<figure><img src=https://blog.llvm.org/img/c_instvtext.png alt="C IR Compiler Instruction Counts versus Text Segment Size">
+</figure>
+<p>Table of outliers for C IR files:</p>
+<figure><img src=https://blog.llvm.org/img/c_outliers.png alt="C IR Outlier Files">
+</figure>
+<h1 id=future-work>Future Work</h1>
+<p>It was discussed in PR 37 to consolidate the tar file creation into the dataset file writer Python script. This is a feature I wish to implement in order to speed up the tar file creation process by having the bitcode files written from memory to the tar instead of from memory, to disk, to tar.</p>
+<p>As mentioned, Julia IR was not analyzed. Modifying the scripts to include Julia IR results is desirable to make complete use of the dataset.
+Adding additional documentation for demonstration-of-use purposes could help clarify ways to use the tools.</p>
+<p>Additionally, outlier analysis can be expanded upon by using more advanced outlier detection methods. Not all the data collected in the CSV files was used, so using those extra features&ndash;in particular the <code>print&lt;func-properties></code> pass&ndash;can allow for improved accuracy in outlier detection.</p>
+<h1 id=acknowledgements>Acknowledgements</h1>
+<p>I would like to thank my mentors Johannes Doerfert and Aiden Grossman for their constant support during and prior to the GSoC program. Additionally, I would like to acknowledge the work of the LLVM Foundation admins and the GSoC admins.</p>
+<h1 id=links>Links</h1>
+<ul>
+<li>
+<p><a href=https://github.com/llvm-ml/llvm-ir-dataset-utils/pull/38>PR 38</a></p>
+</li>
+<li>
+<p><a href=https://github.com/llvm-ml/llvm-ir-dataset-utils/pull/37>PR 37</a></p>
+</li>
+<li>
+<p><a href=https://github.com/llvm-ml/llvm-ir-dataset-utils/pull/36>PR 36</a></p>
+</li>
+<li>
+<p><a href=https://github.com/llvm-ml/llvm-ir-dataset-utils>LLVM IR Dataset Utils Repo</a></p>
+</li>
+<li>
+<p><a href=https://huggingface.co/datasets/llvm-ml/ComPile>Compile Dataset</a></p>
+</li>
+</ul>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/posts/2024-09-01-reviving-newgvn/><i class="fa fa-chevron-circle-left"></i> GSoC 2024: Reviving NewGVN</a>
+</li>
+<li>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
+Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>
