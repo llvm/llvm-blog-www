@@ -1,0 +1,192 @@
+<!doctype html><html lang=en>
+<head>
+<title>GSoC 2024: ABI Lowering in ClangIR - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Vinicius Espindola"><meta property="og:title" content="GSoC 2024: ABI Lowering in ClangIR">
+<meta property="og:description" content="ClangIR is an ongoing effort to build a high-level intermediate representation (IR) for C/C++ within the LLVM ecosystem. Its key advantage lies in its ability to retain more source code information.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/posts/2024-09-07-abi-lowering-in-clangir/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2024-09-30T00:00:00+00:00">
+<meta property="article:modified_time" content="2024-09-30T00:00:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="GSoC 2024: ABI Lowering in ClangIR">
+<meta name=twitter:description content="ClangIR is an ongoing effort to build a high-level intermediate representation (IR) for C/C++ within the LLVM ecosystem. Its key advantage lies in its ability to retain more source code information.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>GSoC 2024: ABI Lowering in ClangIR</h1>
+<aside>
+<ul>
+<li>By Vinicius Espindola</li>
+<li>
+<time class=post-date datetime=2024-09-30T00:00:00Z>Sep 30, 2024</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/gsoc>#GSoC</a>
+,
+<a href=https://blog.llvm.org/tags/mlir>#mlir</a>
+,
+<a href=https://blog.llvm.org/tags/clangir>#clangir</a>
+</em>
+</li>
+<li>3 minute read</li>
+</ul>
+</aside>
+<p>ClangIR is an ongoing effort to build a high-level intermediate representation
+(IR) for C/C++ within the LLVM ecosystem. Its key advantage lies in its ability
+to retain more source code information. While ClangIR is making progress, it
+still lacks certain features, notably ABI handling. Currently, ClangIR lowers
+most functions without accounting for ABI-specific calling convention details.</p>
+<h2 id=goals>Goals</h2>
+<p>The &ldquo;Build & Run SingleSource Benchmarks with ClangIR - Part 2&rdquo; Google Summer of
+Code 2024 builds on my contributions from GSoC 2023 by addressing one of the
+main issues I encountered: target-specific lowering. It focuses on extending
+ClangIR’s code generation capabilities, particularly in ABI-lowering for X86-64.
+Several tests rely on operations and types (e.g., <code>va_arg</code> calls and complex
+data types) that require target-specific information to compile correctly.</p>
+<p>The concrete steps to achieve this were:</p>
+<ol>
+<li><strong>Implement foundational infrastructure</strong> that can scale to multiple
+architectures while adhering to ClangIR design principles such as CodeGen
+parity, feature guarding, and AST backreferences.</li>
+<li><strong>Handle basic calling convention scenarios</strong> as a proof of concept to
+validate the foundational infrastructure.</li>
+<li><strong>Add lowering for a second architecture</strong> to further validate the
+infrastructure&rsquo;s extensibility to multiple architectures.</li>
+<li><strong>Unify target-specific ClangIR lowering into the library</strong>, as there are a
+few isolated methods handling target-specific code lowering like
+<code>cir.va_arg</code>.</li>
+<li><strong>Integrate calling convention lowering into the main pipeline</strong> to ensure
+future contributions and continued development of this infrastructure.</li>
+</ol>
+<h2 id=contributions>Contributions</h2>
+<p>The list of contribution (PRs) can be found
+<a href="https://github.com/llvm/clangir/pulls?q=is%3Apr+is%3Aclosed+author%3Asitio-couto+closed%3A%3E2024-05-01">here</a>.</p>
+<h3 id=target-lowering-library>Target Lowering Library</h3>
+<p>The most significant contribution of this project was the development of a
+modular <a href=https://github.com/llvm/clangir/pull/643><code>TargetLowering</code> library</a>.
+This ensures that target-specific MLIR lowering passes can leverage this shared
+library for lowering logic. The library also follows ClangIR&rsquo;s feature guarding
+principles, ensuring that any contributor can refer to the original CodeGen for
+contributions, and any unimplemented feature is asserted at specific code
+points, making it easy to track missing functionality.</p>
+<h3 id=calling-convention-lowering-pass>Calling Convention Lowering Pass</h3>
+<p>As a proof of concept, the initial development of the <code>TargetLowering</code> library
+focused on implementing a <a href=https://github.com/llvm/clangir/pull/642>calling convention lowering
+pass</a> that targets multiple
+architectures. Currently, ClangIR ignores the target ABI during CodeGen to
+retain high-level information. For example, structs are not unraveled to improve
+argument-passing efficiency. ABI-specific LLVM attributes are also ignored. This
+pass addresses these issues by properly tagging LLVM attributes and rewriting
+function definitions and calls to handle unraveled structs. This was implemented
+for both X86-64 and <a href=https://github.com/llvm/clangir/pull/679>AArch64</a>,
+demonstrating the library&rsquo;s multi-architecture support.</p>
+<h2 id=shortcomings>Shortcomings</h2>
+<h3 id=target-specific-lowering-unification>Target-Specific Lowering Unification</h3>
+<p>While some target-specific lowering code was moved into the library, it was
+copied and pasted rather than properly integrated. This is not ideal for
+leveraging the library’s multi-architecture features.</p>
+<h3 id=inclusion-in-the-main-pipeline>Inclusion in the Main Pipeline</h3>
+<p>This is still a work in progress, as the library is not yet mature enough to
+handle most pre-existing ClangIR tests. There are also feature guards with
+unreachable statements for many unimplemented features.</p>
+<h2 id=future-work>Future Work</h2>
+<p>Now that there is a base infrastructure for handling target-agnostic to
+target-specific CIR code, there is a large amount of future work to be done,
+including:</p>
+<ul>
+<li>Improving DataLayout-related queries using MLIR&rsquo;s built-in tools.</li>
+<li>Implementing calling convention lowering for additional types, such as
+pointers.</li>
+<li>Extending the TargetLowering library to support more architectures.</li>
+<li>Unifying remaining target-specific lowering code from other parts of ClangIR.</li>
+</ul>
+<h2 id=acknowledgements>Acknowledgements</h2>
+<p>I would like to thank my Google Summer of Code mentors, Bruno Cardoso Lopes and
+Nathan Lanza, for another great GSoC experience. I also want to thank the LLVM
+community and Google for organizing the program.</p>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/posts/2024-08-29-gsoc-2024-statistical_analysis_of_llvm-ir_compilation/><i class="fa fa-chevron-circle-left"></i> GSoC 2024: Statistical Analysis of LLVM-IR Compilation</a>
+</li>
+<li>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
+Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>
