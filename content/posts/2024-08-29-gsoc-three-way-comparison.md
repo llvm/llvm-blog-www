@@ -24,15 +24,18 @@ In the middle-end the following passes received some support for these intrinsic
 
 I have also added folds of idiomatic ways that a 3-way comparison can be expressed to a call to the corresponding intrinsic.
 
-In the backend there are two different ways of expanding the intrinsics: [as a nested select](https://github.com/llvm/llvm-project/pull/91871) (i.e. `(x < y) ? -1 : (x > y ? 1 : 0)`) or [as a subtraction of zero-extended comparisons](https://github.com/llvm/llvm-project/pull/98774) (`zext(x > y) - zext(x < y)`). The second option is the default one, but targets can choose to use the second one through a TLI hook.
+In the backend there are two different ways of expanding the intrinsics: [as a nested select](https://github.com/llvm/llvm-project/pull/91871) (i.e. `(x < y) ? -1 : (x > y ? 1 : 0)`) or [as a subtraction of zero-extended comparisons](https://github.com/llvm/llvm-project/pull/98774) (`zext(x > y) - zext(x < y)`). The second option is the default one, but targets can choose to use the first one through a TLI hook.
 
 # Results
 
-I think that overall the project was successful and brought a small positive change to LLVM. To demonstrate its impact in a small test case, the following function in C was compiled twice, first with Clang 18.1 and then with Clang built from the main branch of LLVM repository:
+I think that overall the project was successful and brought a small positive change to LLVM. To demonstrate its impact in a small test case, the following function in C++ that uses the spaceship operator was compiled twice, first with Clang 18.1 and then with Clang built from the main branch of LLVM repository:
 
-```C
-unsigned char ucmp_32_8(unsigned int a, unsigned int b) {
-    return (a < b ? -1 : a > b);
+```C++
+#include <compare>
+
+std::strong_ordering cmp(unsigned int a, unsigned int b)
+{
+    return a <=> b;
 }
 ```
 
@@ -40,22 +43,25 @@ With Clang 18.1:
 
 ```text
 ; ====== LLVM IR ======
-define i8 @ucmp_32_8(i32 %a, i32 %b) {
+define i8 @cmp(i32 %a, i32 %b) {
 entry:
-  %cmp = icmp ult i32 %a, %b
-  %cmp1 = icmp ugt i32 %a, %b
-  %0 = zext i1 %cmp1 to i8
-  %conv2 = select i1 %cmp, i8 -1, i8 %0
-  ret i8 %conv2
+  %cmp.lt = icmp ult i32 %a, %b
+  %sel.lt = select i1 %cmp.lt, i8 -1, i8 1
+  %cmp.eq = icmp eq i32 %a, %b
+  %sel.eq = select i1 %cmp.eq, i8 0, i8 %sel.lt
+  ret i8 %sel.eq
 }
 
 ; ====== x86_64 assembly ======
-ucmp_32_8:
+cmp:
   xor     ecx, ecx
   cmp     edi, esi
-  seta    cl
-  mov     eax, 255
-  cmovae  eax, ecx
+  mov     eax, 0
+  sbb     eax, eax
+  or      al, 1
+  cmp     edi, esi
+  movzx   eax, al
+  cmove   eax, ecx
   ret
 ```
 
@@ -63,21 +69,21 @@ With freshly built Clang:
 
 ```plain
 ; ====== LLVM IR ======
-define i8 @ucmp_32_8(i32 %a, i32 %b) {
+define i8 @cmp(i32 %a, i32 %b) {
 entry:
-  %conv2 = tail call i8 @llvm.ucmp.i8.i32(i32 %a, i32 %b)
-  ret i8 %conv2
+  %sel.eq = tail call i8 @llvm.ucmp.i8.i32(i32 %a, i32 %b)
+  ret i8 %sel.eq
 }
 
 ; ====== x86_64 assembly ======
-ucmp_32_8:
+cmp:
   cmp     edi, esi
   seta    al
   sbb     al, 0
   ret
 ```
 
-As you can see, the number of instructions in the generated code had gone down by 2, or 40% (excluding `ret`). Although this isn't much and is a small synthetic test, it can still make a noticeable impact if code like this is found in a hot path somewhere.
+As you can see, the number of instructions in the generated code had gone down considerably (from 8 to 3 excluding `ret`). Although this isn't much and is a small synthetic test, it can still make a noticeable impact if code like this is found in a hot path somewhere.
 
 The impact of these changes on real-world code is much harder to quantify. Looking at llvm-opt-benchmark, there are quite a few places where the intrinsics are being used, which suggests that some improvement must have taken place, although it is unlikely to be significant in all but very few cases.
 
