@@ -1,6 +1,6 @@
 ---
 author: "Volodymyr Vasylkun (Poseydon)"
-date: "2024-08-29"
+date: "2024-10-07"
 tags: ["GSoC", "optimization", "intrinsics"]
 title: "GSoC 2024: 3-way comparison intrinsics"
 ---
