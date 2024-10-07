@@ -1,0 +1,183 @@
+<!doctype html><html lang=en>
+<head>
+<title>GSoC 2024: 3-way comparison intrinsics - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Volodymyr Vasylkun (Poseydon)"><meta property="og:title" content="GSoC 2024: 3-way comparison intrinsics">
+<meta property="og:description" content="Hello everyone! My name is Volodymyr, and in this post I would like to talk about the project I have been working on for the past couple of months as part of Google Summer of Code 2024.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/posts/2024-08-29-gsoc-three-way-comparison/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2024-10-07T00:00:00+00:00">
+<meta property="article:modified_time" content="2024-10-07T00:00:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="GSoC 2024: 3-way comparison intrinsics">
+<meta name=twitter:description content="Hello everyone! My name is Volodymyr, and in this post I would like to talk about the project I have been working on for the past couple of months as part of Google Summer of Code 2024.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>GSoC 2024: 3-way comparison intrinsics</h1>
+<aside>
+<ul>
+<li>By Volodymyr Vasylkun (Poseydon)</li>
+<li>
+<time class=post-date datetime=2024-10-07T00:00:00Z>Oct 7, 2024</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/gsoc>#GSoC</a>
+,
+<a href=https://blog.llvm.org/tags/optimization>#optimization</a>
+,
+<a href=https://blog.llvm.org/tags/intrinsics>#intrinsics</a>
+</em>
+</li>
+<li>4 minute read</li>
+</ul>
+</aside>
+<p>Hello everyone! My name is Volodymyr, and in this post I would like to talk about the project I have been working on for the past couple of months as part of Google Summer of Code 2024. The aim of the project was to introduce 3-way comparison intrinsics to LLVM IR and add a decent level of optimizations for them.</p>
+<h1 id=background>Background</h1>
+<p>Three-way comparison is an operation present in many high-level languages, such as C++ and its spaceship operator or Rust and the <code>Ord</code> trait. It operates on two values for which there is a defined comparison operation and returns <code>-1</code> if the first operand is less than the second, <code>0</code> if they are equal, and <code>1</code> otherwise. At the moment, compilers that use LLVM express this operation using different sequences of instructions which are optimized and lowered individually rather than as a single operation. Adding an intrinsic for this operation would therefore help us generate better machine code on some targets, as well as potentially optimize patterns in the middle-end that we didn&rsquo;t optimize before.</p>
+<h1 id=what-was-done>What was done</h1>
+<p>Over the course of the project I have added two new intrinsics to the LLVM IR: <code>llvm.ucmp</code> for an unsigned 3-way comparison and <code>llvm.scmp</code> for a signed comparison. They both take two arguments that must be integers or vectors of integers and return an integer or a vector of integers with the same number of elements. The arguments and the result do not need to have the same type.</p>
+<p>In the middle-end the following passes received some support for these intrinsics:</p>
+<ul>
+<li>InstSimplify (<a href=https://github.com/llvm/llvm-project/pull/93730>#1</a>, <a href=https://github.com/llvm/llvm-project/pull/95601>#2</a>)</li>
+<li>InstCombine (<a href=https://github.com/llvm/llvm-project/pull/96118>#1</a>, <a href=https://github.com/llvm/llvm-project/pull/98360>#2</a>, <a href=https://github.com/llvm/llvm-project/pull/101049>#3</a>, <a href=https://github.com/llvm/llvm-project/pull/105272>#4</a>, <a href=https://github.com/llvm/llvm-project/pull/105583>#5</a>)</li>
+<li><a href=https://github.com/llvm/llvm-project/pull/97235>CorrelatedValuePropagation</a></li>
+<li><a href=https://github.com/llvm/llvm-project/pull/97974>ConstraintElimination</a></li>
+</ul>
+<p>I have also added folds of idiomatic ways that a 3-way comparison can be expressed to a call to the corresponding intrinsic.</p>
+<p>In the backend there are two different ways of expanding the intrinsics: <a href=https://github.com/llvm/llvm-project/pull/91871>as a nested select</a> (i.e. <code>(x &lt; y) ? -1 : (x > y ? 1 : 0)</code>) or <a href=https://github.com/llvm/llvm-project/pull/98774>as a subtraction of zero-extended comparisons</a> (<code>zext(x > y) - zext(x &lt; y)</code>). The second option is the default one, but targets can choose to use the first one through a TLI hook.</p>
+<h1 id=results>Results</h1>
+<p>I think that overall the project was successful and brought a small positive change to LLVM. To demonstrate its impact in a small test case, the following function in C++ that uses the spaceship operator was compiled twice, first with Clang 18.1 and then with Clang built from the main branch of LLVM repository:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-C++ data-lang=C++><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;compare&gt;</span><span style=color:#75715e>
+</span><span style=color:#75715e></span>
+std<span style=color:#f92672>::</span>strong_ordering cmp(<span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>int</span> a, <span style=color:#66d9ef>unsigned</span> <span style=color:#66d9ef>int</span> b)
+{
+    <span style=color:#66d9ef>return</span> a <span style=color:#f92672>&lt;=&gt;</span> b;
+}
+</code></pre></div><p>With Clang 18.1:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text>; ====== LLVM IR ======
+define i8 @cmp(i32 %a, i32 %b) {
+entry:
+  %cmp.lt = icmp ult i32 %a, %b
+  %sel.lt = select i1 %cmp.lt, i8 -1, i8 1
+  %cmp.eq = icmp eq i32 %a, %b
+  %sel.eq = select i1 %cmp.eq, i8 0, i8 %sel.lt
+  ret i8 %sel.eq
+}
+
+; ====== x86_64 assembly ======
+cmp:
+  xor     ecx, ecx
+  cmp     edi, esi
+  mov     eax, 0
+  sbb     eax, eax
+  or      al, 1
+  cmp     edi, esi
+  movzx   eax, al
+  cmove   eax, ecx
+  ret
+</code></pre></div><p>With freshly built Clang:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-plain data-lang=plain>; ====== LLVM IR ======
+define i8 @cmp(i32 %a, i32 %b) {
+entry:
+  %sel.eq = tail call i8 @llvm.ucmp.i8.i32(i32 %a, i32 %b)
+  ret i8 %sel.eq
+}
+
+; ====== x86_64 assembly ======
+cmp:
+  cmp     edi, esi
+  seta    al
+  sbb     al, 0
+  ret
+</code></pre></div><p>As you can see, the number of instructions in the generated code had gone down considerably (from 8 to 3 excluding <code>ret</code>). Although this isn&rsquo;t much and is a small synthetic test, it can still make a noticeable impact if code like this is found in a hot path somewhere.</p>
+<p>The impact of these changes on real-world code is much harder to quantify. Looking at llvm-opt-benchmark, there are quite a few places where the intrinsics are being used, which suggests that some improvement must have taken place, although it is unlikely to be significant in all but very few cases.</p>
+<h1 id=future-work>Future Work</h1>
+<p>There are still many opportunities for optimization in the middle-end, some of which are already known and being worked on at the time of writing this, others are yet to be discovered. I would also like to allow pointers and vectors of pointers to be valid operands for the intrinsics, although that would be quite a minor change. In the backend I would also like to work on better handling of intrinsics in GlobalISel, which is something that I didn&rsquo;t have enough time for and other members of LLVM community had helped me with.</p>
+<h1 id=acknowledgements>Acknowledgements</h1>
+<p>None of this would have been possible without my two amazing mentors, Nikita Popov and Dhruv Chawla, and the LLVM community as a whole. Thank you for helping me on this journey and I am looking forward to working with you in the future.</p>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/posts/2024-09-07-abi-lowering-in-clangir/><i class="fa fa-chevron-circle-left"></i> GSoC 2024: ABI Lowering in ClangIR</a>
+</li>
+<li>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
+Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>
