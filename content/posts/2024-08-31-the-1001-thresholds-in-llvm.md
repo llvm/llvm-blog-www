@@ -1,6 +1,6 @@
 ---
 author: "Shourya Goel"
-date: "2024-08-31"
+date: "2024-10-21"
 tags: ["GSoC", "Optimizations", "Performance"]
 title: "GSoC 2024: The 1001 thresholds in LLVM"
 ---
