@@ -1,0 +1,252 @@
+<!doctype html><html lang=en>
+<head>
+<title>GSoC 2024: Out-Of-Process Execution For Clang-Repl - The LLVM Project Blog</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="LLVM Project News and Details from the Trenches">
+<meta name=author content="Sahil Patidar"><meta property="og:title" content="GSoC 2024: Out-Of-Process Execution For Clang-Repl">
+<meta property="og:description" content="Hello! I&rsquo;m Sahil Patidar, and this summer I had the exciting opportunity to participate in Google Summer of Code (GSoC) 2024. My project revolved around enhancing Clang-Repl by introducing Out-Of-Process Execution.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.llvm.org/posts/2024-10-23-out-of-process-execution-for-clang-repl/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2024-11-04T00:00:00+00:00">
+<meta property="article:modified_time" content="2024-11-04T00:00:00+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="GSoC 2024: Out-Of-Process Execution For Clang-Repl">
+<meta name=twitter:description content="Hello! I&rsquo;m Sahil Patidar, and this summer I had the exciting opportunity to participate in Google Summer of Code (GSoC) 2024. My project revolved around enhancing Clang-Repl by introducing Out-Of-Process Execution.">
+<meta name=generator content="Hugo 0.89.4">
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
+<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
+<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
+<body>
+<div id=container>
+<header>
+<h1>
+<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
+</h1>
+<ul id=social-media>
+<li>
+<a href=https://www.facebook.com/llvmorg title=Facebook>
+<i class="fab fa-facebook fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://github.com/llvm title=GitHub>
+<i class="fab fa-github fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://twitter.com/llvmorg title=Twitter>
+<i class="fab fa-twitter fa-lg"></i>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
+<i class="fab fa-youtube fa-lg"></i>
+</a>
+</li>
+</ul>
+<p><em>LLVM Project News and Details from the Trenches</em></p>
+</header>
+<nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/about>
+<i class="fa-li fa fa-lg"></i><span>About</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/posts>
+<i class="fa-li fa fa-lg"></i><span>Posts</span>
+</a>
+</li>
+<li>
+<a href=https://blog.llvm.org/tags>
+<i class="fa-li fa fa-lg"></i><span>Tags</span>
+</a>
+</li>
+<li>
+<a href=https://llvm.org/>
+<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
+</a>
+</li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>GSoC 2024: Out-Of-Process Execution For Clang-Repl</h1>
+<aside>
+<ul>
+<li>By Sahil Patidar</li>
+<li>
+<time class=post-date datetime=2024-11-04T00:00:00Z>Nov 4, 2024</time>
+</li>
+<li>
+<em>
+<a href=https://blog.llvm.org/tags/gsoc>#GSoC</a>
+,
+<a href=https://blog.llvm.org/tags/clang-repl>#clang-repl</a>
+,
+<a href=https://blog.llvm.org/tags/orc-jit>#orc-jit</a>
+</em>
+</li>
+<li>7 minute read</li>
+</ul>
+</aside>
+<p>Hello! I&rsquo;m Sahil Patidar, and this summer I had the exciting opportunity to
+participate in Google Summer of Code (GSoC) 2024. My project revolved around
+enhancing Clang-Repl by introducing Out-Of-Process Execution.</p>
+<p>Mentors: Vassil Vassilev and Matheus Izvekov</p>
+<h2 id=project-background>Project Background</h2>
+<p>Clang-Repl, part of the LLVM project, is a powerful interactive C++ interpreter using Just-In-Time (JIT) compilation. However, it faced two major issues: high resource consumption and instability. Running both Clang-Repl and JIT in the same process consumed excessive system resources, and any crash in user code would shut down the entire session.</p>
+<p>To address these problems, <strong>Out-Of-Process Execution</strong> was introduced. By executing user code in a separate process, resource usage is reduced and crashes no longer affect the main session. This solution significantly enhances both the efficiency and stability of Clang-Repl, making it more reliable and suitable for a broader range of use cases, especially on resource-constrained systems.</p>
+<h2 id=what-we-accomplished>What We Accomplished</h2>
+<p>As part of my GSoC project, I&rsquo;ve been focused on implementing out-of-process execution in Clang-Repl and enhancing the ORC JIT infrastructure to support this feature. Here is a breakdown of the key tasks and improvements I worked on:</p>
+<h3 id=out-of-process-execution-support-for-clang-repl>Out-Of-Process Execution Support for Clang-Repl</h3>
+<p><strong>PR</strong>: <a href=https://github.com/llvm/llvm-project/pull/110418>#110418</a></p>
+<p>One of the primary objectives of my project was to implement <strong>out-of-process (OOP) execution</strong> capabilities within Clang-Repl, enabling it to execute code in a separate, isolated process. This feature leverages <strong>ORC JIT&rsquo;s remote execution capabilities</strong> to enhance code execution flexibility by isolating runtime environments.</p>
+<p>To enable OOP execution in Clang-Repl, I utilized the <code>llvm-jitlink-executor</code>, allowing Clang-Repl to offload code execution to a dedicated executor process. This setup introduces a layer of isolation between Clang-Repl’s main process and the code execution environment.</p>
+<ul>
+<li>
+<p><strong>New Command-Line Flags</strong>:</p>
+<p>To facilitate the out-of-process execution, I added two key command-line flags:</p>
+<ul>
+<li>
+<p><strong><code>--oop-executor</code></strong>
+This flag starts a separate JIT executor process. The executor handles the actual code execution independently of the main Clang-Repl process.</p>
+</li>
+<li>
+<p><strong><code>--oop-executor-connect</code></strong>
+This flag establishes a communication link between Clang-Repl and the out-of-process executor. It allows Clang-Repl to transmit code to the executor and retrieve the results from the execution.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>With these flags in place, Clang-Repl can utilize <code>llvm-jitlink-executor</code> to execute code in an isolated environment. This approach significantly enhances separation between the compilation and execution stages, increasing flexibility and ensuring a more secure and manageable execution process.</p>
+<h3 id=issues-encountered>Issues Encountered</h3>
+<ul>
+<li>
+<p><strong>Block Dependence Calculation in ObjectLinkingLayer</strong>
+<a href=https://github.com/llvm/llvm-project/commit/896dd322afcc1cf5dc4fa7375dedd55b59001eb4>Commit Link</a></p>
+<p><strong>Code Example</strong></p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp>clang<span style=color:#f92672>-</span>repl<span style=color:#f92672>&gt;</span> <span style=color:#66d9ef>int</span> f() {<span style=color:#66d9ef>return</span> <span style=color:#ae81ff>1</span>;}
+clang<span style=color:#f92672>-</span>repl<span style=color:#f92672>&gt;</span> <span style=color:#66d9ef>int</span> f1() {<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>f</span>();}
+clang<span style=color:#f92672>-</span>repl<span style=color:#f92672>&gt;</span> f1();
+error: disconnecting
+clang<span style=color:#f92672>-</span>repl<span style=color:#f92672>&gt;</span> JIT session error: FD<span style=color:#f92672>-</span>transport disconnected
+JIT session error: disconnecting
+JIT session error: FD<span style=color:#f92672>-</span>transport disconnected
+JIT session error: Failed to materialize symbols: { (main, { __Z2fv }) }
+disconnecting
+</code></pre></div><p>During my work on <code>clang-repl</code>, I encountered an issue where the JIT session would crash during incremental compilation. The root cause was a bug in <code>ObjectLinkingLayer::computeBlockNonLocalDeps</code>. The problem arose from the way the worklist was built: it was being populated within the same loop that records immediate dependencies and dependants, which caused some blocks to be missed from the worklist. This bug was fixed by <strong>Lang Hames</strong>.</p>
+</li>
+</ul>
+<h3 id=orc-jit-enhancements>ORC JIT Enhancements</h3>
+<p>As part of the OOP execution work, several improvements were made to ORC JIT, the underlying framework responsible for dynamic compilation and execution of code in Clang-Repl. These improvements target better handling of incremental execution, especially for Mach-O and ELF platforms, and ensuring that initializers are properly managed across different execution environments.</p>
+<ol>
+<li>
+<p><strong>Incremental Initializer Execution for Mach-O and ELF</strong>
+<strong>PRs</strong>: <a href=https://github.com/llvm/llvm-project/pull/97441>#97441</a>, <a href=https://github.com/llvm/llvm-project/pull/110406>#110406</a></p>
+<p>In a typical JIT execution environment, the <code>dlopen</code> function is used to handle code mapping, reference counting, and initializer execution for dynamically loaded libraries. However, this approach is often too broad for interactive environments like Clang-Repl, where we only need to execute newly introduced initializers rather than reinitializing everything. To address this, I introduced the <strong><code>dlupdate</code></strong> function in the ORC runtime.</p>
+<p>The <code>dlupdate</code> function is a targeted solution that focuses solely on running new initializers added during a REPL session. Unlike <code>dlopen</code>, which handles a variety of tasks and can lead to unnecessary overhead, <code>dlupdate</code> only triggers the execution of newly registered initializers, avoiding redundant operations. This improvement is particularly beneficial in interactive settings like Clang-Repl, where code is frequently updated in small increments.</p>
+<p>By streamlining the execution of initializers, this change significantly improves the efficiency of Clang-Repl.</p>
+</li>
+<li>
+<p><strong>Push-Request Model for ELF Initializers</strong>
+<strong>PR</strong>: <a href=https://github.com/llvm/llvm-project/pull/102846>#102846</a></p>
+<p>A push-request model has been introduced to manage ELF initializers within the runtime state for each <code>JITDylib</code>, similar to how initializers are handled for Mach-O and COFF. Previously, ELF required a fresh request for initializers with each invocation of <code>dlopen</code>, but lacked mechanisms to register, deregister, or retain these initializers. This created issues during subsequent <code>dlopen</code> calls, as initializers were erased after the <code>rt_getInitializers</code> function was invoked, making further executions impossible.</p>
+<p>To resolve these issues, the following functions were introduced:</p>
+<ul>
+<li><strong><code>__orc_rt_elfnix_register_init_sections</code></strong>: Registers ELF initializers for the <code>JITDylib</code>.</li>
+<li><strong><code>__orc_rt_elfnix_register_jitdylib</code></strong>: Registers the <code>JITDylib</code> with the ELF runtime state.</li>
+</ul>
+<p>With the new push-request model, the management and tracking of initializers for each <code>JITDylib</code> state are now more efficient. By leveraging Mach-O’s <code>RecordSectionsTracker</code>, only newly registered initializers are executed, greatly improving efficiency and reliability when working with ELF targets in <code>clang-repl</code>.</p>
+<p>This update is crucial for enabling out-of-process execution in <code>clang-repl</code> on ELF platforms, offering a more effective approach to managing incremental execution.</p>
+</li>
+</ol>
+<h3 id=additional-improvements>Additional Improvements</h3>
+<p>Beyond the main enhancements to Clang-Repl and ORC JIT, I also worked on several other improvements:</p>
+<ol>
+<li>
+<p><strong>Auto-loading Dynamic Libraries in ORC JIT.</strong></p>
+<p><strong>PR</strong>: <a href=https://github.com/llvm/llvm-project/pull/109913>#109913</a> (On-going)</p>
+<p>With this update, we’ve introduced a new feature to the ORC executor and controller: <strong>automatic loading of dynamic libraries in the ORC JIT</strong>. This enhancement enables efficient resolution of symbols from both loaded and unloaded libraries.</p>
+<ul>
+<li>
+<p>How It Works:</p>
+<ul>
+<li><strong>Symbol Lookup:</strong>
+When a lookup request is made, the system first attempts to resolve the symbol from already loaded libraries.</li>
+<li><strong>Unloaded Libraries Scan:</strong>
+If the symbol is not found in any loaded library, the system then scans the unloaded dynamic libraries to locate it.</li>
+</ul>
+</li>
+<li>
+<p>Key Addition: <strong>Global Bloom Filter</strong>
+A significant improvement in this update is the introduction of a <strong>Global Bloom Filter</strong>. When a symbol cannot be resolved in the loaded libraries, the symbol tables from the scanned libraries are incorporated into this filter. If the symbol is still not found, the bloom filter’s result is returned to the controller, allowing it to skip checking for symbols that do not exist in the global table during future lookups.</p>
+</li>
+</ul>
+<p>Additionally, the system tracks symbols that were previously thought to be present but are actually absent in both loaded and unloaded libraries. With these enhancements, symbol resolution is significantly faster, as the bloom filter helps prevent unnecessary lookups, thereby improving efficiency for both loaded and unloaded dynamic libraries.</p>
+</li>
+<li>
+<p><strong>Refactor of <code>dlupdate</code> Function</strong>
+<strong>PR</strong>: <a href=https://github.com/llvm/llvm-project/pull/110491>#110491</a></p>
+<p>This update simplifies the <code>dlupdate</code> function by removing the <code>mode</code> argument, streamlining the function&rsquo;s interface. The change enhances the clarity and usability of <code>dlupdate</code> by reducing unnecessary parameters, improving the overall maintainability of the code.</p>
+</li>
+</ol>
+<h2 id=benchmarks-in-process-vs-out-of-process-execution>Benchmarks: In-Process vs Out-of-Process Execution</h2>
+<ul>
+<li><a href=https://gist.github.com/SahilPatidar/4870bf9968b1b0cb3dabcff7281e6135>Prime Finder</a></li>
+<li><a href=https://gist.github.com/SahilPatidar/2191963e59feb7dfa1314509340f95a1>Fibonacci Sequence</a></li>
+<li><a href=https://gist.github.com/SahilPatidar/1df9e219d0f8348bd126f1e01658b3fa>Matrix Multiplication</a></li>
+<li><a href=https://gist.github.com/SahilPatidar/c814634b2f863fc167b8d16b573f88ec>Sorting Algorithms</a></li>
+</ul>
+<h2 id=result>Result</h2>
+<p>With these changes, <code>clang-repl</code> now supports out-of-process execution. We can run it using the following command:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>clang-repl --oop-executor<span style=color:#f92672>=</span>path/to/llvm-jitlink-executor --orc-runtime<span style=color:#f92672>=</span>path/to/liborc_rt.a
+</code></pre></div><h2 id=future-work>Future Work</h2>
+<ul>
+<li>
+<p><strong>Crash Recovery and Session Continuation :</strong>
+Investigate and develop ways to enhance crash recovery so that if something goes wrong, the session can seamlessly resume without losing progress. This involves exploring options for an automatic process to restart the executor in the event of a crash.</p>
+</li>
+<li>
+<p><strong>Finalize Auto Library Loading in ORC JIT :</strong>
+Wrap up the feature that automatically loads libraries in ORC JIT. This will streamline symbol resolution for both loaded and unloaded dynamic libraries by ensuring that any required dylibs containing symbol definitions are loaded as needed.</p>
+</li>
+</ul>
+<h2 id=conclusion>Conclusion</h2>
+<p>With this project, <strong>Clang-Repl</strong> now supports <strong>out-of-process execution</strong> for both <code>ELF</code> and <code>Mach-O</code>, making it much more efficient and stable, especially on devices with limited resources.</p>
+<p>In the future, I plan to work on automating library loading and improving ORC-JIT to make Clang-Repl&rsquo;s out-of-process execution even better.</p>
+<h2 id=acknowledgements>Acknowledgements</h2>
+<p>I would like to thank <strong>Google Summer of Code (GSoC)</strong> and the LLVM community for providing me with this amazing opportunity. Special thanks to my mentors, <strong>Vassil Vassilev</strong> and <strong>Matheus Izvekov</strong>, for their continuous support and guidance. I am also deeply grateful to <strong>Lang Hames</strong> for sharing their expertise on ORC-JIT and helping improve <code>clang-repl</code>. This experience has been a major step in my development, and I look forward to continuing my contributions to open source.</p>
+<h2 id=related-links>Related Links</h2>
+<ul>
+<li><a href=https://github.com/llvm/llvm-project>LLVM Repository</a></li>
+<li><a href=https://discourse.llvm.org/t/clang-out-of-process-execution-for-clang-repl/68225>Project Description</a></li>
+<li><a href=https://github.com/SahilPatidar>My GitHub Profile</a></li>
+</ul>
+</article>
+<section class=post-nav>
+<ul>
+<li>
+<a href=https://blog.llvm.org/posts/2024-08-31-the-1001-thresholds-in-llvm/><i class="fa fa-chevron-circle-left"></i> GSoC 2024: The 1001 thresholds in LLVM</a>
+</li>
+<li>
+</li>
+</ul>
+</section>
+</main>
+<footer>
+<ul>
+<li>
+<h6>llvm.org |
+Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
+<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
+</li>
+</ul>
+</footer>
+</div>
+<script src=https://blog.llvm.org/js/scripts.js></script>
+</body>
+</html>
