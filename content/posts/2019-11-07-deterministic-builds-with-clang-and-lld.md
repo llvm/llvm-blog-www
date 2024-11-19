@@ -67,7 +67,7 @@ This doesn’t affect your build’s determinism, but it does affect the hit rat
 
 For cache invalidation, consider using something finer-grained, such as only the latest commit of the directory containing the cache handling code, or the hash of all source files containing the cache handling code.
 
-For `--version output`, if your build is fully deterministic, the hash of the binary itself (and its dynamic library dependencies) can serve as a stable version identifier. You can keep a map of binary hash to all commit hashes that produce that binary somewhere.
+For `--version` output, if your build is fully deterministic, the hash of the binary itself (and its dynamic library dependencies) can serve as a stable version identifier. You can keep a map of binary hash to all commit hashes that produce that binary somewhere.
 
 Windows only: For the same reason, just using the timestamp of the latest commit as a `/timestamp:` might not be the best option. Rounding the timestamp of the latest commit to 6h (or similar) granularity is a possible approach for not having the timestamp change the binary on every commit, while still keeping the timestamp close to reality. For production builds, the symbol server key for binaries is a (executable size, timestamp) pair, so here having fairly granular timestamps is important to not map binaries from consecutive commits to the same symbol server key. Depending on how often you push production binaries to your symbol servers, you might want to use the timestamp of the latest commit as `/timestamp:` for official builds, or you might want to round to finer granularity than you do on dev builds.
 
@@ -114,7 +114,7 @@ Some debuggers (gdb, lldb) do try to resolve relative paths against the cwd, so 
 
 If you don’t want to require devs to cd into the build directory for debugging to work, you have to do debugger-specific configuration tweaks.
 
-To make sure devs don’t miss this, you could have your custom init script set an env var and query if it’s set early during your test binary startup, and exit with a message like “Add `source /path/to/your/project/gdbinit` to your ~/.gdbinit” if the environment variable isn’t set.
+To make sure devs don’t miss this, you could have your custom init script set an env var and query if it’s set early during your test binary startup, and exit with a message like “Add `source /path/to/your/project/gdbinit` to your `~/.gdbinit`" if the environment variable isn’t set.
 
 ### gdb
 
@@ -136,7 +136,7 @@ If you use the setup described above, `/PDBSourcePath:X:\fake\prefix` will comb
 
 1. Run `subst X: C:\src\real\root` in cmd.exe before launching the debuggers to create a virtual drive that maps X: to the actual source location. Both windbg and Visual Studio will load code over X: this way.
 2. Add `C:\src\real\root` to each debugger’s source search path.
-3. - [Windbg](https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/source-window#source-path): Run `.srcpath+ C:\src\real\root`. You can also set this via the `_NT_SOURCE_PATH`  environment variable, or via  File->Source File Path (Ctrl+P). Or pass `-srcpath C:\src\real\root` when launching windbg from the command line.
+   - [Windbg](https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/source-window#source-path): Run `.srcpath+ C:\src\real\root`. You can also set this via the `_NT_SOURCE_PATH`  environment variable, or via  File->Source File Path (Ctrl+P). Or pass `-srcpath C:\src\real\root` when launching windbg from the command line.
    - Visual Studio: The IDE has a [“Debug Source Files” property](https://docs.microsoft.com/en-us/visualstudio/debugger/debug-source-files-common-properties-solution-property-pages-dialog-box?view=vs-2019). Add `C:\src\real\root` to “Directories containing source code” to Project->Properties (Alt+F7)->Common Properties->Debug Source Files->Directories containing source code.
 
 Alternatively, you could pass the absolute path to the actual build directory to `/PDBSourcePath:` instead of something like `X:\fake\prefix`. That way, all PDBs have “correct” absolute paths in them, while your compile steps are still path-independent and can share a cache across machines. However, since executables contain a reference to the PDB hash, none of your binaries will be path-independent. This setup doesn’t require any debugger configuration, but it doesn’t allow your builds to be locally deterministic.
