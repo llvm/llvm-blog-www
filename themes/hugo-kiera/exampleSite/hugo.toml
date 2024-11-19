@@ -1,10 +1,12 @@
 baseurl = "https://www.example.org/"
 title = "Kiera"
-copyright = "Copyright &copy; 2019 - Author Name"
+copyright = "Copyright &copy; 2023 - Author Name"
 canonifyurls = true
 theme = "hugo-kiera"
 
-paginate = 3
+[pagination]
+  pagersize = 3
+  path = 'page'
 
 summaryLength = 30
 enableEmoji = true
@@ -13,9 +15,9 @@ pygmentsCodeFences = true
 #disqusShortname = "myShortName"
 
 # Note: to disable a social network icon delete or comment out the corresponding line
-[author]
+[params.author]
     name = "Example"
-    github = "funkydan2"
+    github = "funkydan2/hugo-kiera"
     #gitlab = "username"
     #linkedin = "username"
     #facebook = "username"
@@ -28,14 +30,14 @@ pygmentsCodeFences = true
 [params]
     tagline = "A Hugo theme for creative and technical writing"
     description = "Kiera: A Hugo theme for creative and technical writing."
-    #images = [""] #This is used for opengraph/twitter cards.
+    images = [""] #This is used for opengraph/twitter cards.
     customCSS = []  #Optional Customised CSS
     #favicon = ""
     #utterancesRepo = "username/repository"
     #utterancesIssueTerm = "pathname"
     #homepageLength = 10
     #commentAutoload = true  #This mean reader don't need click, disqus comment autoload
-    #mathjax = true #Enable display of mathematics using mathjax (LaTeX syntax)
+    mathjax = true #Enable display of mathematics using mathjax (LaTeX syntax)
     #katex = true #Enable display of mathematics using katex (Faster LaTeX rendering)
     #google_fonts = ["Staatliches"] # Adds additional google fonts
     #disableDarkModeCSS = false # disables css style for users using dark-mode

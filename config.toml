@@ -4,8 +4,6 @@ copyright = "llvm.org"
 canonifyurls = true
 theme = "hugo-kiera"
 
-paginate = 10 
-
 summaryLength = 30
 enableEmoji = true
 pygmentsCodeFences = true
@@ -14,22 +12,13 @@ ignoreFiles = ['template.md']
 
 #disqusShortname = "myShortName"
 
+[pagination]
+  pagerSize = 10
+
 [markup]
   [markup.goldmark]
     [markup.goldmark.renderer]
       unsafe = true
-
-# Note: to disable a social network icon delete or comment out the corresponding line
-[author]
-    name = "LLVM Project"
-    github = "llvm"
-    #gitlab = "username"
-    #linkedin = "username"
-    facebook = "llvmorg"
-    twitter = "llvmorg"
-    #instagram = "username"
-    #stackoverflow = "username"
-    youtube = "c/LLVMPROJ" # or channel/channelname
 
 [params]
     tagline = "LLVM Project News and Details from the Trenches"
@@ -41,6 +30,19 @@ ignoreFiles = ['template.md']
     #utterancesIssueTerm = "pathname"
     homepageLength = 10
     #commentAutoload = true  #This mean reader don't need click, disqus comment autoload
+
+  # Note: to disable a social network icon delete or comment out the corresponding line
+  [params.author]
+    name = "LLVM Project"
+    id="llvmorg"
+    github = "llvm"
+    #gitlab = "username"
+    #linkedin = "username"
+    facebook = "llvmorg"
+    twitter = "llvmorg"
+    #instagram = "username"
+    #stackoverflow = "username"
+    youtube = "c/LLVMPROJ" # or channel/channelname
 
   [[menu.main]]
     identifier = "about"
