@@ -20,8 +20,11 @@ point. It contains the meta data that the author of each blog needs to fill out.
 The naming convention used for the posts is: `YYYY-MM-DD-name-of-blog.md`. 
 
 Once the blog contents have been filled in, the file should be placed under the
-`content/post` directory. You can then use hugo to build the blogs and start a
-webserver on your local machine to view the content:
+`content/post` directory. You can then use [hugo](https://gohugo.io/installation/)
+to build the blogs and start a webserver on your local machine to view the content.
+
+You can find the version of Hugo to use in the `main.yaml` file in the
+`.github/workflows` directory.
 
 ```sh
 hugo server -D
