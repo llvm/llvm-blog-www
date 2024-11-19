@@ -8,6 +8,8 @@ url: /2019/11/deterministic-builds-with-clang-and-lld.html
 
 Deterministic builds can lower continuous integration costs and give you more confidence in your build and test process. This post outlines what it means for a build to be deterministic, the advantages of deterministic builds, and how to achieve them using LLVM tools.
 
+**Note:** This article formats plain text like command line options `like so`. Key information (including some options) is highlighted <mark>like so</mark>.
+
 # What is a deterministic build, and its advantages
 
 A build is called *deterministic* or *reproducible* if running it twice produces exactly the same build outputs.
