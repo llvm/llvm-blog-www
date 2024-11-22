@@ -1,132 +1,29 @@
-<!doctype html><html lang=en>
-<head>
-<title>August 2022 LLVM relicensing update & further suggestions for help - The LLVM Project Blog</title>
-<meta charset=utf-8>
-<meta name=viewport content="width=device-width,initial-scale=1">
-<meta name=description content="LLVM Project News and Details from the Trenches">
-<meta name=author content="Kristof Beyls"><meta property="og:title" content="August 2022 LLVM relicensing update & further suggestions for help">
-<meta property="og:description" content="The last update on LLVM relicensing was done about 8 months ago. Since then we&rsquo;ve made substantial progress, so I thought it&rsquo;s worthwhile to share another update.
-The TL;DR is:">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://blog.llvm.org/posts/2022-08-14-relicensing-update/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2022-08-17T00:00:00+00:00">
-<meta property="article:modified_time" content="2022-08-17T00:00:00+00:00">
-<meta name=twitter:card content="summary">
-<meta name=twitter:title content="August 2022 LLVM relicensing update & further suggestions for help">
-<meta name=twitter:description content="The last update on LLVM relicensing was done about 8 months ago. Since then we&rsquo;ve made substantial progress, so I thought it&rsquo;s worthwhile to share another update.
-The TL;DR is:">
-<meta name=generator content="Hugo 0.89.4">
-<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
-<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
-<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
-<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
-<body>
-<div id=container>
-<header>
-<h1>
-<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
-</h1>
-<ul id=social-media>
-<li>
-<a href=https://www.facebook.com/llvmorg title=Facebook>
-<i class="fab fa-facebook fa-lg"></i>
-</a>
-</li>
-<li>
-<a href=https://github.com/llvm title=GitHub>
-<i class="fab fa-github fa-lg"></i>
-</a>
-</li>
-<li>
-<a href=https://twitter.com/llvmorg title=Twitter>
-<i class="fab fa-twitter fa-lg"></i>
-</a>
-</li>
-<li>
-<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
-<i class="fab fa-youtube fa-lg"></i>
-</a>
-</li>
-</ul>
-<p><em>LLVM Project News and Details from the Trenches</em></p>
-</header>
-<nav>
-<ul>
-<li>
-<a href=https://blog.llvm.org/about>
-<i class="fa-li fa fa-lg"></i><span>About</span>
-</a>
-</li>
-<li>
-<a href=https://blog.llvm.org/posts>
-<i class="fa-li fa fa-lg"></i><span>Posts</span>
-</a>
-</li>
-<li>
-<a href=https://blog.llvm.org/tags>
-<i class="fa-li fa fa-lg"></i><span>Tags</span>
-</a>
-</li>
-<li>
-<a href=https://llvm.org/>
-<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
-</a>
-</li>
-</ul>
-</nav>
-<main>
-<article>
-<h1>August 2022 LLVM relicensing update & further suggestions for help</h1>
-<aside>
-<ul>
-<li>By Kristof Beyls</li>
-<li>
-<time class=post-date datetime=2022-08-17T00:00:00Z>Aug 17, 2022</time>
-</li>
-<li>
-<em>
-<a href=https://blog.llvm.org/tags/relicensing>#relicensing</a>
+<!doctype html><html lang=en><head><title>August 2022 LLVM relicensing update & further suggestions for help - The LLVM Project Blog</title>
+<meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Kristof Beyls"><meta property="og:url" content="https://blog.llvm.org/posts/2022-08-14-relicensing-update/"><meta property="og:site_name" content="The LLVM Project Blog"><meta property="og:title" content="August 2022 LLVM relicensing update & further suggestions for help"><meta property="og:description" content="The last update on LLVM relicensing was done about 8 months ago. Since then we’ve made substantial progress, so I thought it’s worthwhile to share another update.
+The TL;DR is:"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2022-08-17T00:00:00+00:00"><meta property="article:modified_time" content="2022-08-17T00:00:00+00:00"><meta property="article:tag" content="Relicensing"><meta property="article:tag" content="Foundation"><meta name=twitter:card content="summary"><meta name=twitter:title content="August 2022 LLVM relicensing update & further suggestions for help"><meta name=twitter:description content="The last update on LLVM relicensing was done about 8 months ago. Since then we’ve made substantial progress, so I thought it’s worthwhile to share another update.
+The TL;DR is:"><meta name=generator content="Hugo 0.128.0"><link rel=stylesheet href=https://blog.llvm.org/css/normalize.min.css><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>August 2022 LLVM relicensing update & further suggestions for help</h1><aside><ul><li><time class=post-date datetime=2022-08-17T00:00:00Z>Aug 17, 2022</time></li><li><em><a href=https://blog.llvm.org/tags/relicensing>#relicensing</a>
 ,
-<a href=https://blog.llvm.org/tags/foundation>#foundation</a>
-</em>
-</li>
-<li>5 minute read</li>
-</ul>
-</aside>
-<p>The last update on LLVM relicensing was <a href=https://blog.llvm.org/posts/2021-11-18-relicensing-update/>done about 8 months
+<a href=https://blog.llvm.org/tags/foundation>#foundation</a></em></li><li>5 minute read</li></ul></aside><p>The last update on LLVM relicensing was <a href=https://blog.llvm.org/posts/2021-11-18-relicensing-update/>done about 8 months
 ago</a>. Since then
 we&rsquo;ve made substantial progress, so I thought it&rsquo;s worthwhile to share another
-update.</p>
-<p>The TL;DR is:</p>
-<ul>
-<li>Out of the about 32 million LOC that were contributed under the old license,
+update.</p><p>The TL;DR is:</p><ul><li>Out of the about 32 million LOC that were contributed under the old license,
 we&rsquo;ve reduced the lines of code that aren&rsquo;t relicensed yet from 6% to only
-2%.</li>
-<li>8 months ago, we were still searching for ways to contact 808 individuals who
+2%.</li><li>8 months ago, we were still searching for ways to contact 808 individuals who
 contributed to LLVM over the past 20 years. We managed to reduce that number
-to 421 individuals now.</li>
-<li>We&rsquo;ve also reduced the number of companies or universities to get a relicensing
-agreement from from 133 to 122.</li>
-</ul>
-<p>Read on to find out how we achieved that great progress and how you can help
-with getting us closer to our end goal of having LLVM fully relicensed.</p>
-<p>First of all, a big thank you to everyone who responded to the call for help in
+to 421 individuals now.</li><li>We&rsquo;ve also reduced the number of companies or universities to get a relicensing
+agreement from from 133 to 122.</li></ul><p>Read on to find out how we achieved that great progress and how you can help
+with getting us closer to our end goal of having LLVM fully relicensed.</p><p>First of all, a big thank you to everyone who responded to the call for help in
 the <a href=https://blog.llvm.org/posts/2021-11-18-relicensing-update/>November 2021 blog
 post</a> and the <a href="https://www.youtube.com/watch?v=aAFDfhD-jDs">2021
 LLVM dev meeting presentation</a>.
-This level of progress would not have been possible without your action!</p>
-<p>Next to receiving more relicensing agreements, we also started exploring some
+This level of progress would not have been possible without your action!</p><p>Next to receiving more relicensing agreements, we also started exploring some
 of the tactics described in <a href=https://discourse.llvm.org/t/board-meeting-minutes-may-2022/63628>the previous
 update</a>
 under section &ldquo;the end game&rdquo;, for the pieces of code that we end up not
-receiving a relicensing agreement for, as described in the next sections.</p>
-<h2 id=threshold-of-originality>Threshold of originality</h2>
-<p>Remember that licenses exists because of copyright law &ndash; the license is how
+receiving a relicensing agreement for, as described in the next sections.</p><h2 id=threshold-of-originality>Threshold of originality</h2><p>Remember that licenses exists because of copyright law &ndash; the license is how
 the copyright owners of the code in LLVM give rights to users and other
-contributors to use their code in lots of useful and interesting ways.</p>
-<p>This also means that if a piece of code is not protected by copyright law,
-there is no need for it to be covered by a license.</p>
-<p>Some pieces of code are not covered by copyright law. For example, copyright
+contributors to use their code in lots of useful and interesting ways.</p><p>This also means that if a piece of code is not protected by copyright law,
+there is no need for it to be covered by a license.</p><p>Some pieces of code are not covered by copyright law. For example, copyright
 law contains a concept called <a href=https://en.wikipedia.org/wiki/Threshold_of_originality>&ldquo;Threshold of
 originality&rdquo;</a>. It means
 that a work needs to be &ldquo;sufficiently original&rdquo; for it to be considered to be
@@ -142,20 +39,16 @@ meeting</a>,
 the LLVM Foundation decided to make the same assumption for the relicensing
 project: contributions of 10 lines of code or less are assumed to not be
 covered by copyright.
-Therefore, we don&rsquo;t need relicensing agreements for those.</p>
-<p>Furthermore, there are a few commits that don&rsquo;t seem to meet the
+Therefore, we don&rsquo;t need relicensing agreements for those.</p><p>Furthermore, there are a few commits that don&rsquo;t seem to meet the
 &ldquo;threshold-of-originality&rdquo; even though they&rsquo;re changing/adding more than 10
 lines. We also consider those to not needing a relicensing agreement. One
 example is <a href=https://github.com/llvm/llvm-project/commit/cd13ef01a21e>this
 commit</a>, which only
-removes the full stop at the end of a few sentences.</p>
-<h2 id=code-no-longer-present-in-top-of-trunk>Code no longer present in Top-of-Trunk.</h2>
-<p>We started exploring which of the not-yet-relicensed code is still in the
+removes the full stop at the end of a few sentences.</p><h2 id=code-no-longer-present-in-top-of-trunk>Code no longer present in Top-of-Trunk.</h2><p>We started exploring which of the not-yet-relicensed code is still in the
 current top-of-trunk code base. Some big contributions that weren&rsquo;t covered yet
 are no longer there, such as for example the Microblaze and PIC16 backends. We
 manually checked and marked commits contributing to just these backends as not
-needing to be covered by relicensing agreements.</p>
-<p>To help with finding more code that is no longer in the code base, I wrote a
+needing to be covered by relicensing agreements.</p><p>To help with finding more code that is no longer in the code base, I wrote a
 simple heuristic script that searches in current top-of-trunk if lines from a
 specific commit can still be found in the code base. If for a given commit, no
 or very few lines can be found in current top-of-trunk, that&rsquo;s a strong
@@ -165,72 +58,27 @@ longer seem to be present. I still need to find time to manually verify the
 code in these commits is indeed no longer in the code base. This manual
 verification would be something that someone could easily help me with. If
 anyone reading this would like to volunteer for helping with that - please do
-let me know!</p>
-<h2 id=next-steps>Next steps</h2>
-<p>In our quest to get nearer to 100% relicensing coverage, I believe the
-following are the most impactful next steps to take:</p>
-<ul>
-<li>Continue accepting more relicensing agreements, from individuals and from
+let me know!</p><h2 id=next-steps>Next steps</h2><p>In our quest to get nearer to 100% relicensing coverage, I believe the
+following are the most impactful next steps to take:</p><ul><li>Continue accepting more relicensing agreements, from individuals and from
 corporations. An up-to-date list of who we still need to get agreements from
-is published as a <a href="https://docs.google.com/spreadsheets/d/18_0Hog_eSwES8lKwf7WJal3yBwwcYfvPu1yCfZnTcek/edit?usp=sharing">spreadsheet here</a>.
-<ul>
-<li>We found that it can help a lot when corporations can get a list of which
+is published as a <a href="https://docs.google.com/spreadsheets/d/18_0Hog_eSwES8lKwf7WJal3yBwwcYfvPu1yCfZnTcek/edit?usp=sharing">spreadsheet here</a>.<ul><li>We found that it can help a lot when corporations can get a list of which
 commits they&rsquo;re agreeing to relicense. If you&rsquo;re progressing getting a
 corporation/company to sign, please do send an email to
 <a href=mailto:license-questions@llvm.org>license-questions@llvm.org</a> asking for
-the list of commits that the company may own copyright on.</li>
-</ul>
-</li>
-<li>Go through the commits that look like they may no longer be in top-of-trunk,
-and verify that manually.</li>
-</ul>
-<h2 id=how-can-you-help>How can you help?</h2>
-<ul>
-<li>
-<p>You could check if you know any individual still listed in
+the list of commits that the company may own copyright on.</li></ul></li><li>Go through the commits that look like they may no longer be in top-of-trunk,
+and verify that manually.</li></ul><h2 id=how-can-you-help>How can you help?</h2><ul><li><p>You could check if you know any individual still listed in
 <a href="https://docs.google.com/spreadsheets/d/18_0Hog_eSwES8lKwf7WJal3yBwwcYfvPu1yCfZnTcek/edit?usp=sharing">this up-to-date spreadsheet</a>.
 If you do know any of the people, please do reach out directly to them - I&rsquo;m
 often the bottleneck when you share contact details with me and rely on me to
 reach out to them. If they do have any questions, I&rsquo;m more than happy to try
-and answer them.</p>
-</li>
-<li>
-<p>You could check if you know who the right people are to contact at any of the
+and answer them.</p></li><li><p>You could check if you know who the right people are to contact at any of the
 remaining companies/corporations and talk with them directly or share their
 contact details with us at
 <a href=mailto:license-questions@llvm.org>license-questions@llvm.org</a>. They are also
 listed in the <a href="https://docs.google.com/spreadsheets/d/18_0Hog_eSwES8lKwf7WJal3yBwwcYfvPu1yCfZnTcek/edit?usp=sharing">same
 spreadsheet</a>,
-on the sheet starting with &ldquo;Corporations&rdquo;.</p>
-</li>
-<li>
-<p>If you&rsquo;d be interested in helping to check if specific commits are still
+on the sheet starting with &ldquo;Corporations&rdquo;.</p></li><li><p>If you&rsquo;d be interested in helping to check if specific commits are still
 present in the current code base, please do let me know at
-<a href=mailto:license-questions@llvm.org>license-questions@llvm.org</a>.</p>
-</li>
-</ul>
-</article>
-<section class=post-nav>
-<ul>
-<li>
-<a href=https://blog.llvm.org/posts/2022-01-22-security-group-transparency-reports/><i class="fa fa-chevron-circle-left"></i> LLVM security group and 2021 security transparency report</a>
-</li>
-<li>
-<a href=https://blog.llvm.org/posts/2022-08-14-libc++-format/>Text formatting in C++ using libc++ <i class="fa fa-chevron-circle-right"></i> </a>
-</li>
-</ul>
-</section>
-</main>
-<footer>
-<ul>
-<li>
-<h6>llvm.org |
+<a href=mailto:license-questions@llvm.org>license-questions@llvm.org</a>.</p></li></ul></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/posts/2022-01-22-security-group-transparency-reports/><i class="fa fa-chevron-circle-left"></i> LLVM security group and 2021 security transparency report</a></li><li><a href=https://blog.llvm.org/posts/2022-08-14-libc++-format/>Text formatting in C++ using libc++ <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><ul><li><h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
-</li>
-</ul>
-</footer>
-</div>
-<script src=https://blog.llvm.org/js/scripts.js></script>
-</body>
-</html>
+<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></li></ul></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>

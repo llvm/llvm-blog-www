@@ -1,201 +1,62 @@
-<!doctype html><html lang=en>
-<head>
-<title>Bringing Stack Clash Protection to Clang / X86 — the Open Source Way - The LLVM Project Blog</title>
-<meta charset=utf-8>
-<meta name=viewport content="width=device-width,initial-scale=1">
-<meta name=description content="LLVM Project News and Details from the Trenches">
-<meta name=author content="Serge Guelton, Sylvestre Ledru, Josh Stone"><meta property="og:title" content="Bringing Stack Clash Protection to Clang / X86 — the Open Source Way">
-<meta property="og:description" content="Context Stack clash is an attack that dates back to 2017, when the Qualys Research Team released an advisory with a joint blog post. It basically exploits large stack allocation (greater than PAGE_SIZE) that can lead to stack read/write not triggering the stack guard page allocated by the Linux Kernel.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://blog.llvm.org/posts/2021-01-05-stack-clash-protection/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2021-01-30T10:00:00+00:00">
-<meta property="article:modified_time" content="2021-01-30T10:00:00+00:00">
-<meta name=twitter:card content="summary">
-<meta name=twitter:title content="Bringing Stack Clash Protection to Clang / X86 — the Open Source Way">
-<meta name=twitter:description content="Context Stack clash is an attack that dates back to 2017, when the Qualys Research Team released an advisory with a joint blog post. It basically exploits large stack allocation (greater than PAGE_SIZE) that can lead to stack read/write not triggering the stack guard page allocated by the Linux Kernel.">
-<meta name=generator content="Hugo 0.89.4">
-<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
-<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
-<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
-<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
-<body>
-<div id=container>
-<header>
-<h1>
-<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
-</h1>
-<ul id=social-media>
-<li>
-<a href=https://www.facebook.com/llvmorg title=Facebook>
-<i class="fab fa-facebook fa-lg"></i>
-</a>
-</li>
-<li>
-<a href=https://github.com/llvm title=GitHub>
-<i class="fab fa-github fa-lg"></i>
-</a>
-</li>
-<li>
-<a href=https://twitter.com/llvmorg title=Twitter>
-<i class="fab fa-twitter fa-lg"></i>
-</a>
-</li>
-<li>
-<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
-<i class="fab fa-youtube fa-lg"></i>
-</a>
-</li>
-</ul>
-<p><em>LLVM Project News and Details from the Trenches</em></p>
-</header>
-<nav>
-<ul>
-<li>
-<a href=https://blog.llvm.org/about>
-<i class="fa-li fa fa-lg"></i><span>About</span>
-</a>
-</li>
-<li>
-<a href=https://blog.llvm.org/posts>
-<i class="fa-li fa fa-lg"></i><span>Posts</span>
-</a>
-</li>
-<li>
-<a href=https://blog.llvm.org/tags>
-<i class="fa-li fa fa-lg"></i><span>Tags</span>
-</a>
-</li>
-<li>
-<a href=https://llvm.org/>
-<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
-</a>
-</li>
-</ul>
-</nav>
-<main>
-<article>
-<h1>Bringing Stack Clash Protection to Clang / X86 — the Open Source Way</h1>
-<aside>
-<ul>
-<li>By Serge Guelton, Sylvestre Ledru, Josh Stone</li>
-<li>
-<time class=post-date datetime=2021-01-30T10:00:00Z>Jan 30, 2021</time>
-</li>
-<li>
-<em>
-<a href=https://blog.llvm.org/tags/clang>#Clang</a>
+<!doctype html><html lang=en><head><title>Bringing Stack Clash Protection to Clang / X86 — the Open Source Way - The LLVM Project Blog</title>
+<meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Serge Guelton, Sylvestre Ledru, Josh Stone"><meta property="og:url" content="https://blog.llvm.org/posts/2021-01-05-stack-clash-protection/"><meta property="og:site_name" content="The LLVM Project Blog"><meta property="og:title" content="Bringing Stack Clash Protection to Clang / X86 — the Open Source Way"><meta property="og:description" content="Context Stack clash is an attack that dates back to 2017, when the Qualys Research Team released an advisory with a joint blog post. It basically exploits large stack allocation (greater than PAGE_SIZE) that can lead to stack read/write not triggering the stack guard page allocated by the Linux Kernel."><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-01-30T10:00:00+00:00"><meta property="article:modified_time" content="2021-01-30T10:00:00+00:00"><meta property="article:tag" content="Clang"><meta property="article:tag" content="Llvm"><meta name=twitter:card content="summary"><meta name=twitter:title content="Bringing Stack Clash Protection to Clang / X86 — the Open Source Way"><meta name=twitter:description content="Context Stack clash is an attack that dates back to 2017, when the Qualys Research Team released an advisory with a joint blog post. It basically exploits large stack allocation (greater than PAGE_SIZE) that can lead to stack read/write not triggering the stack guard page allocated by the Linux Kernel."><meta name=generator content="Hugo 0.128.0"><link rel=stylesheet href=https://blog.llvm.org/css/normalize.min.css><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>Bringing Stack Clash Protection to Clang / X86 — the Open Source Way</h1><aside><ul><li><time class=post-date datetime=2021-01-30T10:00:00Z>Jan 30, 2021</time></li><li><em><a href=https://blog.llvm.org/tags/clang>#Clang</a>
 ,
-<a href=https://blog.llvm.org/tags/llvm>#llvm</a>
-</em>
-</li>
-<li>8 minute read</li>
-</ul>
-</aside>
-<h1 id=context>Context</h1>
-<p>Stack clash is an attack that dates back to 2017, when the Qualys Research Team
+<a href=https://blog.llvm.org/tags/llvm>#llvm</a></em></li><li>8 minute read</li></ul></aside><h1 id=context>Context</h1><p>Stack clash is an attack that dates back to 2017, when the Qualys Research Team
 released an advisory with a <a href=https://blog.qualys.com/vulnerabilities-research/2017/06/19/the-stack-clash>joint blog post</a>. It basically
 exploits large stack allocation (greater than <code>PAGE_SIZE</code>) that can lead to
 stack read/write <em>not</em> triggering the <a href=https://lkml.org/lkml/2017/6/22/345>stack guard page</a> allocated by the Linux
-Kernel.</p>
-<p>Shortly after the advisory got released, GCC provided a <a href=https://gcc.gnu.org/legacy-ml/gcc-patches/2017-07/msg00556.html>countermeasure</a> activated by <code>-fstack-clash-protection</code> that
+Kernel.</p><p>Shortly after the advisory got released, GCC provided a <a href=https://gcc.gnu.org/legacy-ml/gcc-patches/2017-07/msg00556.html>countermeasure</a> activated by <code>-fstack-clash-protection</code> that
 basically consists in splitting large allocation in chunks of <code>PAGE_SIZE</code>,
-with a probe in each chunk to trigger the kernel stack guard page.</p>
-<p>This has been a major security difference between GCC and Clang since then. It
+with a probe in each chunk to trigger the kernel stack guard page.</p><p>This has been a major security difference between GCC and Clang since then. It
 has even been identified as a blocker by Fedora to move from GCC to Clang as the
 compiler for some projects that already made the move upstream, leading to <a href=https://pagure.io/fesco/issue/2020>extra
-maintenance</a> for packagers.</p>
-<p>Support for this flag <a href=https://reviews.llvm.org/D68720>landed in Clang in 2020</a>,
+maintenance</a> for packagers.</p><p>Support for this flag <a href=https://reviews.llvm.org/D68720>landed in Clang in 2020</a>,
 only for X86, SystemZ and PowerPC. Its implementation is a result of a fruitful
-collaboration between LLVM, Firefox and Rust developers.</p>
-<p>Rust already had a countermeasure implemented in the form of a runtime call to
+collaboration between LLVM, Firefox and Rust developers.</p><p>Rust already had a countermeasure implemented in the form of a runtime call to
 perform the stack probing. With LLVM catching up, using a more lightweight
-approach got <a href=https://github.com/rust-lang/rust/pull/77885>investigated in Rust</a>.</p>
-<h1 id=countermeasure-description>Countermeasure Description</h1>
-<p>The Clang implementation for X86 is derived from the GCC implementation, with a
-few distinctions. The core ideas are:</p>
-<ol>
-<li>
-<p>thanks to X86 calling convention, we get a free probe at each call site,
-which means that each function starts with a probed stack</p>
-</li>
-<li>
-<p>when probing the stack in the function prologue, we don&rsquo;t probe the tail of
+approach got <a href=https://github.com/rust-lang/rust/pull/77885>investigated in Rust</a>.</p><h1 id=countermeasure-description>Countermeasure Description</h1><p>The Clang implementation for X86 is derived from the GCC implementation, with a
+few distinctions. The core ideas are:</p><ol><li><p>thanks to X86 calling convention, we get a free probe at each call site,
+which means that each function starts with a probed stack</p></li><li><p>when probing the stack in the function prologue, we don&rsquo;t probe the tail of
 the allocation. Stated otherwise, if the stack size is <code>PAGE_SIZE + PAGE_SIZE/2</code>,
 we want to probe only once. This is important to limit the number
-of probes: if the stack size is lower than <code>PAGE_SIZE</code> no probe is needed</p>
-</li>
-<li>
-<p>because a signal can interrupt the execution flow any time, at no point
+of probes: if the stack size is lower than <code>PAGE_SIZE</code> no probe is needed</p></li><li><p>because a signal can interrupt the execution flow any time, at no point
 should we have two stack allocations (lower than <code>PAGE_SIZE</code>) without a probe
-in between.</p>
-</li>
-</ol>
-<p>The probing strategy for stack allocation varies based on the size of the stack
+in between.</p></li></ol><p>The probing strategy for stack allocation varies based on the size of the stack
 allocation. If it&rsquo;s smaller than <code>PAGE_SIZE</code>, thanks to (2) no probing is
 needing. If it&rsquo;s below a small multiple of <code>PAGE_SIZE</code>, then the probing loop
 can be unrolled. Otherwise a probing loop alternates stack allocation of
-<code>PAGE_SIZE</code> bytes and probe, starting with the allocation thanks to (1).</p>
-<p>As side effect of (2) is that when performing a dynamic allocation, we need to
+<code>PAGE_SIZE</code> bytes and probe, starting with the allocation thanks to (1).</p><p>As side effect of (2) is that when performing a dynamic allocation, we need to
 probe <em>before</em> updating the stack, otherwise we got a hole in the protection.
 This probe cannot be done after the stack update, even with an offset, because
-of (3). Otherwise we end up with a bug as this one found in <a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=97928">GCC</a></p>
-<p>The following scheme attempts to summarize the allocation and probing
-interaction between static and dynamic allocations:</p>
-<pre><code>     + ----- &lt;- ------------ &lt;- ------------- &lt;- ------------ +
+of (3). Otherwise we end up with a bug as this one found in <a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=97928">GCC</a></p><p>The following scheme attempts to summarize the allocation and probing
+interaction between static and dynamic allocations:</p><pre><code>     + ----- &lt;- ------------ &lt;- ------------- &lt;- ------------ +
      |                                                        |
 [free probe] -&gt; [page alloc] -&gt; [alloc probe] -&gt; [tail alloc] + -&gt; [dyn probe] -&gt; [page alloc] -&gt; [dyn probe] -&gt; [tail alloc] +
                                                               |                                                               |
                                                               + &lt;- ----------- &lt;- ------------ &lt;- ----------- &lt;- ------------ +
-</code></pre>
-<h1 id=validation-with-firefox>Validation with Firefox</h1>
-<p>Firefox provides an amazing test bench to evaluate the impact of compiler
+</code></pre><h1 id=validation-with-firefox>Validation with Firefox</h1><p>Firefox provides an amazing test bench to evaluate the impact of compiler
 changes. Indeed, with more than 12MLOC of C/C++ and 3MLOC of Rust built using
-PGO/LTO and <a href=https://blog.llvm.org/2019/09/closing-gap-cross-language-lto-between.html>XLTO</a>, most of the important cases are covered.</p>
-<p>Moreover, Firefox being supported on a large set of operating system and
+PGO/LTO and <a href=https://blog.llvm.org/2019/09/closing-gap-cross-language-lto-between.html>XLTO</a>, most of the important cases are covered.</p><p>Moreover, Firefox being supported on a large set of operating system and
 architectures, it was a great way to test the Stack Clash protection on various
-set of configurations.</p>
-<p>The work is detailed in the <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1588710">bug 1588710</a>.</p>
-<h2 id=functional-testing>Functional Testing</h2>
-<p>To make sure that Firefox would perform as expected, we leveraged the huge test
-suite to verify that the product would still work as expected with this option.</p>
-<p>We used the <a href=https://hacks.mozilla.org/2020/07/testing-firefox-more-efficiently-with-machine-learning/><code>try auto</code></a>, a new command which will run the most
+set of configurations.</p><p>The work is detailed in the <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1588710">bug 1588710</a>.</p><h2 id=functional-testing>Functional Testing</h2><p>To make sure that Firefox would perform as expected, we leveraged the huge test
+suite to verify that the product would still work as expected with this option.</p><p>We used the <a href=https://hacks.mozilla.org/2020/07/testing-firefox-more-efficiently-with-machine-learning/><code>try auto</code></a>, a new command which will run the most
 appropriate set of tests for such kind of changes during the development phase.
 Then, once the patch landed into Mozilla-central (Firefox nightly), the whole
 test suite is executed, presenting about 29 days of machine time for about 9000
-tasks.</p>
-<p>Thanks to this infrastructure, we have identified an <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1588710#c40">issue with
+tasks.</p><p>Thanks to this infrastructure, we have identified an <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1588710#c40">issue with
 <code>alloca(0)</code></a> generating buggy machine code.
 Fortunately, the <a href="https://bugs.llvm.org/show_bug.cgi?id=47657">fix</a> was already in the trunk version of LLVM.
-We cherry-picked the fix in our custom Clang build which addressed our issue.</p>
-<h2 id=performance-testing>Performance Testing</h2>
-<p>Over the years, Mozilla has developed a few tools to evaluate performance
+We cherry-picked the fix in our custom Clang build which addressed our issue.</p><h2 id=performance-testing>Performance Testing</h2><p>Over the years, Mozilla has developed a few tools to evaluate performance
 impact of changes, from micro-benchmark to page loads. These tools have been key
 to improve Firefox overall performances but also evaluate the impact of the <a href=https://blog.mozilla.org/nfroyd/2018/05/29/when-implementation-monoculture-right-thing/>move
-to Clang</a> on all platforms done a couple years ago.</p>
-<p>The usual procedure to evaluate performances improvements/regressions is to:</p>
-<ol>
-<li>
-<p>Run two builds with benchmarks. One without the patch, one with it.</p>
-</li>
-<li>
-<p>Leverage the tooling to rerun the benchmark (usually 5 to 20 times) to limit
-the noise.</p>
-</li>
-<li>
-<p>Compare the various benchmark to see if significant regressions can be
-identified.</p>
-</li>
-</ol>
-<p>In the context of this project, we run the usual benchmarks sensitive to C++
-changes and we haven&rsquo;t identified any <a href="https://treeherder.mozilla.org/perfherder/comparesubtest?originalProject=try&newProject=try&newRevision=62108fa48bd15fe01f1a0f1ffab133af9b4207cc&originalSignature=1904137&newSignature=1904137&framework=10&originalRevision=a47c98b909b61035dae2e1e00883f2ade0fef129">regression</a> in term of
-performances.</p>
-<h2 id=current-status>Current status</h2>
-<p>Firefox nightly on Linux is now compiled with the stack-clash-option from
+to Clang</a> on all platforms done a couple years ago.</p><p>The usual procedure to evaluate performances improvements/regressions is to:</p><ol><li><p>Run two builds with benchmarks. One without the patch, one with it.</p></li><li><p>Leverage the tooling to rerun the benchmark (usually 5 to 20 times) to limit
+the noise.</p></li><li><p>Compare the various benchmark to see if significant regressions can be
+identified.</p></li></ol><p>In the context of this project, we run the usual benchmarks sensitive to C++
+changes and we haven&rsquo;t identified any <a href="https://treeherder.mozilla.org/perfherder/comparesubtest?originalProject=try&amp;newProject=try&amp;newRevision=62108fa48bd15fe01f1a0f1ffab133af9b4207cc&amp;originalSignature=1904137&amp;newSignature=1904137&amp;framework=10&amp;originalRevision=a47c98b909b61035dae2e1e00883f2ade0fef129">regression</a> in term of
+performances.</p><h2 id=current-status>Current status</h2><p>Firefox nightly on Linux is now compiled with the stack-clash-option from
 January 8th 2021. We have not detected any regressions since it landed.
 If everything goes well, this change should ship with Firefox 86 (planned for
-mid February 2021).</p>
-<h1 id=validation-with-rust>Validation With Rust</h1>
-<p>Rust has long supported the callback style of the LLVM <code>probe-stack</code> attribute,
+mid February 2021).</p><h1 id=validation-with-rust>Validation With Rust</h1><p>Rust has long supported the callback style of the LLVM <code>probe-stack</code> attribute,
 using the function <code>__rust_probestack</code> defined in its own compiler builtins
 library. In Rust&rsquo;s spirit of safety, this attribute is added to <em>all</em> functions,
 letting LLVM sort out which actually need probing. However, forcing such a call
@@ -205,8 +66,7 @@ Furthermore, Rust only has this callback implemented for its Tier 1 (most
 supported) targets, namely i686 and x86_64, leaving other architectures without
 protection so far. Therefore, letting LLVM generate inline stack probes is
 beneficial both for the performance of avoiding a call and for the increased
-architecture support.</p>
-<p>Since the Rust compiler is written in Rust itself, with stack probing enabled by
+architecture support.</p><p>Since the Rust compiler is written in Rust itself, with stack probing enabled by
 default, it makes a great functional test for any new code generation feature.
 The compiler is bootstrapped in stages, first building with a prior version,
 then rebuilding with the result of that first stage. Codegen issues are often
@@ -215,38 +75,28 @@ inline stack probes were no different, leading to fixes in
 <a href=https://reviews.llvm.org/D82867>D82867</a> and
 <a href=https://reviews.llvm.org/D90216>D90216</a>. Both of these were simple errors that
 were not apparent in existing FileCheck tests, showing the importance of
-actually executing generated code.</p>
-<p>An <a href=https://github.com/rust-lang/rust/issues/70143>issue</a> also led to the realization that there was a more
+actually executing generated code.</p><p>An <a href=https://github.com/rust-lang/rust/issues/70143>issue</a> also led to the realization that there was a more
 general bug impacting both GCC and LLVM implementation of
 <code>-fstack-clash-protector</code>, leading to a new patch set on the LLVM side.
-Essentially, the observed behavior is the following:</p>
-<p>Alignment requirements behave similarly to allocation with respect to the stack:
-they (may) make it grow. For instance the stack allocation for an <code>char foo[4096] __attribute__((aligned(2048)));</code> is done through:</p>
-<pre><code>and     rsp, -2048
+Essentially, the observed behavior is the following:</p><p>Alignment requirements behave similarly to allocation with respect to the stack:
+they (may) make it grow. For instance the stack allocation for an <code>char foo[4096] __attribute__((aligned(2048)));</code> is done through:</p><pre><code>and     rsp, -2048
 sub     rsp, 6024
-</code></pre>
-<p>Both <code>and</code> and the <code>sub</code> actually update the stack! To take that effect into
+</code></pre><p>Both <code>and</code> and the <code>sub</code> actually update the stack! To take that effect into
 account, the LLVM patch considers the <code>and rsp, -2048</code> as a <code>sub rsp, 2048</code>
 when computing the probing distance, which means considering the worst
-case scenario.</p>
-<p>For future work on the Rust side, inline stack probes will replace
+case scenario.</p><p>For future work on the Rust side, inline stack probes will replace
 <code>__rust_probestack</code> on i686 and x86_64 soon in <a href=https://github.com/rust-lang/rust/pull/77885>Rust
 pr77885</a>, and that will include
 <a href=https://perf.rust-lang.org/>perf results</a> to monitor the effect. After that,
 additional architectures can be functionally tested and enabled for inline stack
-probes as well, increasing the reach of Rust&rsquo;s memory safety.</p>
-<h1 id=validation-with-a-binary-tracer>Validation with a Binary Tracer</h1>
-<p>None of the above validation validates the security aspect of the protection. To
+probes as well, increasing the reach of Rust&rsquo;s memory safety.</p><h1 id=validation-with-a-binary-tracer>Validation with a Binary Tracer</h1><p>None of the above validation validates the security aspect of the protection. To
 have more confidence on the actual probing scheme implementation, we implemented
 a binary tracer based on the (awesome) <a href=https://github.com/QBDI/QBDI>QBDI</a>
 Dynamic Binary Instrumentation framework. This Proof Of Concept (POC) is
 available on GitHub:
-<a href=https://github.com/serge-sans-paille/stack-clash-tracer>stack-clash-tracer</a></p>
-<p>This tool instruments all stack allocation and memory access of a running
+<a href=https://github.com/serge-sans-paille/stack-clash-tracer>stack-clash-tracer</a></p><p>This tool instruments all stack allocation and memory access of a running
 binary, logs them and checks that no stack allocation is greater than
-<code>PAGE_SIZE</code> and that we get an actual probing between two allocations.</p>
-<p>Here is a sample session that showcases large stack allocation issues:</p>
-<pre><code>$ cat main.c
+<code>PAGE_SIZE</code> and that we get an actual probing between two allocations.</p><p>Here is a sample session that showcases large stack allocation issues:</p><pre><code>$ cat main.c
 #include &lt;alloca.h&gt;
 #include &lt;string.h&gt;
 int main(int argc, char**argv) {
@@ -262,55 +112,22 @@ $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1
 $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1 2 3 4 5
 [sct][error] stack allocation is too big (5024)
 [sct][error] stack allocation is too big (6016)
-</code></pre>
-<p>The same code, compiled with <code>-fstack-clash-protection</code>, is safer (apart from
-the stupid use of <code>strcpy</code>, that is)</p>
-<pre><code>$ gcc main.c -fstack-clash-protection -o main
+</code></pre><p>The same code, compiled with <code>-fstack-clash-protection</code>, is safer (apart from
+the stupid use of <code>strcpy</code>, that is)</p><pre><code>$ gcc main.c -fstack-clash-protection -o main
 $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1
 $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1 2 3 4 5
-</code></pre>
-<p>Small bonus of this compiler-independent approach: we can verify both GCC and
-Clang implementation <code>:-)</code></p>
-<pre><code>$ clang main.c -fstack-clash-protection -o main
+</code></pre><p>Small bonus of this compiler-independent approach: we can verify both GCC and
+Clang implementation <code>:-)</code></p><pre><code>$ clang main.c -fstack-clash-protection -o main
 $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1
 $ LD_PRELOAD=./libstack_clash_tracer.so ./main 1 2 3 4 5
-</code></pre>
-<p>To come back on the Firefox test case, before we landed the change, we could
-see:</p>
-<pre><code>$ LD_PRELOAD=./libstack_clash_tracer.so firefox-bin
+</code></pre><p>To come back on the Firefox test case, before we landed the change, we could
+see:</p><pre><code>$ LD_PRELOAD=./libstack_clash_tracer.so firefox-bin
 [sct][error] stack allocation is too big (4168)
-</code></pre>
-<p>Once Firefox nightly shipped with stack clash protection, this warning
-disappears.</p>
-<h1 id=conclusion>Conclusion</h1>
-<p>Aside from the technical aspects of the countermeasure, it is interesting to
+</code></pre><p>Once Firefox nightly shipped with stack clash protection, this warning
+disappears.</p><h1 id=conclusion>Conclusion</h1><p>Aside from the technical aspects of the countermeasure, it is interesting to
 note that its Clang implementation was derived from the GCC implementation, but
 led to an issue being reported in the GCC codebase. The Clang-generated code got
 validated by Firefox People, tested by Rust people who reported several bugs,
-some impacting both Clang and GCC implementation, the circle is complete!</p>
-<h1 id=references>References</h1>
-</article>
-<section class=post-nav>
-<ul>
-<li>
-<a href=https://blog.llvm.org/posts/2020-12-21-interactive-cpp-for-data-science/><i class="fa fa-chevron-circle-left"></i> Interactive C++ for Data Science</a>
-</li>
-<li>
-<a href=https://blog.llvm.org/posts/2021-02-10-community-dot-o/>Introducing Community.o and the Community.o Summit <i class="fa fa-chevron-circle-right"></i> </a>
-</li>
-</ul>
-</section>
-</main>
-<footer>
-<ul>
-<li>
-<h6>llvm.org |
+some impacting both Clang and GCC implementation, the circle is complete!</p><h1 id=references>References</h1></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/posts/2020-12-21-interactive-cpp-for-data-science/><i class="fa fa-chevron-circle-left"></i> Interactive C++ for Data Science</a></li><li><a href=https://blog.llvm.org/posts/2021-02-10-community-dot-o/>Introducing Community.o and the Community.o Summit <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><ul><li><h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
-</li>
-</ul>
-</footer>
-</div>
-<script src=https://blog.llvm.org/js/scripts.js></script>
-</body>
-</html>
+<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></li></ul></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>

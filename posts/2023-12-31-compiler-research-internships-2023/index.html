@@ -1,156 +1,38 @@
-<!doctype html><html lang=en>
-<head>
-<title>Another step forward towards interactive programming - The LLVM Project Blog</title>
-<meta charset=utf-8>
-<meta name=viewport content="width=device-width,initial-scale=1">
-<meta name=description content="LLVM Project News and Details from the Trenches">
-<meta name=author content="QuillPusher (Saqib)"><meta property="og:title" content="Another step forward towards interactive programming">
-<meta property="og:description" content="The Compiler Research team is pleased to announce the successful completion of another round of internships focused on enhancements in interactive programming, specifically in relation to the Clang-REPL component in LLVM.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://blog.llvm.org/posts/2023-12-31-compiler-research-internships-2023/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2023-12-31T00:00:00+00:00">
-<meta property="article:modified_time" content="2023-12-31T00:00:00+00:00">
-<meta name=twitter:card content="summary">
-<meta name=twitter:title content="Another step forward towards interactive programming">
-<meta name=twitter:description content="The Compiler Research team is pleased to announce the successful completion of another round of internships focused on enhancements in interactive programming, specifically in relation to the Clang-REPL component in LLVM.">
-<meta name=generator content="Hugo 0.89.4">
-<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
-<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
-<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
-<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
-<body>
-<div id=container>
-<header>
-<h1>
-<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
-</h1>
-<ul id=social-media>
-<li>
-<a href=https://www.facebook.com/llvmorg title=Facebook>
-<i class="fab fa-facebook fa-lg"></i>
-</a>
-</li>
-<li>
-<a href=https://github.com/llvm title=GitHub>
-<i class="fab fa-github fa-lg"></i>
-</a>
-</li>
-<li>
-<a href=https://twitter.com/llvmorg title=Twitter>
-<i class="fab fa-twitter fa-lg"></i>
-</a>
-</li>
-<li>
-<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
-<i class="fab fa-youtube fa-lg"></i>
-</a>
-</li>
-</ul>
-<p><em>LLVM Project News and Details from the Trenches</em></p>
-</header>
-<nav>
-<ul>
-<li>
-<a href=https://blog.llvm.org/about>
-<i class="fa-li fa fa-lg"></i><span>About</span>
-</a>
-</li>
-<li>
-<a href=https://blog.llvm.org/posts>
-<i class="fa-li fa fa-lg"></i><span>Posts</span>
-</a>
-</li>
-<li>
-<a href=https://blog.llvm.org/tags>
-<i class="fa-li fa fa-lg"></i><span>Tags</span>
-</a>
-</li>
-<li>
-<a href=https://llvm.org/>
-<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
-</a>
-</li>
-</ul>
-</nav>
-<main>
-<article>
-<h1>Another step forward towards interactive programming</h1>
-<aside>
-<ul>
-<li>By QuillPusher (Saqib)</li>
-<li>
-<time class=post-date datetime=2023-12-31T00:00:00Z>Dec 31, 2023</time>
-</li>
-<li>
-<em>
-<a href=https://blog.llvm.org/tags/clang-repl>#clang-repl</a>
-</em>
-</li>
-<li>5 minute read</li>
-</ul>
-</aside>
-<p>The <a href=https://compiler-research.org>Compiler Research</a> team is pleased to announce the successful completion
+<!doctype html><html lang=en><head><title>Another step forward towards interactive programming - The LLVM Project Blog</title>
+<meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="QuillPusher (Saqib)"><meta property="og:url" content="https://blog.llvm.org/posts/2023-12-31-compiler-research-internships-2023/"><meta property="og:site_name" content="The LLVM Project Blog"><meta property="og:title" content="Another step forward towards interactive programming"><meta property="og:description" content="The Compiler Research team is pleased to announce the successful completion of another round of internships focused on enhancements in interactive programming, specifically in relation to the Clang-REPL component in LLVM."><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2023-12-31T00:00:00+00:00"><meta property="article:modified_time" content="2023-12-31T00:00:00+00:00"><meta property="article:tag" content="Clang-Repl"><meta name=twitter:card content="summary"><meta name=twitter:title content="Another step forward towards interactive programming"><meta name=twitter:description content="The Compiler Research team is pleased to announce the successful completion of another round of internships focused on enhancements in interactive programming, specifically in relation to the Clang-REPL component in LLVM."><meta name=generator content="Hugo 0.128.0"><link rel=stylesheet href=https://blog.llvm.org/css/normalize.min.css><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>Another step forward towards interactive programming</h1><aside><ul><li><time class=post-date datetime=2023-12-31T00:00:00Z>Dec 31, 2023</time></li><li><em><a href=https://blog.llvm.org/tags/clang-repl>#clang-repl</a></em></li><li>5 minute read</li></ul></aside><p>The <a href=https://compiler-research.org>Compiler Research</a> team is pleased to announce the successful completion
 of another round of internships focused on enhancements in interactive
-programming, specifically in relation to the <a href=https://clang.llvm.org/docs/ClangRepl.html>Clang-REPL</a> component in LLVM.</p>
-<p>The Compiler Research team includes researchers located at Princeton University
-and CERN. Our primary goal is best described as follows:</p>
-<blockquote>
-<p>To establish a proficient workflow in LLVM, where <a href=https://compiler-research.org/interactive_cpp>interactive development</a> in
+programming, specifically in relation to the <a href=https://clang.llvm.org/docs/ClangRepl.html>Clang-REPL</a> component in LLVM.</p><p>The Compiler Research team includes researchers located at Princeton University
+and CERN. Our primary goal is best described as follows:</p><blockquote><p>To establish a proficient workflow in LLVM, where <a href=https://compiler-research.org/interactive_cpp>interactive development</a> in
 C++ is possible, and exploratory C++ becomes an accessible experience to a
-wider audience.</p>
-</blockquote>
-<p>Following are some notable contributions by our interns this year.</p>
-<h2 id=yuquan-fu---autocompletion-in-clang-repl>Yuquan Fu - Autocompletion in Clang-REPL</h2>
-<p>Clang-Repl allows developers to program in C++ interactively with a REPL
+wider audience.</p></blockquote><p>Following are some notable contributions by our interns this year.</p><h2 id=yuquan-fu---autocompletion-in-clang-repl>Yuquan Fu - Autocompletion in Clang-REPL</h2><p>Clang-Repl allows developers to program in C++ interactively with a REPL
 environment. However, it was missing the ability to suggest code completion or
 auto-complete options for user input, which can be time-consuming and prone to
-typing errors.</p>
-<p>With this code completion system, users can either complete their input quickly
+typing errors.</p><p>With this code completion system, users can either complete their input quickly
 or see a list of valid completion candidates. The code completion is also
 context-aware, providing semantically relevant results based on the current
-position and input on the current line.</p>
-<p>Mentors: Vassil Vassilev (<a href=https://www.princeton.edu/>Princeton.edu</a>) & David Lange (<a href=https://www.princeton.edu/>Princeton.edu</a>)</p>
-<p>Project Details: <a href=https://www.syntaxforge.net/clang-repl-cc/>Autocompletion in Clang-REPL</a></p>
-<p>Funding: Google Summer of Code 2023</p>
-<h3 id=example--avoiding-tedious-typing>Example – avoiding tedious typing</h3>
-<pre tabindex=0><code>clang-repl&gt; struct WhateverMeaningfulLoooooooooongName{ int field;};
+position and input on the current line.</p><p>Mentors: Vassil Vassilev (<a href=https://www.princeton.edu/>Princeton.edu</a>) & David Lange (<a href=https://www.princeton.edu/>Princeton.edu</a>)</p><p>Project Details: <a href=https://www.syntaxforge.net/clang-repl-cc/>Autocompletion in Clang-REPL</a></p><p>Funding: Google Summer of Code 2023</p><h3 id=example--avoiding-tedious-typing>Example – avoiding tedious typing</h3><pre tabindex=0><code>clang-repl&gt; struct WhateverMeaningfulLoooooooooongName{ int field;};
 clang-repl&gt; Wh&lt;tab&gt;
-</code></pre><p>With code completion, hitting tab completes the entity name:</p>
-<pre tabindex=0><code>clang-repl&gt;  WhateverMeaningfulLoooooooooongName
-</code></pre><blockquote>
-<p>For implementation details, please see the respective <a href=https://compiler-research.org/assets/presentations/CaaS_Weekly_30_08_2023_Fred-Code_Completion_in_ClangRepl_GSoC.pdf>slides</a> and the
-<a href=https://compiler-research.org/blogs/gsoc23_ffu_experience_blog/>blog</a>.</p>
-</blockquote>
-<h2 id=anubhab-ghosh---webassembly-support-for-clang-repl>Anubhab Ghosh - WebAssembly Support for Clang-Repl</h2>
-<p>The Xeus Framework enables accessing Clang-REPL (an interpreter that JIT
+</code></pre><p>With code completion, hitting tab completes the entity name:</p><pre tabindex=0><code>clang-repl&gt;  WhateverMeaningfulLoooooooooongName
+</code></pre><blockquote><p>For implementation details, please see the respective <a href=https://compiler-research.org/assets/presentations/CaaS_Weekly_30_08_2023_Fred-Code_Completion_in_ClangRepl_GSoC.pdf>slides</a> and the
+<a href=https://compiler-research.org/blogs/gsoc23_ffu_experience_blog/>blog</a>.</p></blockquote><h2 id=anubhab-ghosh---webassembly-support-for-clang-repl>Anubhab Ghosh - WebAssembly Support for Clang-Repl</h2><p>The Xeus Framework enables accessing Clang-REPL (an interpreter that JIT
 compiles C++ code into native code) in a web browser, using Jupyter. However,
-this shifts the computational load to the server.</p>
-<p>A more scalable approach is to use WebAssembly. It allows sandboxed execution
+this shifts the computational load to the server.</p><p>A more scalable approach is to use WebAssembly. It allows sandboxed execution
 of native (e.g. C/C++/Rust) programs compiled to an intermediate bytecode at
 closer to native speeds. The idea is to run clang-repl within WebAssembly and
-generate JIT-compiled WebAssembly code and execute it on the client side.</p>
-<p>However, this comes with some challenges (e.g., code in WebAssembly is
-immutable, which is unacceptable for JIT).</p>
-<p>Solution: To address the code immutability issue, a new WebAssembly module is
+generate JIT-compiled WebAssembly code and execute it on the client side.</p><p>However, this comes with some challenges (e.g., code in WebAssembly is
+immutable, which is unacceptable for JIT).</p><p>Solution: To address the code immutability issue, a new WebAssembly module is
 created at each iteration of the REPL loop. Initially, a precompiled module
 containing the Standard C/C++ libraries, LLVM, Clang, and wasm-ld is sent to
-the browser, which runs the interpreter and compiles the user code.</p>
-<p>Since we cannot call Interpreter::Execute() to execute the module (due to
+the browser, which runs the interpreter and compiles the user code.</p><p>Since we cannot call Interpreter::Execute() to execute the module (due to
 JITLink reliance), the LLVM WebAssembly backend is used manually to produce an
 object file. This file is then passed to the WebAssembly version of LLD
 (wasm-ld) to turn it into a shared library which is written to the virtual file
 system of Emscripten. The dynamic linking facilities of Emscripten can be used
-to load this library.</p>
-<p>Mentors: Vassil Vassilev (<a href=https://www.princeton.edu/>Princeton.edu</a>) & Alexander Penev (<a href=https://uni-plovdiv.bg/en/>Uni-Plovdiv.bg</a>)</p>
-<p>Project Details: <a href=https://gist.github.com/argentite/c0852d3e178c4770a429f14291e83475>WebAssembly Support for Clang-Repl</a></p>
-<p>Funding: Google Summer of Code 2023</p>
-<h3 id=example>Example:</h3>
-<pre tabindex=0><code>SDL_Init(SDL_INIT_VIDEO);
+to load this library.</p><p>Mentors: Vassil Vassilev (<a href=https://www.princeton.edu/>Princeton.edu</a>) & Alexander Penev (<a href=https://uni-plovdiv.bg/en/>Uni-Plovdiv.bg</a>)</p><p>Project Details: <a href=https://gist.github.com/argentite/c0852d3e178c4770a429f14291e83475>WebAssembly Support for Clang-Repl</a></p><p>Funding: Google Summer of Code 2023</p><h3 id=example>Example:</h3><pre tabindex=0><code>SDL_Init(SDL_INIT_VIDEO);
 SDL_Window *window;
 SDL_Rendered *renderer;
 SDL_CreateWindowAndRenderer (300, 300, 0, &amp;window, &amp;renderer);
-</code></pre><p>This should connect to a simple black canvas. Next, we can draw things into it.</p>
-<pre tabindex=0><code>SDL_SetRenderDrawColor(renderer, 0x80, 0x00, 0x00, 0xFF);
+</code></pre><p>This should connect to a simple black canvas. Next, we can draw things into it.</p><pre tabindex=0><code>SDL_SetRenderDrawColor(renderer, 0x80, 0x00, 0x00, 0xFF);
 SDL_Rect rect3 = {.x = 20, .y = 20, .w = 150, .h = 100};
 SDL_RenderFillRect(rendered, &amp;rect3);
  
@@ -159,41 +41,28 @@ SDL_Rect rect4 = {.x = 40, .y = 40, .w = 150, .h = 100};
 SDL_RenderFillRect(rendered, &amp;rect4);
  
 SDL_RenderPresent(renderer);
-</code></pre><p>The output should look something like this:</p>
-<figure><img src=https://blog.llvm.org/img/WebAssemblyExample.png alt="Web Assembly Example">
-</figure>
-<h2 id=sunho-kim----re-optimization-using-jitlink>Sunho Kim - Re-optimization using JITLink</h2>
-<p>In order to support re-optimization, the JITLink API was extended by adding the
+</code></pre><p>The output should look something like this:</p><figure><img src=https://blog.llvm.org/img/WebAssemblyExample.png alt="Web Assembly Example"></figure><h2 id=sunho-kim----re-optimization-using-jitlink>Sunho Kim - Re-optimization using JITLink</h2><p>In order to support re-optimization, the JITLink API was extended by adding the
 cross-architecture stub creation API. This API works in all platforms and
 architectures that JITLink supports and through this we can create the
-redirectable stubs by using JITLink.</p>
-<p>Once the re-optimization API was developed, it was time to actually implement
+redirectable stubs by using JITLink.</p><p>Once the re-optimization API was developed, it was time to actually implement
 re-optimization. A new layer was introduced to support re-optimization of IR
 modules. There were many abstraction levels where redirection could be
 implemented, but we ended up doing it at IR level since that brings a lot of
 re-optimization techniques to be implemented easily by transforming IR
 directly. From an API perspective, the most flexible abstraction level to do
-this may be at the FrontEnd AST level.</p>
-<p>Clang-Repl relies on LLJIT to do JIT-related tasks. Enabling re-optimization
+this may be at the FrontEnd AST level.</p><p>Clang-Repl relies on LLJIT to do JIT-related tasks. Enabling re-optimization
 for LLJIT also helped enable it in Clang-Repl. However, there were minor
 challenges (e.g., mismatch in what clang-repl expects from how the runtime
 executes the static initializers and how ELF orc runtime runs it). Possible
 solutions for these are in discussion (e.g., adding a new dl function).
 Nevertheless, we now have a real-world experimental environment where we can
 test new re-optimization techniques and perform benchmarks to see if they are
-useful.</p>
-<p>Finally, based on the above infrastructure, profile guided optimization is now
+useful.</p><p>Finally, based on the above infrastructure, profile guided optimization is now
 possible (by transforming the IR module). There are still some enhancements
 pending before the code is fully upstreamed, but the current code achieves
 instrumentation on the orc-runtime side, which simplifies implementation by a
-lot.</p>
-<p>Mentors: Vassil Vassilev (<a href=https://www.princeton.edu/>Princeton.edu</a>) & Lang Hames/ lhames (<a href=https://www.apple.com>Apple</a>)</p>
-<p>Project Details: <a href=https://gist.github.com/sunho/bbbf7c415ea4e16d37bec5cea8adce5a>Re-optimization using JITLink</a></p>
-<p>Funding: Google Summer of Code 2023</p>
-<h3 id=example-doing-the--o2-optimization-if-function-was-called-more-than-10-times>Example: Doing the -O2 optimization if function was called more than 10 times</h3>
-<p>The following example builds a PassManager using the LLVM library and then runs
-the optimization pipeline.</p>
-<pre tabindex=0><code>static Error reoptimizeTo02(ReOptimizeLayer &amp;Parent, ReOptMaterializationUnitID MUID,
+lot.</p><p>Mentors: Vassil Vassilev (<a href=https://www.princeton.edu/>Princeton.edu</a>) & Lang Hames/ lhames (<a href=https://www.apple.com>Apple</a>)</p><p>Project Details: <a href=https://gist.github.com/sunho/bbbf7c415ea4e16d37bec5cea8adce5a>Re-optimization using JITLink</a></p><p>Funding: Google Summer of Code 2023</p><h3 id=example-doing-the--o2-optimization-if-function-was-called-more-than-10-times>Example: Doing the -O2 optimization if function was called more than 10 times</h3><p>The following example builds a PassManager using the LLVM library and then runs
+the optimization pipeline.</p><pre tabindex=0><code>static Error reoptimizeTo02(ReOptimizeLayer &amp;Parent, ReOptMaterializationUnitID MUID,
     unsigned Curverison, ResourceTrackerSP OldRT, ThreadSafeModule &amp;TSM) {
       TSM.withModuleDo([&amp;]{llvm::Module &amp;M) {
          auto PassManager = buildPassManager();
@@ -203,54 +72,23 @@ the optimization pipeline.</p>
 }
 ReOptLayer -&gt;setReoptimizeFunc(reoptimizeTo02);
 ReOptLayer -&gt;setAddProfileFunc(reoptimizeIfCallFrequent);
-</code></pre><p>For more examples, please see the <a href=https://github.com/sunho/LLVM-JITLink-COFF-Example>LLVM-JITLink-COFF-Example</a> repo.</p>
-<h2 id=krishna-narayanan---tutorial-development-with-clang-repl>Krishna Narayanan - Tutorial development with clang-repl</h2>
-<p>Open Source documentation is often a neglected area in the software lifecycle.
+</code></pre><p>For more examples, please see the <a href=https://github.com/sunho/LLVM-JITLink-COFF-Example>LLVM-JITLink-COFF-Example</a> repo.</p><h2 id=krishna-narayanan---tutorial-development-with-clang-repl>Krishna Narayanan - Tutorial development with clang-repl</h2><p>Open Source documentation is often a neglected area in the software lifecycle.
 Specifically, this project targeted helping contributors by documenting how
 they can set up respective environments on their local machines to contribute
 to the code and documentation of the respective project. These environments
 were set up locally, tested and then the setup methodology was updated in the
-relevant documentation.</p>
-<p>Besides other compiler research technologies, write-ups were also added to LLVM
+relevant documentation.</p><p>Besides other compiler research technologies, write-ups were also added to LLVM
 (specifically the Clang-Repl documentation) as part of this project. Usage
-examples were also added.</p>
-<p>Mentors: Vassil Vassilev (<a href=https://www.princeton.edu/>Princeton.edu</a>) & David Lange (<a href=https://www.princeton.edu/>Princeton.edu</a>)</p>
-<p>Project Details: <a href=https://github.com/Krishna-13-cyber/GSoC23-LLVM/blob/main/README.md>Tutorial development with clang-repl</a></p>
-<p>Funding: Google Summer of Code 2023</p>
-<h3 id=example-1>Example</h3>
-<pre tabindex=0><code>// Classes and Structures
+examples were also added.</p><p>Mentors: Vassil Vassilev (<a href=https://www.princeton.edu/>Princeton.edu</a>) & David Lange (<a href=https://www.princeton.edu/>Princeton.edu</a>)</p><p>Project Details: <a href=https://github.com/Krishna-13-cyber/GSoC23-LLVM/blob/main/README.md>Tutorial development with clang-repl</a></p><p>Funding: Google Summer of Code 2023</p><h3 id=example-1>Example</h3><pre tabindex=0><code>// Classes and Structures
 clang-repl&gt; #include &lt;iostream&gt;
 clang-repl&gt; class Rectangle {int width, height; public: void set_values (int,int);\
 clang-repl... int area() {return width*height;}};
 clang-repl&gt;  void Rectangle::set_values (int x, int y) { width = x;height = y;}
 clang-repl&gt; int main () { Rectangle rect;rect.set_values (3,4);\
-clang-repl... std::cout &lt;&lt; &quot;area: &quot; &lt;&lt; rect.area() &lt;&lt; std::endl;\
+clang-repl... std::cout &lt;&lt; &#34;area: &#34; &lt;&lt; rect.area() &lt;&lt; std::endl;\
 clang-repl... return 0;}
 clang-repl&gt; main();
 area: 12
-</code></pre>
-</article>
-<section class=post-nav>
-<ul>
-<li>
-<a href=https://blog.llvm.org/posts/2023-12-07-tools-for-learning-llvm-tablegen/><i class="fa fa-chevron-circle-left"></i> Tools for Learning LLVM TableGen</a>
-</li>
-<li>
-<a href=https://blog.llvm.org/posts/2024-02-26-gsoc/>LLVM Google Summer of Code 2024 & 2023 <i class="fa fa-chevron-circle-right"></i> </a>
-</li>
-</ul>
-</section>
-</main>
-<footer>
-<ul>
-<li>
-<h6>llvm.org |
+</code></pre></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/posts/2023-12-07-tools-for-learning-llvm-tablegen/><i class="fa fa-chevron-circle-left"></i> Tools for Learning LLVM TableGen</a></li><li><a href=https://blog.llvm.org/posts/2024-02-26-gsoc/>LLVM Google Summer of Code 2024 & 2023 <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><ul><li><h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
-</li>
-</ul>
-</footer>
-</div>
-<script src=https://blog.llvm.org/js/scripts.js></script>
-</body>
-</html>
+<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></li></ul></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>

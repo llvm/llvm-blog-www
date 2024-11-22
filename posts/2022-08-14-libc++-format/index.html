@@ -1,195 +1,86 @@
-<!doctype html><html lang=en>
-<head>
-<title>Text formatting in C++ using libc++ - The LLVM Project Blog</title>
-<meta charset=utf-8>
-<meta name=viewport content="width=device-width,initial-scale=1">
-<meta name=description content="LLVM Project News and Details from the Trenches">
-<meta name=author content="Mark de Wever"><meta property="og:title" content="Text formatting in C++ using libc++">
-<meta property="og:description" content="Historically formatting text in C++, using the standard library, has been unpleasant. It is possible to get nice output with the stream operators, but it is very verbose due to the stream manipulators.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://blog.llvm.org/posts/2022-08-14-libc++-format/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2022-09-27T00:00:00+00:00">
-<meta property="article:modified_time" content="2022-09-27T00:00:00+00:00">
-<meta name=twitter:card content="summary">
-<meta name=twitter:title content="Text formatting in C++ using libc++">
-<meta name=twitter:description content="Historically formatting text in C++, using the standard library, has been unpleasant. It is possible to get nice output with the stream operators, but it is very verbose due to the stream manipulators.">
-<meta name=generator content="Hugo 0.89.4">
-<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin=anonymous>
-<link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css>
-<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda">
-<link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head>
-<body>
-<div id=container>
-<header>
-<h1>
-<a href=https://blog.llvm.org/>The LLVM Project Blog</a>
-</h1>
-<ul id=social-media>
-<li>
-<a href=https://www.facebook.com/llvmorg title=Facebook>
-<i class="fab fa-facebook fa-lg"></i>
-</a>
-</li>
-<li>
-<a href=https://github.com/llvm title=GitHub>
-<i class="fab fa-github fa-lg"></i>
-</a>
-</li>
-<li>
-<a href=https://twitter.com/llvmorg title=Twitter>
-<i class="fab fa-twitter fa-lg"></i>
-</a>
-</li>
-<li>
-<a href=https://www.youtube.com/c/LLVMPROJ title=Youtube>
-<i class="fab fa-youtube fa-lg"></i>
-</a>
-</li>
-</ul>
-<p><em>LLVM Project News and Details from the Trenches</em></p>
-</header>
-<nav>
-<ul>
-<li>
-<a href=https://blog.llvm.org/about>
-<i class="fa-li fa fa-lg"></i><span>About</span>
-</a>
-</li>
-<li>
-<a href=https://blog.llvm.org/posts>
-<i class="fa-li fa fa-lg"></i><span>Posts</span>
-</a>
-</li>
-<li>
-<a href=https://blog.llvm.org/tags>
-<i class="fa-li fa fa-lg"></i><span>Tags</span>
-</a>
-</li>
-<li>
-<a href=https://llvm.org/>
-<i class="fa-li fa fa-lg"></i><span>llvm.org</span>
-</a>
-</li>
-</ul>
-</nav>
-<main>
-<article>
-<h1>Text formatting in C++ using libc++</h1>
-<aside>
-<ul>
-<li>By Mark de Wever</li>
-<li>
-<time class=post-date datetime=2022-09-27T00:00:00Z>Sep 27, 2022</time>
-</li>
-<li>
-<em>
-<a href=https://blog.llvm.org/tags/c++>#C++</a>
+<!doctype html><html lang=en><head><title>Text formatting in C++ using libc++ - The LLVM Project Blog</title>
+<meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Mark de Wever"><meta property="og:url" content="https://blog.llvm.org/posts/2022-08-14-libc++-format/"><meta property="og:site_name" content="The LLVM Project Blog"><meta property="og:title" content="Text formatting in C++ using libc++"><meta property="og:description" content="Historically formatting text in C++, using the standard library, has been unpleasant. It is possible to get nice output with the stream operators, but it is very verbose due to the stream manipulators."><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2022-09-27T00:00:00+00:00"><meta property="article:modified_time" content="2022-09-27T00:00:00+00:00"><meta property="article:tag" content="C++"><meta property="article:tag" content="Libc++"><meta property="article:tag" content="Std::format"><meta name=twitter:card content="summary"><meta name=twitter:title content="Text formatting in C++ using libc++"><meta name=twitter:description content="Historically formatting text in C++, using the standard library, has been unpleasant. It is possible to get nice output with the stream operators, but it is very verbose due to the stream manipulators."><meta name=generator content="Hugo 0.128.0"><link rel=stylesheet href=https://blog.llvm.org/css/normalize.min.css><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>Text formatting in C++ using libc++</h1><aside><ul><li><time class=post-date datetime=2022-09-27T00:00:00Z>Sep 27, 2022</time></li><li><em><a href=https://blog.llvm.org/tags/c++>#C++</a>
 ,
 <a href=https://blog.llvm.org/tags/libc++>#libc++</a>
 ,
-<a href=https://blog.llvm.org/tags/stdformat>#std::format</a>
-</em>
-</li>
-<li>7 minute read</li>
-</ul>
-</aside>
-<p>Historically formatting text in C++, using the standard library, has been
+<a href=https://blog.llvm.org/tags/stdformat>#std::format</a></em></li><li>7 minute read</li></ul></aside><p>Historically formatting text in C++, using the standard library, has been
 unpleasant. It is possible to get nice output with the stream operators, but it
 is very verbose due to the stream manipulators. The other option is using
 <code>printf</code>, which is convenient but only supports a limited number of types and
 is not extendable. A non-standard option is using the
 <a href=https://fmt.dev/latest/index.html>{fmt}</a> library. This article provides a
 short introduction to the parts of this library that were standardized in C++20
-as <code>std::format</code>, as well as the current implementation status in LLVM 15.</p>
-<h2 id=what-is-stdformat>What is <code>std::format</code></h2>
-<p><code>std::format</code> is a text formatting library using format strings similar to
+as <code>std::format</code>, as well as the current implementation status in LLVM 15.</p><h2 id=what-is-stdformat>What is <code>std::format</code></h2><p><code>std::format</code> is a text formatting library using format strings similar to
 Python&rsquo;s <a href=https://docs.python.org/3/library/stdtypes.html#str.format>format</a>
-and extensible for user defined types.</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;format&gt;</span><span style=color:#75715e>
-</span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
-</span><span style=color:#75715e></span>
-<span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
-  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>format(<span style=color:#e6db74>&#34;Hello {} in C++{}&#34;</span>, <span style=color:#e6db74>&#34;std::format&#34;</span>, <span style=color:#ae81ff>20</span>);
-}
-</code></pre></div><p>Writes the following output:</p>
-<pre tabindex=0><code>Hello std::format in C++20
+and extensible for user defined types.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;format&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>format(<span style=color:#e6db74>&#34;Hello {} in C++{}&#34;</span>, <span style=color:#e6db74>&#34;std::format&#34;</span>, <span style=color:#ae81ff>20</span>);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>Writes the following output:</p><pre tabindex=0><code>Hello std::format in C++20
 </code></pre><p>The <code>{}</code> indicates a replacement field like <code>%</code> in <code>printf</code>. With
 <code>std::format</code> the argument types are known, so it is not required to specify
-them in the replacement field.</p>
-<p>The desired output format and the positional argument to use for each
+them in the replacement field.</p><p>The desired output format and the positional argument to use for each
 replacement field can also be specified.
-(For brevity, the following examples omit the required includes.)</p>
-<p>Writes the first positional argument using different bases, a prefix, and
-zero padding to 8 columns.</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
-  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>format(<span style=color:#e6db74>&#34;{0:#08b}, {0:#08o}, {0:08}, {0:#08x}&#34;</span>, <span style=color:#ae81ff>16</span>);
-}
-</code></pre></div><pre tabindex=0><code>0b010000, 00000020, 00000016, 0x000010
-</code></pre><p>It is possible to use an upper case prefix and hexadecimal digits.</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
-  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>format(<span style=color:#e6db74>&#34;{0:#08B}, {0:#08o}, {0:08}, {0:#08X}&#34;</span>, <span style=color:#ae81ff>15</span>);
-}
-</code></pre></div><pre tabindex=0><code>0B001111, 00000017, 00000015, 0X00000F
-</code></pre><p>The alignment and fill character can be specified.</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
-  std<span style=color:#f92672>::</span>cout
-     <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>format(<span style=color:#e6db74>&#34;{:#&lt;8} {:*&gt;8} {:-^5}&#34;</span>, <span style=color:#e6db74>&#34;Hello&#34;</span>, <span style=color:#e6db74>&#34;world&#34;</span>, <span style=color:#e6db74>&#39;!&#39;</span>);
-}
-</code></pre></div><pre tabindex=0><code>Hello### ***world --!--
+(For brevity, the following examples omit the required includes.)</p><p>Writes the first positional argument using different bases, a prefix, and
+zero padding to 8 columns.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>format(<span style=color:#e6db74>&#34;{0:#08b}, {0:#08o}, {0:08}, {0:#08x}&#34;</span>, <span style=color:#ae81ff>16</span>);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><pre tabindex=0><code>0b010000, 00000020, 00000016, 0x000010
+</code></pre><p>It is possible to use an upper case prefix and hexadecimal digits.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>format(<span style=color:#e6db74>&#34;{0:#08B}, {0:#08o}, {0:08}, {0:#08X}&#34;</span>, <span style=color:#ae81ff>15</span>);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><pre tabindex=0><code>0B001111, 00000017, 00000015, 0X00000F
+</code></pre><p>The alignment and fill character can be specified.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>cout
+</span></span><span style=display:flex><span>     <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>format(<span style=color:#e6db74>&#34;{:#&lt;8} {:*&gt;8} {:-^5}&#34;</span>, <span style=color:#e6db74>&#34;Hello&#34;</span>, <span style=color:#e6db74>&#34;world&#34;</span>, <span style=color:#e6db74>&#39;!&#39;</span>);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><pre tabindex=0><code>Hello### ***world --!--
 </code></pre><p>When printing tables it is nice to be able to specify the alignment and width
 of the columns. However, formatting Unicode text can be especially tricky,
-since not every <code>char</code> (or <code>wchar_t</code>) is one &ldquo;character&rdquo;.</p>
-<p>For example the letter Á, can be written in two ways:</p>
-<ul>
-<li>LATIN CAPITAL LETTER A WITH ACUTE</li>
-<li>LATIN CAPITAL LETTER A + COMBINING ACUTE ACCENT</li>
-</ul>
-<p>This combining of multiple &ldquo;characters&rdquo; is used in several scripts and in
+since not every <code>char</code> (or <code>wchar_t</code>) is one &ldquo;character&rdquo;.</p><p>For example the letter Á, can be written in two ways:</p><ul><li>LATIN CAPITAL LETTER A WITH ACUTE</li><li>LATIN CAPITAL LETTER A + COMBINING ACUTE ACCENT</li></ul><p>This combining of multiple &ldquo;characters&rdquo; is used in several scripts and in
 emojis. (This &ldquo;combined multiple characters&rdquo; is known as
 <a href=https://www.unicode.org/reports/tr29/>extended grapheme clusters</a> in
 Unicode.) The library has implemented these rules so it will count both forms
-of Á as using one column in the output.</p>
-<p>Another issue with text formatting is that not all every &ldquo;character&rdquo; has the
+of Á as using one column in the output.</p><p>Another issue with text formatting is that not all every &ldquo;character&rdquo; has the
 same column width. Based on the &ldquo;character&rdquo; the column width is estimated to be
-one or two columns.</p>
-<p>Below is an example taken from the <a href=https://wg21.link/p1868r2>paper</a> that
-introduced the width estimation algorithm in <code>std::format</code>:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>input</span> {
-  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>*</span> text;
-  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>*</span> info;
-};
-
-<span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
-  input inputs[] <span style=color:#f92672>=</span> {
-    {<span style=color:#e6db74>&#34;Text&#34;</span>, <span style=color:#e6db74>&#34;Description&#34;</span>},
-    {<span style=color:#e6db74>&#34;-----&#34;</span>,
-     <span style=color:#e6db74>&#34;------------------------------------------------------------------------&#34;</span>
-     <span style=color:#e6db74>&#34;--------------&#34;</span>},
-    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\x41</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+0041 { LATIN CAPITAL LETTER A }&#34;</span>},
-    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xC3\x81</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+00C1 { LATIN CAPITAL LETTER A WITH ACUTE }&#34;</span>},
-    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\x41\xCC\x81</span><span style=color:#e6db74>&#34;</span>,
-     <span style=color:#e6db74>&#34;U+0041 U+0301 { LATIN CAPITAL LETTER A } { COMBINING ACUTE ACCENT }&#34;</span>},
-    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xc4\xb2</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+0132 { LATIN CAPITAL LIGATURE IJ }&#34;</span>}, <span style=color:#75715e>// Ĳ
-</span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xce\x94</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+0394 { GREEK CAPITAL LETTER DELTA }&#34;</span>}, <span style=color:#75715e>// Δ
-</span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xd0\xa9</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+0429 { CYRILLIC CAPITAL LETTER SHCHA }&#34;</span>}, <span style=color:#75715e>// Щ
-</span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xd7\x90</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+05D0 { HEBREW LETTER ALEF }&#34;</span>}, <span style=color:#75715e>// א
-</span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xd8\xb4</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+0634 { ARABIC LETTER SHEEN }&#34;</span>}, <span style=color:#75715e>// ش
-</span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xe3\x80\x89</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+3009 { RIGHT-POINTING ANGLE BRACKET }&#34;</span>}, <span style=color:#75715e>// 〉
-</span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xe7\x95\x8c</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+754C { CJK Unified Ideograph-754C }&#34;</span>}, <span style=color:#75715e>// 界
-</span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xf0\x9f\xa6\x84</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+1F921 { UNICORN FACE }&#34;</span>}, <span style=color:#75715e>// 🦄
-</span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xf0\x9f\x91\xa8\xe2\x80\x8d\xf0\x9f\x91\xa9\xe2\x80\x8d</span><span style=color:#e6db74>&#34;</span>
-     <span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xf0\x9f\x91\xa7\xe2\x80\x8d\xf0\x9f\x91\xa6</span><span style=color:#e6db74>&#34;</span>,
-     <span style=color:#e6db74>&#34;U+1F468 U+200D U+1F469 U+200D U+1F467 U+200D U+1F466 &#34;</span>
-     <span style=color:#e6db74>&#34;{ Family: Man, Woman, Girl, Boy } &#34;</span>} <span style=color:#75715e>// 👨‍👩‍👧‍👦
-</span><span style=color:#75715e></span>  };
-
-  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>auto</span> input: inputs) {
-    std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>format(<span style=color:#e6db74>&#34;{:&gt;5} | {}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, input.text, input.info);
-  }
-}
-</code></pre></div><p>(Note the column width is intended to look good on a terminal. The author has
-observed differences in quality of the output depending on the browser used.)</p>
-<pre tabindex=0><code> Text | Description
+one or two columns.</p><p>Below is an example taken from the <a href=https://wg21.link/p1868r2>paper</a> that
+introduced the width estimation algorithm in <code>std::format</code>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>input</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>*</span> text;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>*</span> info;
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>  input inputs[] <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>&#34;Text&#34;</span>, <span style=color:#e6db74>&#34;Description&#34;</span>},
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>&#34;-----&#34;</span>,
+</span></span><span style=display:flex><span>     <span style=color:#e6db74>&#34;------------------------------------------------------------------------&#34;</span>
+</span></span><span style=display:flex><span>     <span style=color:#e6db74>&#34;--------------&#34;</span>},
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\x41</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+0041 { LATIN CAPITAL LETTER A }&#34;</span>},
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xC3\x81</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+00C1 { LATIN CAPITAL LETTER A WITH ACUTE }&#34;</span>},
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\x41\xCC\x81</span><span style=color:#e6db74>&#34;</span>,
+</span></span><span style=display:flex><span>     <span style=color:#e6db74>&#34;U+0041 U+0301 { LATIN CAPITAL LETTER A } { COMBINING ACUTE ACCENT }&#34;</span>},
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xc4\xb2</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+0132 { LATIN CAPITAL LIGATURE IJ }&#34;</span>}, <span style=color:#75715e>// Ĳ
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xce\x94</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+0394 { GREEK CAPITAL LETTER DELTA }&#34;</span>}, <span style=color:#75715e>// Δ
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xd0\xa9</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+0429 { CYRILLIC CAPITAL LETTER SHCHA }&#34;</span>}, <span style=color:#75715e>// Щ
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xd7\x90</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+05D0 { HEBREW LETTER ALEF }&#34;</span>}, <span style=color:#75715e>// א
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xd8\xb4</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+0634 { ARABIC LETTER SHEEN }&#34;</span>}, <span style=color:#75715e>// ش
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xe3\x80\x89</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+3009 { RIGHT-POINTING ANGLE BRACKET }&#34;</span>}, <span style=color:#75715e>// 〉
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xe7\x95\x8c</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+754C { CJK Unified Ideograph-754C }&#34;</span>}, <span style=color:#75715e>// 界
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xf0\x9f\xa6\x84</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;U+1F921 { UNICORN FACE }&#34;</span>}, <span style=color:#75715e>// 🦄
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    {<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xf0\x9f\x91\xa8\xe2\x80\x8d\xf0\x9f\x91\xa9\xe2\x80\x8d</span><span style=color:#e6db74>&#34;</span>
+</span></span><span style=display:flex><span>     <span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\xf0\x9f\x91\xa7\xe2\x80\x8d\xf0\x9f\x91\xa6</span><span style=color:#e6db74>&#34;</span>,
+</span></span><span style=display:flex><span>     <span style=color:#e6db74>&#34;U+1F468 U+200D U+1F469 U+200D U+1F467 U+200D U+1F466 &#34;</span>
+</span></span><span style=display:flex><span>     <span style=color:#e6db74>&#34;{ Family: Man, Woman, Girl, Boy } &#34;</span>} <span style=color:#75715e>// 👨‍👩‍👧‍👦
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  };
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>auto</span> input: inputs) {
+</span></span><span style=display:flex><span>    std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>format(<span style=color:#e6db74>&#34;{:&gt;5} | {}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, input.text, input.info);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>(Note the column width is intended to look good on a terminal. The author has
+observed differences in quality of the output depending on the browser used.)</p><pre tabindex=0><code> Text | Description
 ----- | --------------------------------------------------------------------------------------
     A | U+0041 { LATIN CAPITAL LETTER A }
     Á | U+00C1 { LATIN CAPITAL LETTER A WITH ACUTE }
@@ -210,130 +101,79 @@ incorrect format specifiers in <code>printf</code>, but this is not part of the
 specification, and in particular embedded compilers often don&rsquo;t provide that
 warning. In contrast, <code>std::format</code> is <em>specified</em> to produce a compilation
 error, which is implemented in the library itself using C++20 <code>consteval</code>
-functions.</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
-  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>format(<span style=color:#e6db74>&#34;{0:#08B}, {0:#08o}, {0:08}, {0:#08X}&#34;</span>, <span style=color:#e6db74>&#34;15&#34;</span>);
-}
-
-</code></pre></div><p>The compiler output starts with this error, followed by a lot of not too useful messages.</p>
-<pre tabindex=0><code>error: call to consteval function 'std::basic_format_string&lt;char, const char (&amp;)[3]&gt;::basic_format_string&lt;char[37]&gt;' is not a constant expression
-  std::cout &lt;&lt; std::format(&quot;{0:#08B}, {0:#08o}, {0:08}, {0:#08X}&quot;, &quot;15&quot;);
-</code></pre><p>In addition to outputting the formatted result to a string, it is also possible:</p>
-<ul>
-<li>to output the result to an arbitrary output iterator,</li>
-</ul>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
-  std<span style=color:#f92672>::</span>format_to(
-    std<span style=color:#f92672>::</span>ostream_iterator<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>char</span><span style=color:#f92672>&gt;</span>(std<span style=color:#f92672>::</span>cout, <span style=color:#e6db74>&#34;&#34;</span>),
-    <span style=color:#e6db74>&#34;Hello {} in C++{}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;std::format&#34;</span>, <span style=color:#ae81ff>20</span>);
-}
-</code></pre></div><ul>
-<li>to determine the output size,</li>
-</ul>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
-  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>formatted_size(<span style=color:#e6db74>&#34;Hello {} in C++{}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;std::format&#34;</span>, <span style=color:#ae81ff>20</span>);
-}
-</code></pre></div><pre tabindex=0><code>27
-</code></pre><ul>
-<li>or limit the size of the output.</li>
-</ul>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
-  std<span style=color:#f92672>::</span>format_to(
-    std<span style=color:#f92672>::</span>ostream_iterator<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>char</span><span style=color:#f92672>&gt;</span>(std<span style=color:#f92672>::</span>cout, <span style=color:#e6db74>&#34;&#34;</span>),
-    <span style=color:#ae81ff>11</span>, <span style=color:#e6db74>&#34;Hello {} in C++{}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;std::format&#34;</span>, <span style=color:#ae81ff>20</span>);
-}
-</code></pre></div><pre tabindex=0><code>Hello std
+functions.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>format(<span style=color:#e6db74>&#34;{0:#08B}, {0:#08o}, {0:08}, {0:#08X}&#34;</span>, <span style=color:#e6db74>&#34;15&#34;</span>);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>The compiler output starts with this error, followed by a lot of not too useful messages.</p><pre tabindex=0><code>error: call to consteval function &#39;std::basic_format_string&lt;char, const char (&amp;)[3]&gt;::basic_format_string&lt;char[37]&gt;&#39; is not a constant expression
+  std::cout &lt;&lt; std::format(&#34;{0:#08B}, {0:#08o}, {0:08}, {0:#08X}&#34;, &#34;15&#34;);
+</code></pre><p>In addition to outputting the formatted result to a string, it is also possible:</p><ul><li>to output the result to an arbitrary output iterator,</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>format_to(
+</span></span><span style=display:flex><span>    std<span style=color:#f92672>::</span>ostream_iterator<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>char</span><span style=color:#f92672>&gt;</span>(std<span style=color:#f92672>::</span>cout, <span style=color:#e6db74>&#34;&#34;</span>),
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;Hello {} in C++{}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;std::format&#34;</span>, <span style=color:#ae81ff>20</span>);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><ul><li>to determine the output size,</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>formatted_size(<span style=color:#e6db74>&#34;Hello {} in C++{}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;std::format&#34;</span>, <span style=color:#ae81ff>20</span>);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><pre tabindex=0><code>27
+</code></pre><ul><li>or limit the size of the output.</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>format_to(
+</span></span><span style=display:flex><span>    std<span style=color:#f92672>::</span>ostream_iterator<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>char</span><span style=color:#f92672>&gt;</span>(std<span style=color:#f92672>::</span>cout, <span style=color:#e6db74>&#34;&#34;</span>),
+</span></span><span style=display:flex><span>    <span style=color:#ae81ff>11</span>, <span style=color:#e6db74>&#34;Hello {} in C++{}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, <span style=color:#e6db74>&#34;std::format&#34;</span>, <span style=color:#ae81ff>20</span>);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><pre tabindex=0><code>Hello std
 </code></pre><p>An example of formatting user defined types is available in the standard
 library. It has formatting support for the <code>chrono</code> library. (This is not
 available in libc++ yet.) These formatters are quite complex. For other types
-it is possible quickly create a formatter. For example for the following <code>enum class</code>:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#66d9ef>enum</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>color</span> { red, green, blue };
-</code></pre></div><p>Adding a formatter based on an existing formatter can be done like:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;&gt;</span>
-<span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>std</span><span style=color:#f92672>::</span>formatter<span style=color:#f92672>&lt;</span>color<span style=color:#f92672>&gt;</span> <span style=color:#f92672>:</span> std<span style=color:#f92672>::</span>formatter<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>*&gt;</span> {
-  <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>constexpr</span> <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>*</span> color_names[] <span style=color:#f92672>=</span> {<span style=color:#e6db74>&#34;red&#34;</span>, <span style=color:#e6db74>&#34;green&#34;</span>, <span style=color:#e6db74>&#34;blue&#34;</span>};
-
-  <span style=color:#66d9ef>auto</span> <span style=color:#a6e22e>format</span>(color c, <span style=color:#66d9ef>auto</span><span style=color:#f92672>&amp;</span> ctx) <span style=color:#66d9ef>const</span> <span style=color:#f92672>-&gt;</span> <span style=color:#66d9ef>decltype</span>(ctx.out()) {
-    <span style=color:#66d9ef>using</span> base <span style=color:#f92672>=</span> formatter<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>*&gt;</span>;
-    <span style=color:#66d9ef>return</span> base<span style=color:#f92672>::</span>format(color_names[<span style=color:#66d9ef>static_cast</span><span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span>(c)], ctx);
-  }
-};
-</code></pre></div><p>Now all features of the <code>const char*</code> formatter are available in the color
-formatter:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
-  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>format(<span style=color:#e6db74>&#34;{:#&lt;10}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>{:+^10}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>{:-&gt;10}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>,
-                           color<span style=color:#f92672>::</span>red, color<span style=color:#f92672>::</span>green, color<span style=color:#f92672>::</span>blue);
-}
-</code></pre></div><pre tabindex=0><code>red#######
+it is possible quickly create a formatter. For example for the following <code>enum class</code>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>enum</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>color</span> { red, green, blue };
+</span></span></code></pre></div><p>Adding a formatter based on an existing formatter can be done like:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>template</span> <span style=color:#f92672>&lt;&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>std</span><span style=color:#f92672>::</span>formatter<span style=color:#f92672>&lt;</span>color<span style=color:#f92672>&gt;</span> <span style=color:#f92672>:</span> std<span style=color:#f92672>::</span>formatter<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>*&gt;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>constexpr</span> <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>*</span> color_names[] <span style=color:#f92672>=</span> {<span style=color:#e6db74>&#34;red&#34;</span>, <span style=color:#e6db74>&#34;green&#34;</span>, <span style=color:#e6db74>&#34;blue&#34;</span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>auto</span> <span style=color:#a6e22e>format</span>(color c, <span style=color:#66d9ef>auto</span><span style=color:#f92672>&amp;</span> ctx) <span style=color:#66d9ef>const</span> <span style=color:#f92672>-&gt;</span> <span style=color:#66d9ef>decltype</span>(ctx.out()) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>using</span> base <span style=color:#f92672>=</span> formatter<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>const</span> <span style=color:#66d9ef>char</span><span style=color:#f92672>*&gt;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> base<span style=color:#f92672>::</span>format(color_names[<span style=color:#66d9ef>static_cast</span><span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span>(c)], ctx);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>};
+</span></span></code></pre></div><p>Now all features of the <code>const char*</code> formatter are available in the color
+formatter:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> std<span style=color:#f92672>::</span>format(<span style=color:#e6db74>&#34;{:#&lt;10}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>{:+^10}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>{:-&gt;10}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>,
+</span></span><span style=display:flex><span>                           color<span style=color:#f92672>::</span>red, color<span style=color:#f92672>::</span>green, color<span style=color:#f92672>::</span>blue);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><pre tabindex=0><code>red#######
 ++green+++
 ------blue
 </code></pre><p>More examples and details of the specification can be found in this
-<a href=https://hackingcpp.com/cpp/libs/fmt.html>{fmt} cheet sheet</a>.</p>
-<h2 id=the-status-in-llvm-15>The status in LLVM 15</h2>
-<p>In LLVM 15 most of the basic text formatting is complete. All major papers
+<a href=https://hackingcpp.com/cpp/libs/fmt.html>{fmt} cheet sheet</a>.</p><h2 id=the-status-in-llvm-15>The status in LLVM 15</h2><p>In LLVM 15 most of the basic text formatting is complete. All major papers
 have been implemented, but some defect reports are not implemented. The libc++
 team also wants to work on performance improvements and improvements to the
 compile-time errors. Some of these improvements have already landed in <code>main</code>
-and will be included in LLVM 16, while others are only planned.</p>
-<p>Since the library is not entirely complete and the ABI may need to change (due
+and will be included in LLVM 16, while others are only planned.</p><p>Since the library is not entirely complete and the ABI may need to change (due
 to planned improvements but also changes voted by the C++ Committee), it is
 shipped as an experimental feature in LLVM 15. To use the code in libc++ you
-need to compile the code like:</p>
-<pre tabindex=0><code>clang -std=c++20 -stdlib=libc++ -fexperimental-library -ofoo foo.cpp
+need to compile the code like:</p><pre tabindex=0><code>clang -std=c++20 -stdlib=libc++ -fexperimental-library -ofoo foo.cpp
 </code></pre><p>Format support for <code>chrono</code> is unavailable. Initial work has landed for
 LLVM 16, but none of it is available in LLVM 15. The <code>chrono</code> library
 itself lacks support for time zones, leap seconds, and some of the less common
 clocks. These need to be available before the formatting support for <code>chrono</code>
-can be completed.</p>
-<h2 id=formatting-improvements-in-c23>Formatting improvements in C++23</h2>
-<p>In the examples the output is first formatted in a <code>std::string</code> before
+can be completed.</p><h2 id=formatting-improvements-in-c23>Formatting improvements in C++23</h2><p>In the examples the output is first formatted in a <code>std::string</code> before
 streaming it to the output. To avoid the temporary <code>std::string</code> it is
 possible to use <code>std::format_to</code>, but that doesn&rsquo;t have an ergonomic syntax.
-In C++23 there will be <code>std::print</code>.</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
-  std<span style=color:#f92672>::</span>print(<span style=color:#e6db74>&#34;Hello {} in C++{}&#34;</span>, <span style=color:#e6db74>&#34;std::format&#34;</span>, <span style=color:#ae81ff>20</span>);
-}
-</code></pre></div><pre tabindex=0><code>Hello std::format in C++20
+In C++23 there will be <code>std::print</code>.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>print(<span style=color:#e6db74>&#34;Hello {} in C++{}&#34;</span>, <span style=color:#e6db74>&#34;std::format&#34;</span>, <span style=color:#ae81ff>20</span>);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><pre tabindex=0><code>Hello std::format in C++20
 </code></pre><p>There is little support for formatting containers. In C++23 it will become
-possible to format ranges and containers.</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
-  std<span style=color:#f92672>::</span>print(<span style=color:#e6db74>&#34;{::*^5}&#34;</span>, std<span style=color:#f92672>::</span>vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span>{<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>});
-}
-</code></pre></div><pre tabindex=0><code>[**1**, **2**, **3**]
+possible to format ranges and containers.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>print(<span style=color:#e6db74>&#34;{::*^5}&#34;</span>, std<span style=color:#f92672>::</span>vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span>{<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>});
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><pre tabindex=0><code>[**1**, **2**, **3**]
 </code></pre><p>Some progress on formatting ranges has been made, but the main focus in the
-short term will be to finish C++20&rsquo;s format implementation.</p>
-<h2 id=closing-words>Closing words</h2>
-<p>Starting with C++20, formatting text becomes a lot more pleasant and C++23 has
+short term will be to finish C++20&rsquo;s format implementation.</p><h2 id=closing-words>Closing words</h2><p>Starting with C++20, formatting text becomes a lot more pleasant and C++23 has
 even more improvements lined up. This should provide long awaited functionality
 in C++ and allow replacing several uses of <code>&lt;iostream></code> by a more convenient,
-faster and safer alternative.</p>
-<h2 id=acknowledgements>Acknowledgements</h2>
-<p>Huge thanks to Victor Zverovich, the author of {fmt}. He has been heavily
+faster and safer alternative.</p><h2 id=acknowledgements>Acknowledgements</h2><p>Huge thanks to Victor Zverovich, the author of {fmt}. He has been heavily
 involved in getting <code>std::format</code> in the C++ Standard. He has aided reviewing
 libc++&rsquo;s implementation and his insights and comments have improved the quality
-of the implementation.</p>
-</article>
-<section class=post-nav>
-<ul>
-<li>
-<a href=https://blog.llvm.org/posts/2022-08-14-relicensing-update/><i class="fa fa-chevron-circle-left"></i> August 2022 LLVM relicensing update & further suggestions for help</a>
-</li>
-<li>
-<a href=https://blog.llvm.org/posts/2022-09-30-llvmdevmtgprogram/>Announcing the 2022 LLVM Developers' Meeting Program <i class="fa fa-chevron-circle-right"></i> </a>
-</li>
-</ul>
-</section>
-</main>
-<footer>
-<ul>
-<li>
-<h6>llvm.org |
+of the implementation.</p></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/posts/2022-08-14-relicensing-update/><i class="fa fa-chevron-circle-left"></i> August 2022 LLVM relicensing update & further suggestions for help</a></li><li><a href=https://blog.llvm.org/posts/2022-09-30-llvmdevmtgprogram/>Announcing the 2022 LLVM Developers' Meeting Program <i class="fa fa-chevron-circle-right"></i></a></li></ul></section></main><footer><ul><li><h6>llvm.org |
 Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
-<a href=https://blog.llvm.org/index.xml>Subscribe </a></h6>
-</li>
-</ul>
-</footer>
-</div>
-<script src=https://blog.llvm.org/js/scripts.js></script>
-</body>
-</html>
+<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></li></ul></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
