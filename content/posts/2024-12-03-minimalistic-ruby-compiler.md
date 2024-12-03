@@ -10,7 +10,9 @@ We started the project with certain goals and hypotheses in mind, and while the 
 
 In the meantime, we decided to strip it down to a bare minimum and implement just enough features to validate the hypotheses.
 
-The source code of our minimalistic Ruby compiler is here: https://github.com/dragonruby/lightstorm
+Just like the original compiler we use MLIR to bridge the gap between Ruby VM's bytecode and the codegen, but instead of targeting LLVM IR directly, we go through EmitC dialect and targeting C language, as it significantly simplifies OS/CPU support. We go into a bit more details later.
+
+The source code of our minimalistic Ruby compiler is here: https://github.com/dragonruby/lightstorm.
 
 The rest of the article covers why we decided to build it, how we approached the problem, and what we discovered along the way.
 
@@ -142,12 +144,26 @@ This eliminates a lot of complexity, but it also means that we only support a su
 
 This is obviously not ideal, but it serves important purpose - **our goal at this point is to validate the hypothesis**.
 
-We convert VM's bytecode into MLIR representation, and then lower it to C.
-At that point, we can just use clang to compile/link the code together with the existing runtime and that's it.
+A classical compilation pipeline looks as follows:
 
-Here is an illustration of this approach (taken from the [EuroLLVM talk](https://www.youtube.com/watch?v=NfMX-dFMSr0)).
+![Classical compilation pipeline](/img/ruby-compiler/compilation-pipeline.png)
 
-![How to compile a dynamic language](/img/ruby-compiler/how-to-compile-dynamic-language.png)
+
+To build a compiler one needs to implement the conversions from the raw source file all the way down to machine code and the language runtime library.
+Since we are targeting the existing runtime, we have the benefit of reusing the frontend (parsing + AST) and the runtime.
+
+Still, we need to implement the conversion from AST to the machine code.
+And this is where the power of MLIR kicks in: we built a custom dialect ([Rite](https://github.com/DragonRuby/lightstorm/blob/3ed0077af589ba51b98954bba8869daf58e22b9e/include/lightstorm/dialect/rite.td)) which represents mruby VM's bytecode, and then using a number of builtin dialects (`cf`, `func`, `arith`, `emitc`) to convert our IR into C code.
+
+At this point, we can just use clang to compile/link the code together with the existing runtime and that's it.
+
+The final compilation pipeline looks as follows:
+
+![Lightstorm compilation pipeline](/img/ruby-compiler/lightstorm-compilation-pipeline.png)
+
+With the benefit of MLIR we are able to build a funtional compiler in just a couple of thousands lines of code!
+
+Now let's look at how it performs.
 
 ## Some numbers
 
