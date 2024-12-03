@@ -150,10 +150,10 @@ A classical compilation pipeline looks as follows:
 
 
 To build a compiler one needs to implement the conversions from the raw source file all the way down to machine code and the language runtime library.
-Since we are targeting the existing runtime, we have the benefit of reusing the frontend (parsing + AST) and the runtime.
+Since we are targeting the existing implementation, we have the benefit of reusing the frontend (parsing + AST) and the runtime library.
 
 Still, we need to implement the conversion from AST to the machine code.
-And this is where the power of MLIR kicks in: we built a custom dialect ([Rite](https://github.com/DragonRuby/lightstorm/blob/3ed0077af589ba51b98954bba8869daf58e22b9e/include/lightstorm/dialect/rite.td)) which represents mruby VM's bytecode, and then using a number of builtin dialects (`cf`, `func`, `arith`, `emitc`) to convert our IR into C code.
+And this is where the power of MLIR kicks in: we built a custom dialect ([Rite](https://github.com/DragonRuby/lightstorm/blob/3ed0077af589ba51b98954bba8869daf58e22b9e/include/lightstorm/dialect/rite.td)) which represents mruby VM's bytecode, and then use a number of builtin dialects (`cf`, `func`, `arith`, `emitc`) to convert our IR into C code.
 
 At this point, we can just use clang to compile/link the code together with the existing runtime and that's it.
 
@@ -161,7 +161,7 @@ The final compilation pipeline looks as follows:
 
 ![Lightstorm compilation pipeline](/img/ruby-compiler/lightstorm-compilation-pipeline.png)
 
-With the benefit of MLIR we are able to build a funtional compiler in just a couple of thousands lines of code!
+> With the benefit of MLIR we are able to build a funtional compiler in just a couple of thousands lines of code!
 
 Now let's look at how it performs.
 
