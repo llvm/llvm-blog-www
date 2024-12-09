@@ -1,6 +1,6 @@
 ---
 author: "Alex Denisov, Amir Rajan"
-date: "2024-12-03"
+date: "2024-12-09"
 tags: ["llvm", "mlir", "ruby", "dragonruby"]
 title: "Lightstorm: minimalistic Ruby compiler"
 ---
