@@ -28,7 +28,9 @@ In summary, I added four comprehensive tests that covered all features that we w
 
 ### Improve Clang-Doc’s performance by 1.58 times 
 
-Internally, the way Clang-Doc works is by leveraging libtooling's ASTVisitor class to parse the source level declarations in each TU and serializing it into an internal format which gets deserialized later when we output the final format. 
+Internally, the way Clang-Doc works is by leveraging libtooling's ASTVisitor class to parse the source level declarations in each TU. 
+
+Clang-Doc is architected using a Map-Reduce pattern. Clang-Doc parses each fragment of a declaration into an in-memory data format which is serialized then into an internal format and stored as a key value paired, identified by their [USR](https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__XREF.html#ga51679cb755bbd94cc5e9476c685f2df3). After, Clang-Doc deserializes and combines each of the fragment declarations back into the in-memory data format which is used by each of the backend to generate the results.
 
 Many experiments were conducted to identified the source of the bottleneck. First I tried benchmarking the code with many different codebases such JSON, and fmtlib to identify certain code patterns that slowed the code path down. This didn't really work since the bottlenecking only showed up for large codebases like LLVM.
 Next I leverage Windows prolifer (since I was coding on windows) however the visualizations was not helpful and the my system was not capable of profiling the 10 hour runtime required to compile LLVM documenation. 
