@@ -77,9 +77,10 @@ Here is a plot of the benchmarking numbers:
 
 ### Added Template Mustache HTML Backend
 
+
 Clang-Doc originally used an ad-hoc method of generating HTML. I introduced a templating language as a way of reducing project complexity and reducing the ease of development. Two RFCs were made before arriving at the idea of introducing Mustache as a library. Originally the idea was to introduce a custom templating language, however, upon further discussion, it was decided that the complexity of designing and implementing a new templating language was too much.
 An LLVM community member suggested using Mustache as a templating language. 
-Mustache was the ideal choice since it was very simple to implement, and has a well defined spec that fit what was needed for Clang-Doc’s use case. The feedback on the RFC was generally positive. While there was some resistance regarding the inclusion of an HTML support library in LLVM, this concern stemmed partly from a lack of awareness that HTML generation already occurs in several parts of LLVM. Additionally, the introduction of Mustache has the potential to simplify other HTML-related use cases.
+Mustache was the ideal choice since it was very simple to implement, and has a well defined spec that fit what was needed for Clang-Doc’s use case. The feedback on the [RFC](https://discourse.llvm.org/t/rfc-add-template-mustache-language-to-the-support-library/82439/18) was generally positive. While there was some resistance regarding the inclusion of an HTML support library in LLVM, this concern stemmed partly from a lack of awareness that HTML generation already occurs in several parts of LLVM. Additionally, the introduction of Mustache has the potential to simplify other HTML-related use cases.
 In terms of engineering wins, this library was able to cut the direct down on the HTML backend significantly dropping 500 lines of code compared to the original Clang-Doc HTML backend. This library was also designed for general-purpose use around LLVM since there are numerous places in LLVM where various tools generate HTML in its way. Using the Mustache templating library would be a nice way to standardize the codebase. 
 
 ### Improve Clang-Doc HTML Output
