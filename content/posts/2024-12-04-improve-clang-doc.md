@@ -12,30 +12,31 @@ Mentors: Petr Hosek and Paul Kirth
 ## Project Background
 
 Clang-Doc is a documentation generator developed on top of libtooling, as an
-alternative to Doxygen. Development started in 2018, and continued through 2019,
-however it has since stalled. Currently, the tool can generate HTML, YAML, and markdown but the generated output has usability issues. This GSOC project was aimed to address the pain points regarding the output of the HTML, by adding support for various C++ constructs and reworking the css of the HTML output to be more user friendly.
+alternative to Doxygen. Development started in 2018 and continued through 2019,
+however, it has since stalled. Currently, the tool can generate HTML, YAML, and markdown but the generated output has usability issues. This GSOC project aimed to address the pain points regarding the output of the HTML, by adding support for various C++ constructs and reworking the CSS of the HTML output to be more user-friendly.
 
 ## Work Done
 
 The original scope of the project was to improve the output of Clang-Doc's generation. However during testing the tool was significantly slower than expected which made developing features for the tool impossible. 
-Each compilation of the LLVM codebase was taking upwards of 10 hours on my local machine. Additionally the tool utilized a lot of memory and was prone to crashing with an out of memory error. Similar tools such as Doxygen and Hdoc ran in comparatively less time for the same codebase. This pointed to a significant bottleneck within Clang-Doc’s codepath when generating large scale software projects. Due to this the project scope quickly changed to improving the runtime of Clang-Doc so that it could run much faster. It was only during the latter half of the project did the scope change back to improving Clang-Doc’s generation.
+Each compilation of the LLVM codebase was taking upwards of 10 hours on my local machine. Additionally, the tool utilized a lot of memory and was prone to crashing with an out-of-memory error. Similar tools such as Doxygen and Hdoc ran in comparatively less time for the same codebase. This pointed to a significant bottleneck within Clang-Doc’s code path when generating large-scale software projects. Due to this the project scope quickly changed to improving the runtime of Clang-Doc so that it could run much faster. It was only during the latter half of the project did the scope changed back to improving Clang-Doc’s generation.
 
 ### Added More Test Cases to Clang-Doc test suite
 
-
 Clang-Doc previously had tests which did not test the full scope of the the HTML or Markdown output. I added more end-to-end tests to make sure that in the process of optimizing documentation generation we were not degrading the quality or functionality of the tool. 
 
-In summary, I added four comprehensive tests which covered all features that we were not testing such as testing the generation for Enums, Namespace and Records for HTML and Markdown.
+In summary, I added four comprehensive tests that covered all features that we were not testing such as testing the generation for Enums, Namespace, and Records for HTML and Markdown.
 
 ### Improve Clang-Doc’s performance by 1.58 times 
 
 Internally, the way Clang-Doc works is by leveraging libtooling's ASTVisitor class to parse the source level declarations in each TU and serializing it into an internal format which gets deserialized later when we output the final format. 
 
-Many experiments were conducted in order to identified the source of the bottleneck, initially I leverage windows prolifer however that was not fined grained enough to identified the true source of the 
+Many experiments were conducted to identified the source of the bottleneck. First I tried benchmarking the code with many different codebases such JSON, and fmtlib to identify certain code patterns that slowed the code path down. This didn't really work since the bottlenecking only showed up for large codebases like LLVM.
+Next I leverage Windows prolifer (since I was coding on windows) however the visualizations was not helpful and the my system was not capable of profiling the 10 hour runtime required to compile LLVM documenation. 
 
-Eventually, we were able to identify a major bottleneck in Clang-Doc's performance to doing redundant work when it was processing each declaration. We settled on a caching/memoization strategy to minimize the redundant work.
+Eventually, we were able to identify a major bottleneck in Clang-Doc's by leveraging the TimeProfiler code to identify where the performance bottleneck was. Clang-Doc was performing redundant work when it was processing each declaration. We settled on a caching/memoization strategy to minimize the redundant work.
 
-For example if we had a the following project: 
+For example, if we had the following project: 
+
 
 ```cpp
 //File: Base.cpp
@@ -47,18 +48,23 @@ class Base {}
 ```cpp
 //File: A.cpp
 
-class A : public Base {}
+#include "Base.cpp"
+
+...
+
 ```
 
 ```cpp
 //File: B.cpp
 
-class B : public Base {}
+#include "Base.cpp"
+
+...
 ```
 
-In this case, the ASTVisitor invoked by Clang-Doc would visit the serialized Base class three times, once when it is parsing Base.cpp, another when its visiting A.cpp then B.cpp. This means any C++ project that heavily leverages inheritance would result in a lot of redundant work. 
+In this case, the ASTVisitor invoked by Clang-Doc would visit the serialized Base class three times, once when it is parsing Base.cpp, another when its visiting A.cpp then B.cpp. The problem was that there was no mechanism to identify declarations that we had already seen. The optimization ended up being a simple memoization dictionary which kept track of a list of declaration that Clang-Doc had visited. 
 
-The optimization ended up being a simple memoization dictionary which kept track of a list of declaration that Clang-Doc had visited. 
+
 
 Here is a plot of the benchmarking numbers:
 
@@ -69,10 +75,10 @@ Here is a plot of the benchmarking numbers:
 
 ### Added Template Mustache HTML Backend
 
-Clang-Doc originally used an ad-hoc method of generating HTML. I introduced a templating language as a way of reducing project complexity and reducing the ease of development. Two RFCs were made before arriving at the idea of introducing Mustache as a library. Originally the idea was to introduce a custom templating language, however upon further discussion it was decided that the complexity of designing and implementing a new templating language was too much.
-A LLVM community member suggested using Mustache as templating language. 
+Clang-Doc originally used an ad-hoc method of generating HTML. I introduced a templating language as a way of reducing project complexity and reducing the ease of development. Two RFCs were made before arriving at the idea of introducing Mustache as a library. Originally the idea was to introduce a custom templating language, however, upon further discussion, it was decided that the complexity of designing and implementing a new templating language was too much.
+An LLVM community member suggested using Mustache as a templating language. 
 Mustache was the ideal choice since it was very simple to implement, and has a well defined spec that fit what was needed for Clang-Doc’s use case. The feedback on the RFC was generally positive. While there was some resistance regarding the inclusion of an HTML support library in LLVM, this concern stemmed partly from a lack of awareness that HTML generation already occurs in several parts of LLVM. Additionally, the introduction of Mustache has the potential to simplify other HTML-related use cases.
-In terms of engineering wins, this library was able to cut the direct down on HTML backend significantly dropping 500 lines of code compared to the original Clang-Doc HTML backend. This library was also designed for general purpose use around LLVM, since there are numerous places in LLVM where various tools generate html in its own way. Using the Mustache templating library would be a nice way to standardize the codebase. 
+In terms of engineering wins, this library was able to cut the direct down on the HTML backend significantly dropping 500 lines of code compared to the original Clang-Doc HTML backend. This library was also designed for general-purpose use around LLVM since there are numerous places in LLVM where various tools generate HTML in its way. Using the Mustache templating library would be a nice way to standardize the codebase. 
 
 ### Improve Clang-Doc HTML Output
 
@@ -91,14 +97,14 @@ Below is a comparison of the same output between the two backends
   <img src="/img/Clang-Doc-new-output.png"><br/>
 </div>
 
-You can also visit the output project on my personal github.io page link
+You can also visit the output project on my github.io page link
 [here](https://peterchou1.github.io/).
 
 Note: this output is still a work in progress.
 
 ## Learning Insight
 
-I've learned a lot in the past few months, thanks to GSOC I now have a much better idea of what it’s like to participate in a large open source project. I received a lot of feedback through PR’s, making RFC and collaborating with other GSOC members. I’d learned a lot about how to interact with the community and solicit feedback. I also learned a lot about instrumentation/profiling code having conducted many experiments in order to try to speed Clang-Doc up.
+I've learned a lot in the past few months, thanks to GSOC I now have a much better idea of what it’s like to participate in a large open-source project. I received a lot of feedback through PRs, making RFC, and collaborating with other GSOC members. I learned a lot about how to interact with the community and solicit feedback. I also learned a lot about instrumentation/profiling code having conducted many experiments to try to speed Clang-Doc up.
 
 ## Future Work
 
