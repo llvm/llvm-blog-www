@@ -18,7 +18,7 @@ however, it has since stalled. Currently, the tool can generate HTML, YAML, and 
 ## Work Done
 
 The original scope of the project was to improve the output of Clang-Doc's generation. However during testing the tool was significantly slower than expected which made developing features for the tool impossible. 
-Each compilation of the LLVM codebase was taking upwards of 10 hours on my local machine. Additionally, the tool utilized a lot of memory and was prone to crashing with an out-of-memory error. Similar tools such as Doxygen and Hdoc ran in comparatively less time for the same codebase. This pointed to a significant bottleneck within Clang-Doc’s code path when generating large-scale software projects. Due to this the project scope quickly changed to improving the runtime of Clang-Doc so that it could run much faster. It was only during the latter half of the project did the scope changed back to improving Clang-Doc’s generation.
+Documentation generation for the LLVM codebase was taking upwards of 10 hours on my local machine. Additionally, the tool utilized a lot of memory and was prone to crashing with an out-of-memory error. Similar tools such as Doxygen and Hdoc ran in comparatively less time for the same codebase. This pointed to a significant bottleneck within Clang-Doc’s code path when generating large-scale software projects. Due to this the project scope quickly changed to improving the runtime of Clang-Doc so that it could run much faster. It was only during the latter half of the project did the scope changed back to improving Clang-Doc’s generation.
 
 ### Added More Test Cases to Clang-Doc test suite
 
@@ -30,12 +30,12 @@ In summary, I added four comprehensive tests that covered all features that we w
 
 Internally, the way Clang-Doc works is by leveraging libtooling's ASTVisitor class to parse the source level declarations in each TU. 
 
-Clang-Doc is architected using a Map-Reduce pattern. Clang-Doc parses each fragment of a declaration into an in-memory data format which is serialized then into an internal format and stored as a key value paired, identified by their [USR](https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__XREF.html#ga51679cb755bbd94cc5e9476c685f2df3). After, Clang-Doc deserializes and combines each of the fragment declarations back into the in-memory data format which is used by each of the backend to generate the results.
+The tool is architected using a Map-Reduce pattern. Clang-Doc parses each fragment of a declaration into an in-memory data format which is serialized then into an internal format and stored as a key value paired, identified by their [USR](https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__XREF.html#ga51679cb755bbd94cc5e9476c685f2df3). After, Clang-Doc deserializes and combines each of the fragment declarations back into the in-memory data format which is used by each of the backend to generate the results.
 
 Many experiments were conducted to identified the source of the bottleneck. First I tried benchmarking the code with many different codebases such JSON, and fmtlib to identify certain code patterns that slowed the code path down. This didn't really work since the bottlenecking only showed up for large codebases like LLVM.
 Next I leverage Windows prolifer (since I was coding on windows) however the visualizations was not helpful and the my system was not capable of profiling the 10 hour runtime required to compile LLVM documenation. 
 
-Eventually, we were able to identify a major bottleneck in Clang-Doc's by leveraging the TimeProfiler code to identify where the performance bottleneck was. Clang-Doc was performing redundant work when it was processing each declaration. We settled on a caching/memoization strategy to minimize the redundant work.
+Eventually, we were able to identify a major bottleneck in Clang-Doc's by leveraging the TimeProfiler (similar to -ftime-trace in clang) code to identify where the performance bottleneck was. Clang-Doc was performing redundant work when it was processing each declaration. We settled on a caching/memoization strategy to minimize the redundant work.
 
 For example, if we had the following project: 
 
@@ -64,7 +64,7 @@ class Base {}
 ...
 ```
 
-In this case, the ASTVisitor invoked by Clang-Doc would visit the serialized Base class three times, once when it is parsing Base.cpp, another when its visiting A.cpp then B.cpp. The problem was that there was no mechanism to identify declarations that we had already seen. The optimization ended up being a simple memoization dictionary which kept track of a list of declaration that Clang-Doc had visited. 
+In this case, the ASTVisitor invoked by Clang-Doc would visit the serialized Base class three times, once when it is parsing Base.cpp, another when its visiting A.cpp then B.cpp. The problem was that there was no mechanism to identify declarations that we had already seen. Using a simple dictionary which kept track of a list of declaration that Clang-Doc had visited as a basic form of memoization ended up being a surprisingly effective optimization. 
 
 
 
@@ -79,13 +79,13 @@ Here is a plot of the benchmarking numbers:
 
 
 Clang-Doc originally used an ad-hoc method of generating HTML. I introduced a templating language as a way of reducing project complexity and reducing the ease of development. Two RFCs were made before arriving at the idea of introducing Mustache as a library. Originally the idea was to introduce a custom templating language, however, upon further discussion, it was decided that the complexity of designing and implementing a new templating language was too much.
-An LLVM community member suggested using Mustache as a templating language. 
+An LLVM community member ([@cor3ntin](https://discourse.llvm.org/u/cor3ntin/summary)) suggested using Mustache as a templating language. 
 Mustache was the ideal choice since it was very simple to implement, and has a well defined spec that fit what was needed for Clang-Doc’s use case. The feedback on the [RFC](https://discourse.llvm.org/t/rfc-add-template-mustache-language-to-the-support-library/82439/18) was generally positive. While there was some resistance regarding the inclusion of an HTML support library in LLVM, this concern stemmed partly from a lack of awareness that HTML generation already occurs in several parts of LLVM. Additionally, the introduction of Mustache has the potential to simplify other HTML-related use cases.
 In terms of engineering wins, this library was able to cut the direct down on the HTML backend significantly dropping 500 lines of code compared to the original Clang-Doc HTML backend. This library was also designed for general-purpose use around LLVM since there are numerous places in LLVM where various tools generate HTML in its way. Using the Mustache templating library would be a nice way to standardize the codebase. 
 
 ### Improve Clang-Doc HTML Output
 
-The previous version of Clang-Doc’s output was a pretty minimal bare bones implementation. It had a sidebar that contained every single declaration within the project which created a large unnavigable UI. Typedef documentation was missing, plus method documentation was missing details such as whether or not the method was a const or virtual. There was no linking between other declarations in the project and there was no syntax highlighting on any language construct.
+The previous version of Clang-Doc’s HTML output was a pretty minimal, bare bones implementation. It had a sidebar that contained every single declaration within the project which created a large unnavigable UI. Typedef documentation was missing, plus method documentation was missing details such as whether or not the method was a const or virtual. There was no linking between other declarations in the project and there was no syntax highlighting on any language construct.
 
 With the new Mustache changes an additional backend was added using the specifier (--format=mhtml). That addresses these issues. 
 
