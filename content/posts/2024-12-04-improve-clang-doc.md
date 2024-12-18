@@ -71,9 +71,18 @@ In this case, the ASTVisitor invoked by Clang-Doc would visit the serialized Bas
 Here is a plot of the benchmarking numbers:
 
 <div style="margin:0 auto;">
-  <img src="/img/Clang-Doc-benchmark-numbers.png"><br/>
+  <img src="/img/clang-doc-benchmark-numbers.png"><br/>
 </div>
 
+The benchmarking numbers were performed on a machine with a 6th gen Intel(R) Xeon(R) CPU @ 2.00GHz w/ 96 cores, and 180GB of ram. Clang-doc is able to run concurrently, however the benchmark here is with concurrency set to 2. This is because anything higher crashes the slow version of the tool with an out of memory error. It took around 6 hours to complete a full generation of LLVM documentation in the previous tool, where as current version took around 4 hours.
+
+Here is a plot of the benchmark by number of threads:
+
+<div style="margin:0 auto;">
+  <img src="/img/clang-doc-concurrency.png"><br/>
+</div>
+
+We notice a pretty dramatic dropoff as more and more threads are utilize from the original tool which ran in 6 hours down to 13 minutes at 64 threads. Considering the previous versions of the tool could not use the higher thread count without crashing (even on a machine with 180GB of ram), the performance gains are even more dramatic.
 
 ### Added Template Mustache HTML Backend
 
