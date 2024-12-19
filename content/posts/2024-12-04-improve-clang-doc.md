@@ -1,6 +1,6 @@
 ---
 author: "Peter Chou"
-date: "2024-12-04"
+date: "2024-12-23"
 tags: ["GSoC", "Clang-Doc"]
 title: "GSoC 2024: Improve Clang Doc"
 ---
