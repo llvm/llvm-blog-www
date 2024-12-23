@@ -64,7 +64,7 @@ class Base {}
 ...
 ```
 
-In this case, the ASTVisitor invoked by Clang-Doc would visit the serialized Base class three times, once when it is parsing Base.cpp, another when its visiting A.cpp then B.cpp. The problem was that there was no mechanism to identify declarations that we had already seen. Using a simple dictionary which kept track of a list of declaration that Clang-Doc had visited as a basic form of memoization ended up being a surprisingly effective optimization. 
+In this case, the ASTVisitor invoked by Clang-Doc would visit the serialized Base class three times, once when it is parsing Base.h, another when its visiting A.cpp then B.cpp. The problem was that there was no mechanism to identify declarations that we had already seen. Using a simple dictionary which kept track of a list of declaration that Clang-Doc had visited as a basic form of memoization ended up being a surprisingly effective optimization. 
 
 
 
