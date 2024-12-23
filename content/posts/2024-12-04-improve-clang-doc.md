@@ -41,7 +41,7 @@ For example, if we had the following project:
 
 
 ```cpp
-//File: Base.cpp
+//File: Base.h
 
 class Base {}
 ```
@@ -50,7 +50,7 @@ class Base {}
 ```cpp
 //File: A.cpp
 
-#include "Base.cpp"
+#include "Base.h"
 
 ...
 
@@ -59,7 +59,7 @@ class Base {}
 ```cpp
 //File: B.cpp
 
-#include "Base.cpp"
+#include "Base.h"
 
 ...
 ```
@@ -82,7 +82,7 @@ Here is a plot of the benchmark by number of threads:
   <img src="/img/clang-doc-concurrency.png"><br/>
 </div>
 
-We notice a pretty dramatic dropoff as more and more threads are utilize from the original tool which ran in 6 hours down to 13 minutes at 64 threads. Considering the previous versions of the tool could not use the higher thread count without crashing (even on a machine with 180GB of ram), the performance gains are even more dramatic.
+We notice a pretty dramatic dropoff as more and more threads are utilize, the original time t 6 hours was cut down to 13 minutes at 64 threads. Considering the previous versions of the tool could not use the higher thread count without crashing (even on a machine with 180GB of ram), the performance gains are even more dramatic.
 
 ### Added Template Mustache HTML Backend
 
