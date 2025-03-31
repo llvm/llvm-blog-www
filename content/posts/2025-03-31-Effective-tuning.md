@@ -89,6 +89,10 @@ We maded used of al algoirthm known as Combine Elimination Algorithm (CE)
 - **Application-Specific Tuning:** The optimal window size and set of optimizations are highly application-dependent.
 - **Future Directions:** Emphasis on integrating machine learning techniques to better navigate the enormous search space and further refine auto-tuning strategies.
 
+# CGO EXPERIENCE
+Receiving the LLVM Foundation Travel Grant significantly supported my research and deepen my involvement with the LLVM community. My work explores the integration of AI-driven models into compiler optimizations, with a focus on evaluating and improving optimization techniques. Attending CGO 2025 was crucial for me to present my findings, gain valuable feedback, meeting new people, and engage with experts working on LLVM, MLIR, and AI-assisted compiler transformations. I really enjoyed the conference and I learned a lot!
+
+
 
 
 
