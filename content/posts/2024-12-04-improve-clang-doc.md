@@ -102,11 +102,11 @@ Below is a comparison of the same output between the two backends
 
 
 <div style="margin:0 auto;">
-  <img src="/img/Clang-Doc-old-html-output.png"><br/>
+  <img src="/img/clang-doc-old-html-output.png"><br/>
 </div>
 
 <div style="margin:0 auto;">
-  <img src="/img/Clang-Doc-new-output.png"><br/>
+  <img src="/img/clang-doc-new-output.png"><br/>
 </div>
 
 You can also visit the output project on my github.io page link
