@@ -1,4 +1,4 @@
-baseurl = "https://blog.llvm.org/"
+baseurl = "http://localhost:1313"
 title = "The LLVM Project Blog"
 copyright = "llvm.org"
 canonifyurls = true
