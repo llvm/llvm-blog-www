@@ -1,6 +1,6 @@
 ---
 author: "Leandro Augusto Lacerda Campos"
-date: "2025-08-29"
+date: "2025-09-01"
 tags: ["gsoc", "libc", "profiling", "testing", "math", "gpu"]
 title: "GSoC 2025: Profiling and Testing Math Functions on GPUs"
 ---
