@@ -45,7 +45,7 @@ Here's a quick overview on Clang-Doc's architecture, which follows a map-reduce 
 It seems fairly straightforward, but the architecture had a critical flaw.
 If a new C++ construct needed to be supported, it would be visited and serialized, but then support would have to be added to each backend individually.
 If you wanted to serialize something in YAML, you'd have to implement the Markdown logic separately.
-This placed a very high maintenance cost for extending basic functionality, even if you just wanted to add something simple.
+This imposed a very high maintenance cost for extending basic functionality, even if you just wanted to add something simple.
 It also easily led to generator disparity; a construct might be serialized in YAML, but not in Markdown.
 Testing was also in an awkward spot because it was unclear what format would be used to verify if the documentation output was acceptable.
 
@@ -92,7 +92,7 @@ The new JSON generator allowed me to quickly implement and test these features b
 I could work with the assumption that as long as the information was properly serialized into JSON, it would be able to be displayed well in HTML later.
 
 Testing is an area that the JSON backend brought a lot of clarity to.
-Clang-Doc didn't have a format where all the information we wanted, like ensuring we document that a variable is `cosnt` or `volatile`, was validated.
+Clang-Doc didn't have a format where all the information we wanted, like ensuring we document that a variable is `const` or `volatile`, was validated.
 At one time, YAML was meant to be that format, but it suffered from feature disparity since it wasn't relevant when something needed to be displayed in HTML.
 I ended up adding 14 different test files over the course of the summer to ensure test coverage.
 
@@ -103,8 +103,6 @@ I ended up adding 14 different test files over the course of the summer to ensur
 - [removed default label on some switches](https://github.com/llvm/llvm-project/pull/143919)
 - [precommit](https://github.com/llvm/llvm-project/pull/144160) and [add support for concepts](https://github.com/llvm/llvm-project/pull/144430)
 - [precommit](https://github.com/llvm/llvm-project/pull/145069) and [document global variables](https://github.com/llvm/llvm-project/pull/145070)
-- [refactor JSONGenerator array usage](https://github.com/llvm/llvm-project/pull/145595)
-- [refactor BitcodeReader::readSubBlock](https://github.com/llvm/llvm-project/pull/145835)
 - [serialize isBuiltIn and IsTemplate](https://github.com/llvm/llvm-project/pull/146149)
 - [precommit](https://github.com/llvm/llvm-project/pull/146164) and [serialize friends](https://github.com/llvm/llvm-project/pull/146165)
 
@@ -162,14 +160,11 @@ This would've been incredibly cumbersome since I would've had to:
 1. Add the appropriate templating language to allow the comments to render.
 2. Add the correct HTML tags to allow the test to pass.
 
-Like I just mentioned, comments weren't being generated the best in HTML anyways, so I could've run into more annoyances if I had to follow that workflow.
-
+As I mentioned, comments weren't being generated the best in HTML anyways, so I could've run into more annoyances if I had to follow that workflow.
 
 ### Pull Requests
 - [add namespace references to VarInfo](https://github.com/llvm/llvm-project/pull/146964)
-- [Serialize record files with mangled name](https://github.com/llvm/llvm-project/pull/148021)
 - [fix ASan complaints from passing RepositoryURL as reference](https://github.com/llvm/llvm-project/pull/148923)
-- [refactor JSON for better Mustache compatibility](https://github.com/llvm/llvm-project/pull/149588)
 - [integrate JSON as the source for Mustache templates](https://github.com/llvm/llvm-project/pull/149589)
 - [separate comments into categories](https://github.com/llvm/llvm-project/pull/149590)
 - [enable comments in class templates](https://github.com/llvm/llvm-project/pull/149848)
@@ -184,7 +179,7 @@ Markdown was the most speculative aspect of the project.
 It wasn't clear whether we'd try to integrate a solution into Clang itself or whether we'd keep it in clang-tools-extra.
 
 ## A JavaScript Solution
-The first option I explored was suggested by my mentor, which was a Javascript library called [Markdown-Tag](https://github.com/MarketingPipeline/Markdown-Tag)
+The first option I explored was suggested by my mentor, which was a JavaScript library called [Markdown-Tag](https://github.com/MarketingPipeline/Markdown-Tag)
 This would've been really convenient since all it requires is an HTML tag to enable rendering, so any comment text in a template can be easily rendered.
 Unfortunately, it requires all HTML to be sanitized, which defeats the purpose of a ready-made solution for us.
 We would have to parse any potential HTML in comments anyways.
@@ -196,6 +191,7 @@ Markdown has no official standard, so I opted for CommonMark conformance.
 
 The summer ended without a complete solution since a couple weeks were spent researching whether or not this could be integrated directly in the Clang comment parser or whether we'd need to build our own solution or not.
 You can see my initial draft [here](https://github.com/llvm/llvm-project/pull/155887).
+I plan to continue working on this parser and landing it in Clang-Doc.
 
 # Refactors, Name Mangling, and More!
 During my summer, I would stumble into places where I would think "This could be better" and my mentors usually agreed.
@@ -204,7 +200,7 @@ In fact, one of my best refactors was of the JSON generator that I wrote, which 
 Future me was extremely thankful for the easy-to-use functions I had added.
 I also refactored some of the bitcode reader/writer code so that less copy-pasting would be involved in the future.
 
-Another signifcant feature that I hadn't planned was name mangling.
+Another significant feature that I hadn't planned was name mangling.
 Clang-Doc suffered from a bug where template specializations would be serialized to the same file as their described class because they had the same name.
 The YAML backend avoided this problem because its filenames were SymbolIDs, but this meant that the lit tests would have to use regex to find the file for FileCheck.
 Nasty.
@@ -212,21 +208,28 @@ In HTML, you ended up with a buggy HTML page from duplicate tags.
 In JSON, you get a fatal error since two JSON documents can't live in the same file.
 So I used `ItaniumMangleContext` to generate mangled names we could use for the filenames.
 
+### Pull Requests
+- [Serialize record files with mangled name](https://github.com/llvm/llvm-project/pull/148021)
+- [refactor BitcodeReader::readSubBlock](https://github.com/llvm/llvm-project/pull/145835)
+- [refactor JSONGenerator array usage](https://github.com/llvm/llvm-project/pull/145595)
+- [refactor JSON for better Mustache compatibility](https://github.com/llvm/llvm-project/pull/149588)
+
 # Overview
 I implemented a new JSON generator that will serve as the basis for Clang-Doc's documentation generation.
 This will vastly reduce overall lines of code and maintenance burdens.
 I added a lot of tests to increase code coverage and ensure we are serializing all the information necessary for high-quality documentation.
 I refactored our comment handling to streamline the logic that handles them and for better output in the HTML.
-I also explored options for rendering Markdown and began an implenetation for a parser that I plan on working on in the future.
+I also explored options for rendering Markdown and began an implemetation for a parser that I plan on working on in the future.
 Along the way, I also did some refactoring to improve code reuse and improved maintenance burdens by reducing boilerplate code.
 
 After my work this summer, Clang-Doc is nearly ready to switch to HTML generation via Mustache templates, which will be a huge milestone.
 It is backed by the JSON generator which will allow for a much more flexible architecture that will change how we generate other documentation formats like our existing Markdown backend.
-All of this was done with little to no performance loss.
+All of this was achieved with little to no performance loss.
+I also hope that future contributors have an easier time than I did learning about and working with Clang-Doc.
+The threshold for contributing was high due to a disjointed architecture.
 
-Another huge boon from my work this summer is that contributors should (hopefully) have a much easier time contributing to Clang-Doc.
-Before, the threshold for contributing was high due to a disjointed architecture.
-I hope that future contributors find Clang-Doc easier to navigate and to write helpful patches due to my work.
+I'm also very excited to present my work and showcase Clang-Doc at this year's LLVM Dev Meeting during a technical talk.
+This is the first time I'll be presenting at a conference and I didn't expect to have the opportunity when I started at the beginning of the summer.
 
 Over the summer, I addressed these issues:
 - [template operator T() produces a bad name](https://github.com/llvm/llvm-project/issues/59812)
@@ -269,3 +272,4 @@ It's a common feature of modern documentation, so hopefully someday soon Clang-D
 # Acknowledgements
 Thank you very much to my mentors Paul Kirth and Petr Hosek for guiding me and advising me in this project.
 I learned so much from review feedback and our conversations.
+I would not be presenting at the Dev Meeting if not for the encouragement you both gave.
