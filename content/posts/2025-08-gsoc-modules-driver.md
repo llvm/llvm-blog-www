@@ -67,6 +67,8 @@ module MyLib {
 auto get_answer() -> int { return 42; }
 ```
 
+Although one of the main advantages of modules is that they can be precompiled once and reused for future uses, support for caching was not included in the scope of this GSoC project.
+
 ## Design Overview & Challenges
 
 {{< figure src="/img/gsoc2025-modules-driver-design.webp" alt="Modules Driver Design">}}
@@ -87,7 +89,7 @@ Some parts introduced unique challenges:
 
 #### Handling of the Standard library modules.
 
-Clang’s dependency scanning tooling used the generated `-cc1` compilation jobs as input. Since we can’t know in advance whether a standard library module will be needed, we always build the jobs for `std` and `std.compat`. During the scanning phase, we only scan those standard library modules if a command-line source input depends on them. If a standard library module ends up unused, we drop its job and carefully remove its outputs from the linker command line.
+Clang’s dependency scanning tooling uses the generated `-cc1` compilation job's command lines as input. Since we can’t know in advance whether a standard library module will be needed, we always build the jobs for `std` and `std.compat`. During the scanning phase, we only scan those standard library modules if a command-line source input depends on them. If a standard library module ends up unused, we drop its job and carefully remove its outputs from the linker command line.
 
 #### Propagating scan diagnostics
 
@@ -109,7 +111,9 @@ Regular translation units are able to import both Clang and C++20 named modules.
 
 While basic examples using modules compile correctly, there are still many command-line options and input configurations that are incompatible or may break the modules driver in unexpected ways. In the near term, I plan to fix the draft's remaining quirks, land this feature, and make it more robust.
 
-In the long term, support for imports between different kinds of module units or caching could be added to the moduels driver.
+In addition, the modules driver should gain support for caching precompiled module files, since caching is one of the core strengths of modules and makes up for the initial overhead they add.
+
+In the longer term, support for imports between different kinds of module units should also be added. Because of the current design of Clang’s dependency scanning tooling, however, allowing C++20 named modules to be imported into Clang modules would require deeper architectural changes.
 
 ## Acknowledgements
 
