@@ -1,6 +1,6 @@
 ---
 author: "Pedro Lobo"
-date: "2025-08-29"
+date: "2025-09-08"
 tags: ["GSoC", "clang", "optimizations", "IR"]
 title: "GSoC 2025 - Byte Type: Supporting Raw Data Copies in the LLVM IR"
 ---
