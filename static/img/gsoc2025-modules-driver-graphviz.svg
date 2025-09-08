@@ -1,0 +1,67 @@
+<svg width="338pt" height="306pt" viewBox="0.00 0.00 338.36 306.20" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 302.2)">
+<title>Module Dependency Graph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-302.2 334.36,-302.2 334.36,4 -4,4"/>
+<text text-anchor="middle" x="165.18" y="-8.2" font-family="Times,serif" font-size="14.00">Module Dependency Graph</text>
+<!-- MyLib (Clang module) -->
+<g id="node1" class="node">
+<title>MyLib (Clang module)</title>
+<path fill="none" stroke="black" d="M12,-124.3C12,-124.3 119.09,-124.3 119.09,-124.3 125.09,-124.3 131.09,-130.3 131.09,-136.3 131.09,-136.3 131.09,-161.9 131.09,-161.9 131.09,-167.9 125.09,-173.9 119.09,-173.9 119.09,-173.9 12,-173.9 12,-173.9 6,-173.9 0,-167.9 0,-161.9 0,-161.9 0,-136.3 0,-136.3 0,-130.3 6,-124.3 12,-124.3"/>
+<text text-anchor="middle" x="65.54" y="-157.3" font-family="Times,serif" font-size="14.00">Type: Clang module</text>
+<polyline fill="none" stroke="black" points="0,-149.1 131.09,-149.1"/>
+<text text-anchor="middle" x="65.54" y="-132.5" font-family="Times,serif" font-size="14.00">Provides: MyLib</text>
+</g>
+<!-- /home/naveen/Code/llvm&#45;dev/llvm&#45;project/./../playground&#45;example/main.cpp (Non&#45;module source) -->
+<g id="node2" class="node">
+<title>/home/naveen/Code/llvm-dev/llvm-project/./../playground-example/main.cpp (Non-module source)</title>
+<path fill="none" stroke="black" d="M90.07,-25.3C90.07,-25.3 229.02,-25.3 229.02,-25.3 235.02,-25.3 241.02,-31.3 241.02,-37.3 241.02,-37.3 241.02,-62.9 241.02,-62.9 241.02,-68.9 235.02,-74.9 229.02,-74.9 229.02,-74.9 90.07,-74.9 90.07,-74.9 84.07,-74.9 78.07,-68.9 78.07,-62.9 78.07,-62.9 78.07,-37.3 78.07,-37.3 78.07,-31.3 84.07,-25.3 90.07,-25.3"/>
+<text text-anchor="middle" x="159.54" y="-58.3" font-family="Times,serif" font-size="14.00">Type: Non-module source</text>
+<polyline fill="none" stroke="black" points="78.07,-50.1 241.02,-50.1"/>
+<text text-anchor="middle" x="159.54" y="-33.5" font-family="Times,serif" font-size="14.00">Filename: main.cpp</text>
+</g>
+<!-- MyLib (Clang module)&#45;&gt;/home/naveen/Code/llvm&#45;dev/llvm&#45;project/./../playground&#45;example/main.cpp (Non&#45;module source) -->
+<g id="edge1" class="edge">
+<title>MyLib (Clang module)-&gt;/home/naveen/Code/llvm-dev/llvm-project/./../playground-example/main.cpp (Non-module source)</title>
+<path fill="none" stroke="black" d="M96.56,-116.1C109.49,-102.75 124.27,-87.51 136.25,-75.14"/>
+<polygon fill="black" stroke="black" points="94.28,-113.42 89.83,-123.04 99.31,-118.29 94.28,-113.42"/>
+</g>
+<!-- A (C++20 module) -->
+<g id="node3" class="node">
+<title>A (C++20 module)</title>
+<path fill="none" stroke="black" d="M199.16,-111.9C199.16,-111.9 311.93,-111.9 311.93,-111.9 317.93,-111.9 323.93,-117.9 323.93,-123.9 323.93,-123.9 323.93,-174.3 323.93,-174.3 323.93,-180.3 317.93,-186.3 311.93,-186.3 311.93,-186.3 199.16,-186.3 199.16,-186.3 193.16,-186.3 187.16,-180.3 187.16,-174.3 187.16,-174.3 187.16,-123.9 187.16,-123.9 187.16,-117.9 193.16,-111.9 199.16,-111.9"/>
+<text text-anchor="middle" x="255.54" y="-169.7" font-family="Times,serif" font-size="14.00">Type: C++20 module</text>
+<polyline fill="none" stroke="black" points="187.16,-161.5 323.93,-161.5"/>
+<text text-anchor="middle" x="255.54" y="-144.9" font-family="Times,serif" font-size="14.00">Provides: A</text>
+<polyline fill="none" stroke="black" points="187.16,-136.7 323.93,-136.7"/>
+<text text-anchor="middle" x="255.54" y="-120.1" font-family="Times,serif" font-size="14.00">Filename: A.cppm</text>
+</g>
+<!-- A (C++20 module)&#45;&gt;/home/naveen/Code/llvm&#45;dev/llvm&#45;project/./../playground&#45;example/main.cpp (Non&#45;module source) -->
+<g id="edge2" class="edge">
+<title>A (C++20 module)-&gt;/home/naveen/Code/llvm-dev/llvm-project/./../playground-example/main.cpp (Non-module source)</title>
+<path fill="none" stroke="black" d="M211.26,-103.36C201.65,-93.65 191.84,-83.74 183.39,-75.19"/>
+<polygon fill="black" stroke="black" points="208.66,-105.71 218.19,-110.35 213.64,-100.78 208.66,-105.71"/>
+</g>
+<!-- std (C++20 module) -->
+<g id="node4" class="node">
+<title>std (C++20 module)</title>
+<path fill="none" stroke="black" d="M96.73,-223.3C96.73,-223.3 318.36,-223.3 318.36,-223.3 324.36,-223.3 330.36,-229.3 330.36,-235.3 330.36,-235.3 330.36,-285.7 330.36,-285.7 330.36,-291.7 324.36,-297.7 318.36,-297.7 318.36,-297.7 96.73,-297.7 96.73,-297.7 90.73,-297.7 84.73,-291.7 84.73,-285.7 84.73,-285.7 84.73,-235.3 84.73,-235.3 84.73,-229.3 90.73,-223.3 96.73,-223.3"/>
+<text text-anchor="middle" x="207.54" y="-281.1" font-family="Times,serif" font-size="14.00">Type: C++20 module</text>
+<polyline fill="none" stroke="black" points="84.73,-272.9 330.36,-272.9"/>
+<text text-anchor="middle" x="207.54" y="-256.3" font-family="Times,serif" font-size="14.00">Provides: std</text>
+<polyline fill="none" stroke="black" points="84.73,-248.1 330.36,-248.1"/>
+<text text-anchor="middle" x="207.54" y="-231.5" font-family="Times,serif" font-size="14.00">Filename: /usr/include/c++/15/bits/std.cc</text>
+</g>
+<!-- std (C++20 module)&#45;&gt;/home/naveen/Code/llvm&#45;dev/llvm&#45;project/./../playground&#45;example/main.cpp (Non&#45;module source) -->
+<g id="edge3" class="edge">
+<title>std (C++20 module)-&gt;/home/naveen/Code/llvm-dev/llvm-project/./../playground-example/main.cpp (Non-module source)</title>
+<path fill="none" stroke="black" d="M186.94,-212.61C183.77,-204.14 180.8,-195.3 178.54,-186.8 168.36,-148.4 163.38,-102.35 161.14,-74.98"/>
+<polygon fill="black" stroke="black" points="183.59,-213.65 190.49,-221.69 190.11,-211.1 183.59,-213.65"/>
+</g>
+<!-- std (C++20 module)&#45;&gt;A (C++20 module) -->
+<g id="edge4" class="edge">
+<title>std (C++20 module)-&gt;A (C++20 module)</title>
+<path fill="none" stroke="black" d="M228.09,-212.68C231.89,-204.01 235.82,-195.06 239.47,-186.74"/>
+<polygon fill="black" stroke="black" points="224.95,-211.12 224.14,-221.69 231.36,-213.93 224.95,-211.12"/>
+</g>
+</g>
+</svg>
