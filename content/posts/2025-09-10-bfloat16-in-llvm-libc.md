@@ -42,6 +42,7 @@ We also want all functions to be generic, platform independent and correctly rou
 | `scalbnbf16`, `scalblnbf16`                                                                                                                                    | [#155569](https://github.com/llvm/llvm-project/pull/155569) |
 | `fmodbf16`                                                                                                                                                     | [#155575](https://github.com/llvm/llvm-project/pull/155575) |
 
+The implementation status can be viewed at the libc `math.h` header implementation [status page](https://libc.llvm.org/headers/math/index.html), which is updated regularly.
 
 ## What was not done
 
