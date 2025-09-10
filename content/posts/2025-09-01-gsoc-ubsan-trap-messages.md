@@ -117,12 +117,14 @@ The approach used is based on how `__builtin_verbose_trap` is currently implemen
 An alternative to this approach would be to teach debuggers (e.g. LLDB) to decode the trap reason encoded in trap instructions in the debugger. However, this approach wasn’t taken for several reasons:
 
 
-Using the trap reason encoded in trap instructions only works for x86_64 and arm64. The approach that I used works for all targets where debug info is supported (many more).
-Relying on decoding the trap reason encoded in the trap instruction creates a tight coupling between the compiler and the debugger because if the encoding ever changes
-The debugger would need to be changed to adapt to the new encoding.
-Older versions of the debugger would fail to work with binaries using the new encoding.
-New versions of the debugger would fail to work with binaries using the old encoding.
-In contrast, encoding the trap reason as a string in the debug info is a much looser coupling because the compiler is free to change the trap reason without changes to the debugger.
+* Using the trap reason encoded in trap instructions only works for x86_64 and arm64. The approach that I used works for all targets where debug info is supported (many more).
+
+* Relying on decoding the trap reason encoded in the trap instruction creates a tight coupling between the compiler and the debugger because if the encoding ever changes:
+  * The debugger would need to be changed to adapt to the new encoding.
+
+  * Older versions of the debugger would fail to work with binaries using the new encoding.
+  * New versions of the debugger would fail to work with binaries using the old encoding.
+* In contrast, encoding the trap reason as a string in the debug info is a much looser coupling because the compiler is free to change the trap reason without changes to the debugger.
 
 
 
