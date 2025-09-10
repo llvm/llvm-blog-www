@@ -15,45 +15,7 @@ My name is Anthony and I had the pleasure of working on improving the Undefined 
 ## Background
 
 
-Undefined Behavior Sanitizer (UBSan) is a tool for detecting a subset of the undefined behaviors in the C, C++, and Objective-C languages at runtime. This project focused mainly on the trapping variant of UBSan, which is evoked through `-fsanitize-trap=<...>` along with `-fsanitize=<...>`. Trapping UBSan is a lighter-weight version of UBSan because upon detection of undefined behavior a trap instruction is executed rather than calling into a runtime library to handle the undefined behavior. This makes it more appealing for kernel, embedded, and production hardening use cases.
-
-Here are some basic examples of undefined behavior:
-
-**Signed integer overflow** (addition)
-```
-#include <limits.h>
-
-int main() {
-    int overflow = INT_MAX + 1;
-
-    return 0;
-}
-```
-
-**Shift overflow** (right)
-```
-int main() {
-    signed char x = 1;
-    int y = x >> 8;
-
-    return 0;
-}
-```
-
-**Float cast overflow**
-```
-#include <limits.h>
-#include <float.h>
-
-int main() {
-    float f = 2.0f * INT_MAX; 
-    int i = (int)f;
-
-    return 0;
-}
-```
-
-For all other undefined behavior that can be detected by UBSan, check out the [official clang documentation on it](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html).
+Undefined Behavior Sanitizer (UBSan) is a tool for detecting a subset of the undefined behaviors in the C, C++, and Objective-C languages at runtime. This project focused mainly on the trapping variant of UBSan, which is evoked through `-fsanitize-trap=<...>` along with `-fsanitize=<...>`. Trapping UBSan is a lighter-weight version of UBSan because upon detection of undefined behavior a trap instruction is executed rather than calling into a runtime library to handle the undefined behavior. This makes it more appealing for kernel, embedded, and production hardening use cases. For cases of undefined behavior that can be detected by UBSan, check out the [official clang documentation](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html).
 
 An issue with trapping UBSan prior to my work was that it was much harder to debug undefined behavior when it is detected when compared to the non-trapping mode. To illustrate this consider this C program that reads integers from the command line arguments and adds them.
 
@@ -149,7 +111,7 @@ During my GSoC project I implemented support for displaying human readable descr
 The approach used is based on how `__builtin_verbose_trap` is currently implemented inside Clang [11] [12]. `__builtin_verbose_trap` was implemented in the past for [libc++ hardening](https://discourse.llvm.org/t/rfc-hardening-in-libc/73925). At a high-level this works by encoding the reason for trapping as a string on the trap instruction in the debug info for the program being compiled. Then when a trap is hit in the debugger, the debugger retrieves this string and shows it as the reason for trapping.
 
 
-### An Alternative approach
+### Let the debugger handle most of the work
 
 
 An alternative to this approach would be to teach debuggers (e.g. LLDB) to decode the trap reason encoded in trap instructions in the debugger. However, this approach wasn’t taken for several reasons:
