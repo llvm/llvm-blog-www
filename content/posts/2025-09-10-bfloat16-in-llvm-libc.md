@@ -14,9 +14,9 @@ We also want all functions to be generic, platform independent and correctly rou
 
 ## What was done
 
-- BFloat16 type was added in the LLVM libc (`libc/src/__support/FPUtil/bfloat16.h`) [#144463](https://github.com/llvm/llvm-project/pull/144463).
-- All 70 expected basic math functions for `bfloat16` were implemented, with a generic approach that supports all libc supported architectures (ARM, RISC-V, GPUs, x86, Darwin) (see table below).
-- Implemented two addition basic math functions: `iscanonicalbf16` and `issignalingbf16`.
+- BFloat16 type was added to the LLVM libc (`libc/src/__support/FPUtil/bfloat16.h`) [#144463](https://github.com/llvm/llvm-project/pull/144463).
+- All 70 expected basic math functions for `bfloat16` were implemented, using a generic approach that supports all libc supported architectures (ARM, RISC-V, GPUs, x86, Darwin) (see table below).
+- Implemented two additional basic math functions: `iscanonicalbf16` and `issignalingbf16`.
 - Implemented higher math functions: `sqrtbf16` [#156654](https://github.com/llvm/llvm-project/pull/156654) and `log_bf16` [#157811](https://github.com/llvm/llvm-project/pull/157811) (open).
 - Comparison operations for the `FPBits` class were added [#144983](https://github.com/llvm/llvm-project/pull/144983).
 
