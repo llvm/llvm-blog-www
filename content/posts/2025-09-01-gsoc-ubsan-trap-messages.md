@@ -111,7 +111,7 @@ The natural place to tackle the debugging experience was to look at debugger int
 ### Let the debugger handle most of the work
 
 
-An alternative to this approach would be to teach debuggers (e.g. LLDB) to decode the trap reason encoded in trap instructions in the debugger. However, this approach wasn’t taken for several reasons:
+One approach to this would be to teach debuggers (e.g. LLDB) to decode the trap reason encoded in trap instructions in the debugger. However, this approach wasn’t taken for several reasons:
 
 
 * Using the trap reason encoded in trap instructions only works for x86_64 and arm64. The approach that I used works for all targets where debug info is supported (many more).
