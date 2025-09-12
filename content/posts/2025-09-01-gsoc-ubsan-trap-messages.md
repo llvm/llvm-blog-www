@@ -128,11 +128,11 @@ An alternative to this approach would be to teach debuggers (e.g. LLDB) to decod
 ### Encoding the trap reason in the debug info
 
 
-The approach I took is based on how `__builtin_verbose_trap` encodes its message into debug info [11] [12], in which `__builtin_verbose_trap` was implemented in the past for [libc++ hardening](https://discourse.llvm.org/t/rfc-hardening-in-libc/73925). This is done by pretending in the debug info that the trap instruction was inlined from another function, where that function is artificially generated and its name is of the form `__clang_trap_msg$<Category>$<TrapMessage>`, where <Category> and <TrapMessage> are the trap category and message to display when trapping respectively. This function does not actually exist in the compiled program. It only exists in the debug info as a convenient (albeit hacky) way to describe the reason for trapping. When a trap is hit in the debugger, the debugger retrieves this string from the debug info and shows it as the reason for trapping.
+The approach I took is based on how `__builtin_verbose_trap` encodes its message into debug info [11] [12], a feature which was implemented in the past for [libc++ hardening](https://discourse.llvm.org/t/rfc-hardening-in-libc/73925). The core idea is that the trap reason string gets encoded directly in the trap's debug information.
 
+To accomplish this, we needed to find a place to "stuff" the string in the DWARF DIE tree. Using a `DW_TAG_subprogram` was deemed the most straightforward and space-efficient location. This means we create a synthetic `DISubprogram` which is not a real function in the compiled program; it exists only in the debug info as a container. While the string could have been placed elsewhere, for reasons outside the scope of this blog post, it resides on this fake function DIE, with the trap reason encoded in the `DW_TAG_subprogram`'s name. For a deeper dive into this design decision, you can see [15](https://github.com/llvm/llvm-project/pull/145967#issuecomment-3054319138).
 
-If we take the example shown earlier and compile we can see this in the LLVM IR.
-
+Let's look at the LLVM IR of the previous example to see how this is implemented:
 
 ```
 $ clang -fsanitize=undefined -fsanitize-trap=undefined  add.c -g -o - -o - -S -emit-llvm -fsanitize-debug-trap-reasons=basic
@@ -165,8 +165,9 @@ cont:                                             ; preds = %entry
 !32 = distinct !DISubprogram(name: "__clang_trap_msg$Undefined Behavior Sanitizer$Integer addition overflowed", scope: !2, file: !2, type: !33, flags: DIFlagArtificial, spFlags: DISPFlagDefinition, unit: !14)
 ```
 
+The debug metadata for the `@llvm.ubsantrap` call is `!31`.  That `DILocation` has the scope of the `DISubprogram` assigned to `!32` which is the artificial function which encodes the trap category. This function's name is formatted as `__clang_trap_msg$<Category>$<TrapMessage>` to encode the trap category (`Undefined Behavior Sanitizer`) and the specific message (`Integer addition overflowed`). This function does not actually exist in the compiled program. It only exists in the debug info as a convenient (albeit hacky) way to describe the reason for trapping. When a trap is hit in the debugger, the debugger retrieves this string from the debug info and shows it as the reason for trapping.
 
-The debug metadata for the `@llvm.ubsantrap` call is `!31`.  That `DILocation` has the scope of the `DISubprogram` assigned to `!32` which is the artificial function which encodes the trap category (`Undefined Behavior Sanitizer`) and the trap message (`Integer addition overflowed`). Note that the `DILocation` for `!31` has `inlinedAt:` which tells us that the trap was inlined from !32 into the location at !29 which is the location of the `a + b` expression in the `add` function.
+Note that the `DILocation` for `!31` has `inlinedAt:` which tells us that the trap was inlined from `!32` into the location at `!29` which is the location of the `a + b` expression in the `add` function. 
 
 
 I implemented this change on this [PR](https://github.com/llvm/llvm-project/pull/145967).
@@ -369,3 +370,5 @@ https://github.com/llvm/llvm-project/commits?author=anthonyhatran
 [13] https://discourse.llvm.org/t/rfc-hardening-in-libc/73925
 
 [14] https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
+
+[15] https://github.com/llvm/llvm-project/pull/145967#issuecomment-3054319138
