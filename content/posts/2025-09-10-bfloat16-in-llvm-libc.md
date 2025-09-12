@@ -7,14 +7,14 @@ title: "GSoC 2025: Bfloat16 in LLVM libc"
 
 
 ## Introduction
-BFloat16 is a 16-bit floating-point format, introduced by Google and standardized in C++23 as `std::bfloat16_t`. It uses 1 sign bit, 8 exponent bits (the same as `float`), and 7 mantissa bits. This configuration allows BFloat16 to represent a much wider dynamic range than IEEE `binary16` (~ 3×10^38 compared to 65,504), though with lower precision. BFloat16 has become popular in AI and machine learning use-cases where it offers significant performance advantages.
+BFloat16 is a 16-bit floating-point format, introduced by Google and standardized in C++23 as `std::bfloat16_t`. It uses 1 sign bit, 8 exponent bits (the same as `float`), and 7 mantissa bits. This configuration allows BFloat16 to represent a much wider dynamic range than IEEE `binary16` (~3×10^38 values compared to 65,504), though with lower precision. BFloat16 has become popular in AI and machine learning use-cases where it offers significant performance advantages over IEEE `binary32` while preserving its approximate dynamic range.
 
 The goal of this project was to implement the BFloat16 type in LLVM libc along with the basic math functions like `fabsbf16`, `fmaxbf16`, etc.  
-We also want all functions to be generic, platform independent and correctly rounded for all rounding modes.
+We also want all functions to be generic (platform-independent) and correctly rounded for all rounding modes.
 
 ## What was done
 
-- BFloat16 type was added to the LLVM libc (`libc/src/__support/FPUtil/bfloat16.h`) [#144463](https://github.com/llvm/llvm-project/pull/144463).
+- BFloat16 type was added to LLVM libc (`libc/src/__support/FPUtil/bfloat16.h`) [#144463](https://github.com/llvm/llvm-project/pull/144463).
 - All 70 expected basic math functions for `bfloat16` were implemented, using a generic approach that supports all libc supported architectures (ARM, RISC-V, GPUs, x86, Darwin) (see table below).
 - Implemented two additional basic math functions: `iscanonicalbf16` and `issignalingbf16`.
 - Implemented higher math functions: `sqrtbf16` [#156654](https://github.com/llvm/llvm-project/pull/156654) and `log_bf16` [#157811](https://github.com/llvm/llvm-project/pull/157811) (open).
