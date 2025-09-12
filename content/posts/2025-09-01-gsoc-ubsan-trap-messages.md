@@ -108,9 +108,6 @@ As we can see the debugging experience with UBSan traps is not ideal and improvi
 During my GSoC project I implemented support for displaying human readable descriptions of UBSan traps in LLDB to improve the debugging experience.
 
 
-The approach used is based on how `__builtin_verbose_trap` is currently implemented inside Clang [11] [12]. `__builtin_verbose_trap` was implemented in the past for [libc++ hardening](https://discourse.llvm.org/t/rfc-hardening-in-libc/73925). At a high-level this works by encoding the reason for trapping as a string on the trap instruction in the debug info for the program being compiled. Then when a trap is hit in the debugger, the debugger retrieves this string and shows it as the reason for trapping.
-
-
 ### Let the debugger handle most of the work
 
 
@@ -131,7 +128,7 @@ An alternative to this approach would be to teach debuggers (e.g. LLDB) to decod
 ### Encoding the trap reason in the debug info
 
 
-As previously mentioned the approach I took is based on how `__builtin_verbose_trap` encodes its message into debug info. This is done by pretending in the debug info that the trap instruction was inlined from another function, where that function is artificially generated and its name is of the form `__clang_trap_msg$<Category>$<TrapMessage>`, where <Category> and <TrapMessage> are the trap category and message to display when trapping respectively. This function does not actually exist in the compiled program. It only exists in the debug info as a convenient (albeit hacky) way to describe the reason for trapping.
+The approach I took is based on how `__builtin_verbose_trap` encodes its message into debug info [11] [12], in which `__builtin_verbose_trap` was implemented in the past for [libc++ hardening](https://discourse.llvm.org/t/rfc-hardening-in-libc/73925). This is done by pretending in the debug info that the trap instruction was inlined from another function, where that function is artificially generated and its name is of the form `__clang_trap_msg$<Category>$<TrapMessage>`, where <Category> and <TrapMessage> are the trap category and message to display when trapping respectively. This function does not actually exist in the compiled program. It only exists in the debug info as a convenient (albeit hacky) way to describe the reason for trapping. When a trap is hit in the debugger, the debugger retrieves this string from the debug info and shows it as the reason for trapping.
 
 
 If we take the example shown earlier and compile we can see this in the LLVM IR.
