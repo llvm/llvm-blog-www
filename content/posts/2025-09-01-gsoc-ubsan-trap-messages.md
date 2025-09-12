@@ -105,7 +105,7 @@ As we can see the debugging experience with UBSan traps is not ideal and improvi
 ## Human readable descriptions of UBSan traps in LLDB
 
 
-During my GSoC project I implemented support for displaying human readable descriptions of UBSan traps in LLDB to improve the debugging experience.
+The natural place to tackle the debugging experience was to look at debugger integration.
 
 
 ### Let the debugger handle most of the work
