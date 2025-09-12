@@ -46,13 +46,14 @@ The implementation status can be viewed at the libc `math.h` header implementati
 
 ## What was not done
 
-- The implementation relied on a generic approach, so the `__bf16` compiler intrinsic was not used.
+- The implementation used a generic approach and did not rely on the `__bf16` compiler intrinsic, as it is not available in all compilers versions. Our goal is to ensure that the type is supported by all compilers and versions supported by [LLVM libc](https://libc.llvm.org/compiler_support.html).
 - Hardware optimizations provided by Intel's [AVX-512_BF16](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#avx512techs=AVX512_BF16) were not utilized. These instructions only support round-to-nearest-even mode, always flush output denormals to zero, and treat input denormals as zero, which does not align with our goal. See [VCVTNE2PS2BF16 instruction description](https://www.felixcloutier.com/x86/vcvtne2ps2bf16#description).
+- ARMv9 [SVE instructions](https://developer.arm.com/documentation/ddi0602/2021-12/SVE-Instructions/) were not utilized, as they are relatively new and not yet widely supported.
 - Not all higher math functions were implemented due to time constraints.
 
 ## Future Work
 - Implement the remaining higher math functions.
-- Perform performance comparisons with other libc implementations once their `bfloat16` support is available.
+- Perform performance comparisons with other libc implementations once their `bfloat16` support is available and also with the [CORE-MATH](https://core-math.gitlabpages.inria.fr/) project.
 - Update the test suite when the `mpfr_get_bfloat16` function becomes available.
 
 ## Acknowledgements
