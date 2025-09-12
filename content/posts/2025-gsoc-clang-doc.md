@@ -14,7 +14,7 @@ Recently, there have been efforts to get it back on track.
 
 This year, the [GSoC project idea](https://discourse.llvm.org/t/improve-documentation-parsing-in-clang/84513) had a simple premise: improve core functionality.
 
-## The Issues
+# The Project
 
 The project idea proposed three main areas of focus to improve documentation quality.
 
@@ -29,48 +29,105 @@ Lastly, having Markdown available to developers for documentation would be usefu
 Markdown provides the power of expression in an area that is technically dense.
 It can be used to highlight critical information and warnings.
 
-### The Architecture
+# The Architecture
 
 Here's a quick overview on Clang-Doc's architecture, which follows a map-reduce pattern:
-
-1. Visit source declarations via Clang's ASTVisitor.
-2. Serialize relevant source information into an Info (Clang-Doc's main data entity).
-3. Once all source declarations are serialized, write them into bitcode, reduce, and read the reduced Infos.
-4. Serialize Infos into the desired format.
 
 <div style="margin:0 auto;">
   <img src="/img/gsoc-2025-clang-doc-architecture.png"><br/>
 </div>
 
-It seems fairly straightforward, but the architecture had a critical flaw.
-If a new C++ construct needed to be supported, it would be visited and serialized, but then support would have to be added to each backend individually.
-If you wanted to serialize something in YAML, you'd have to implement the Markdown logic separately.
-This imposed a very high maintenance cost for extending basic functionality, even if you just wanted to add something simple.
-It also easily led to generator disparity; a construct might be serialized in YAML, but not in Markdown.
-Testing was also in an awkward spot because it was unclear what format would be used to verify if the documentation output was acceptable.
+1. Visit source declarations via Clang's ASTVisitor.
+2. Serialize relevant source information into an Info (Clang-Doc's main data entity).
+3. Write Infos into bitcode, reduce, and reread.
+4. Serialize Infos into the desired format with a target backend.
 
-## The Good: Mustache
+The architecture seems straightforward at a glance, but Clang-Doc has critical flaws at step 4.
 
+## The Bad
+
+Clang-Doc has support for many formats.
+That sounds great in principal, but the backend pipeline's execution made development extremely cumbersome.
+
+<div style="margin:0 auto;">
+  <img src="/img/gsoc-2025-clang-doc-architecture-old.png"><br/>
+</div>
+
+Unlike in LLVM, Clang-Doc doesn't have a framework like CodeGen that shares functionality across different targets.
+To document a `class`, every backend needs to independently implement logic to serialize the `class` into its target format.
+Each backend also has separate logic to write all of the documented entities to disk.
+There is also no IR where Infos can be preprocessed, which means that any organizational preprocessing done in a backend cant be shared.
+
+Here's the code for serializing the bases and virtual bases of a class in the HTML backend:
+
+```cpp
+  std::vector<std::unique_ptr<HTMLNode>> Parents =
+      genReferenceList(I.Parents, I.Path);
+  std::vector<std::unique_ptr<HTMLNode>> VParents =
+      genReferenceList(I.VirtualParents, I.Path);
+  if (!Parents.empty() || !VParents.empty()) {
+    Out.emplace_back(std::make_unique<TagNode>(HTMLTag::TAG_P));
+    auto &PBody = Out.back();
+    PBody->Children.emplace_back(std::make_unique<TextNode>("Inherits from "));
+    if (Parents.empty())
+      appendVector(std::move(VParents), PBody->Children);
+  ...
+```
+
+Here's the same logic for doing it in Markdown:
+
+```cpp
+  std::string Parents = genReferenceList(I.Parents);
+  std::string VParents = genReferenceList(I.VirtualParents);
+  if (!Parents.empty() || !VParents.empty()) {
+    if (Parents.empty())
+      writeLine("Inherits from " + VParents, OS);
+    else if (VParents.empty())
+      writeLine("Inherits from " + Parents, OS);
+    else
+      writeLine("Inherits from " + Parents + ", " + VParents, OS);
+    writeNewLine(OS);
+  }
+  ...
+```
+
+You can see how differently both backends need to handle these constructs, which makes it complicated to bring feature parity.
+The HTML tag creation being so tightly coupled to the documentation serialization also highlights a different problem of formatting problems being difficult to identify.
+
+This lack of generic handling imposed a very high maintenance cost for extending basic functionality.
+It also easily led to backend disparity; a construct might be serialized in YAML, but not in Markdown.
+Changes to how a documentation entity was handled would not be uniform across backends.
+
+Testing was also in an awkward spot.
+If not all backends were guaranteed to generate the same documentation, who could be trusted as the source of truth?
+YAML was originally meant to serve this role, but it suffered from feature disparity.
+It's a cumbersome process to implement support for a construct in YAML, verify it there, but then also go to implement it in HTML.
+There's a logical disconnect: what's serialized in YAML isn't guaranteed to reflect in HTML, so what is the benefit of updating YAML if my documentation is shown through HTML?
+
+## The Good
+
+The good news is that Clang-Doc's recent improvements had brought in changes that could rectify these problems, with a bit more work.
 Last year's GSoC brought in great improvements that became the basis of my summer.
 First, last year's GSoC contributor landed a large performance improvement.
 I might not have been able to test Clang-Doc on Clang itself without it.
 
-Another contribution that was essential to my summer is the [Mustache template engine](https://mustache.github.io/) implementation in LLVM.
+The same contributor authored the [Mustache template engine](https://mustache.github.io/) implementation in LLVM.
 Mustache templates allow Clang-Doc to shift away from manually generating HTML tags and eliminate high maintenance burdens.
 Templates could also solve the feature parity problem by using JSON to feed templates.
+This was a huge part of my summer and allowed me to bring in great improvements that would make Clang-Doc more flexible and easier to contribute to.
 
 # Building a JSON Backend
 
-While familiarizing myself with the codebase during the Community Bonding Period, I quickly determined that implementing a JSON backend would be incredibly beneficial to the project and my summer plans.
+While studying the codebase during the Community Bonding Period, I determined that creating a separate JSON backend would be extremely helpful.
 A JSON backend presented two immediate benefits:
 
 1. We could use it to feed our Mustache HTML templates and future template usage.
 2. As the main feeder format, testing can be focused on the JSON output.
 
 The existing Mustache backend in Clang-Doc already contained logic to create JSON documents, but they were immediately discarded when the templates were rendered.
-This backend is extremely beneficial to Clang-Doc because it would completely eliminate any need for manual HTML tag generation, thus greatly reducing lines of code.
+This backend is extremely beneficial to Clang-Doc because it completely eliminated any need for manual HTML tag generation, thus greatly reducing lines of code.
 If the JSON and template rendering logic from the existing implementation were uncoupled, we could apply the same pattern to any format we'd want to support.
-For example, Markdown generation would be a similar case to HTML where templates would be used to automate the creation of all markup.
+Markdown generation would be a similar case where templates would be used to automate the creation of all markup syntax.
 
 <div style="margin:0 auto;">
   <img src="/img/gsoc-2025-clang-doc-template-backend.png"><br/>
@@ -79,21 +136,25 @@ For example, Markdown generation would be a similar case to HTML where templates
 This diagram models the architecture that Clang-Doc would follow given a unified JSON backend.
 Note the similarities to Clang, where our frontend (the visitation/serialization) gathers all the information we need and emits an intermediate representation (JSON).
 The JSON is then fed to the desired templates to produce our documentation, similar to how IR is used for different LLVM backends.
-Following this pattern would reduce the logic maintenance to only the JSON generation; all the formatting for HTML, Markdown, etc. would exist in template files that are very simple to change.
+Following this pattern would reduce the logic maintenance to only the JSON generation; all the formatting for HTML, Markdown, etc. would exist in template files that are very simple to change and neatly separates documentation logic from display/formatting logic.
+Also note how much more streamlined it is compared to the previous diagram where serialization logic was separated among Clang-Doc's backends.
 
 Thus, I adapted the JSON logic from the Mustache backend and create a separate JSON backend.
 I also added tests to ensure the C++ constructs that Clang-Doc already supported were properly serialized in JSON.
 I didn't realize it at the time, but this would end up dramatically accelerating my pace of implementation.
+I was especially pleased with the timeframe of this feature since I had no plans at all to work on it when submitting my proposal.
 
 ## C++ Language Support and Testing
 
-After landing the JSON generator in about a week, I returned to my proposed schedule by implementing support for C++ constructs like friends.
+After landing the JSON generator in about a week, I returned to my proposed schedule by implementing support for missing C++ constructs.
 The new JSON generator allowed me to quickly implement and test these features because I didn't have to worry about HTML formatting or appearance.
 I could work with the assumption that as long as the information was properly serialized into JSON, it would be able to be displayed well in HTML later.
 
 Testing is an area that the JSON backend brought a lot of clarity to.
-Clang-Doc didn't have a format where all the information we wanted, like ensuring we document that a variable is `const` or `volatile`, was validated.
+Clang-Doc didn't have a format where all the information we wanted to document was validated.
 At one time, YAML was meant to be that format, but it suffered from feature disparity since it wasn't relevant when something needed to be displayed in HTML.
+If we used HTML instead, there was a lot of other data (tags, indentation, classes, IDs) that would need to be validated alongside the construct.
+Testing the documentation and testing the displayed content are two different tasks.
 I ended up adding 14 different test files over the course of the summer to ensure test coverage.
 
 ### Pull Requests
@@ -124,7 +185,10 @@ The only logic operation that Mustache has to check if a field exists is an iter
 {{/Fields}}
 ```
 
-All of the logic to order them needs to be done in the serialization to JSON itself, so I overhauled our comment organization.
+the `<h3>` header would be duplicated for every iteration over `Fields`.
+If the header was outside of the iteration, then it would be displayed even if there weren't any elements in `Fields`.
+All of the logic to order them needs to be done in the serialization to JSON itself, so I had overhaul our comment organization.
+
 Previously, Clang-Doc's comments were organized exactly as in Clang's AST like the following:
 
 - FullComment
@@ -153,16 +217,20 @@ After this refactor was landed, I implemented support for the comments we had al
 
 ## Reaping the benefits of JSON
 
-This was an area where a JSON backend once again accelerated my progress.
-Without it, I would've written the same JSON logic but would've had to written tests to check for the comments in HTML.
-This would've been incredibly cumbersome since I would've had to:
+This was an area where the JSON backend really accelerated my progress.
+Without it, I would've written the same JSON logic but written tests for HTML output.
+This meant that I would've had to:
 
 1. Add the appropriate templating language to allow the comments to render.
 2. Add the correct HTML tags to allow the test to pass.
 
 As I mentioned, comments weren't being generated the best in HTML anyways, so I could've run into more annoyances if I had to follow that workflow.
+Instead, I could just write some really simple JSON.
 
 ### Pull Requests
+
+Here are the pull requests I made during this phase of the project:
+
 - [add namespace references to VarInfo](https://github.com/llvm/llvm-project/pull/146964)
 - [fix ASan complaints from passing RepositoryURL as reference](https://github.com/llvm/llvm-project/pull/148923)
 - [integrate JSON as the source for Mustache templates](https://github.com/llvm/llvm-project/pull/149589)
@@ -179,7 +247,7 @@ Markdown was the most speculative aspect of the project.
 It wasn't clear whether we'd try to integrate a solution into Clang itself or whether we'd keep it in clang-tools-extra.
 
 ## A JavaScript Solution
-The first option I explored was suggested by my mentor, which was a JavaScript library called [Markdown-Tag](https://github.com/MarketingPipeline/Markdown-Tag)
+The first option I explored was suggested by my mentor, which was a JavaScript library called [Markdown-Tag](https://github.com/MarketingPipeline/Markdown-Tag).
 This would've been really convenient since all it requires is an HTML tag to enable rendering, so any comment text in a template can be easily rendered.
 Unfortunately, it requires all HTML to be sanitized, which defeats the purpose of a ready-made solution for us.
 We would have to parse any potential HTML in comments anyways.
@@ -198,17 +266,49 @@ During my summer, I would stumble into places where I would think "This could be
 Thus, there were a few patches where I dedicated time to general refactors to improve code reuse and hopefully make the lives of future contributors much easier than what I had to go through.
 In fact, one of my best refactors was of the JSON generator that I wrote, which my mentor noted had a lot of areas for great code reuse.
 Future me was extremely thankful for the easy-to-use functions I had added.
-I also refactored some of the bitcode reader/writer code so that less copy-pasting would be involved in the future.
 
-Another significant feature that I hadn't planned was name mangling.
-Clang-Doc suffered from a bug where template specializations would be serialized to the same file as their described class because they had the same name.
+## Bitcode Refactor
+The bitcode read/write operations contain highly repetitive code.
+Adding something to documentation, like serializing `const` for a function, required several copy-pastes in several locations.
+It was structured like so:
+
+```cpp
+case BI_MEMBER_TYPE_BLOCK_ID: {
+  MemberTypeInfo TI;
+  if (auto Err = readBlock(ID, &TI))
+    return Err;
+  if (auto Err = addTypeInfo(I, std::move(TI)))
+    return Err;
+  return llvm::Error::success();
+}
+```
+
+`addTypeInfo` is specific for `MemberTypeInfo`, so every other type of `Info` would need to call its own function.
+Hence, highly repetitive similar code.
+I refactored that block to this:
+
+```cpp
+  return handleTypeSubBlock<TypeInfo>(ID, I, CreateAddFunc(addTypeInfo<T, TypeInfo>));
+```
+
+`handleTypeSubBlock` contains the same logic as the previous block, but it calls a generic `Function`.
+All of this was achieved without compromising the performance of documentation generation.
+
+## Mangling Filenames
+Clang-Doc had a bug stemming from non-unique filenames.
 The YAML backend avoided this problem because its filenames were SymbolIDs, but this meant that the lit tests would have to use regex to find the file for FileCheck.
 Nasty.
-In HTML, you ended up with a buggy HTML page from duplicate tags.
-In JSON, you get a fatal error since two JSON documents can't live in the same file.
-So I used `ItaniumMangleContext` to generate mangled names we could use for the filenames.
 
-### Pull Requests
+In HTML and JSON, the filenames for classes were just the class name.
+If you had a template specialization, this would cause problems
+In HTML, we'd get duplicate HTML resulting in wonky web pages.
+In JSON, we'd get a fatal error from the JSON parser since there were two sets of top level braces.
+I used `ItaniumMangleContext` to generate mangled names we could use for the filenames.
+
+## Pull Requests
+
+Here are the pull requests I made for refactors during the project:
+
 - [Serialize record files with mangled name](https://github.com/llvm/llvm-project/pull/148021)
 - [refactor BitcodeReader::readSubBlock](https://github.com/llvm/llvm-project/pull/145835)
 - [refactor JSONGenerator array usage](https://github.com/llvm/llvm-project/pull/145595)
@@ -219,12 +319,12 @@ I implemented a new JSON generator that will serve as the basis for Clang-Doc's 
 This will vastly reduce overall lines of code and maintenance burdens.
 I added a lot of tests to increase code coverage and ensure we are serializing all the information necessary for high-quality documentation.
 I refactored our comment handling to streamline the logic that handles them and for better output in the HTML.
-I also explored options for rendering Markdown and began an implemetation for a parser that I plan on working on in the future.
+I also explored options for rendering Markdown and began an implementation for a parser that I plan on working on in the future.
 Along the way, I also did some refactoring to improve code reuse and improved maintenance burdens by reducing boilerplate code.
 
 After my work this summer, Clang-Doc is nearly ready to switch to HTML generation via Mustache templates, which will be a huge milestone.
 It is backed by the JSON generator which will allow for a much more flexible architecture that will change how we generate other documentation formats like our existing Markdown backend.
-All of this was achieved with little to no performance loss.
+All of this was achieved without compromising the performance of documentation generation.
 I also hope that future contributors have an easier time than I did learning about and working with Clang-Doc.
 The threshold for contributing was high due to a disjointed architecture.
 
