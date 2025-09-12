@@ -200,7 +200,9 @@ Using bloaty, I tested a release build of clang with the `-fsanitize-debug-trap-
  ```
 
 
-Note it is likely the code size difference is negligible because because in optimized builds trap instructions in a function get merged together which causes the additional debug info my patch adds to be dropped.
+Note it is likely the code size difference is negligible because because in optimized builds trap instructions in a function get merged together which causes the additional debug info my patch adds to be dropped. 
+
+An increase of size would likely be the result of extra bytes per-UBSan trap in debug_info. It would also be contingent on the number of traps emitted since a new `DW_TAG_subprogram` DIE is emitted for each trap with this new feature. [A later comparison on a larger code base ("Big Google Binary")](https://github.com/llvm/llvm-project/pull/154618#issuecomment-3225724300), actually found a rather significant size increase of about 18% with trap reasons enabled. Future work may involve looking into why this is happening, and how such drastic size increases can be reduced.
 
 
 ### Displaying the trap reason in the debugger
@@ -322,7 +324,9 @@ Before I started this GSoC, I barely even knew how to build clang and LLVM or us
 ## Work to Do
 
 
-As stated prior, the diagnostics extension for trap messages has been [upstreamed by Dan](https://github.com/llvm/llvm-project/pull/154618). As of right now, only signed and unsigned overflow for addition, subtraction, and multiplication are being used by this system. I plan to integrate what I found on my [abandoned PR](https://github.com/llvm/llvm-project/pull/153845) by building on top of what Dan has already done. This will be done after the GSoC coding period.
+As stated prior, some research needs to be conducted to figure out how size increase can be minimalized.
+
+Also stated previously, the diagnostics extension for trap messages has been [upstreamed by Dan](https://github.com/llvm/llvm-project/pull/154618). As of right now, only signed and unsigned overflow for addition, subtraction, and multiplication are being used by this system. I plan to integrate what I found on my [abandoned PR](https://github.com/llvm/llvm-project/pull/153845) by building on top of what Dan has already done. This will be done after the GSoC coding period.
 
 
 There is [an issue](https://github.com/llvm/llvm-project/issues/150707) where trap messages are not emitted in cases where they should be due to a null check. The purpose of the null check was to prevent a nullptr dereference that occurred in the debug-info prologue. This is a known issue to which there isn't a concrete solution as of current.
