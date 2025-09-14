@@ -130,7 +130,7 @@ One approach to this would be to teach debuggers (e.g. LLDB) to decode the trap 
 
 The approach I took is based on how `__builtin_verbose_trap` encodes its message into debug info [11] [12], a feature which was implemented in the past for [libc++ hardening](https://discourse.llvm.org/t/rfc-hardening-in-libc/73925). The core idea is that the trap reason string gets encoded directly in the trap's debug information.
 
-To accomplish this, we needed to find a place to "stuff" the string in the DWARF DIE tree. Using a `DW_TAG_subprogram` was deemed the most straightforward and space-efficient location. This means we create a synthetic `DISubprogram` which is not a real function in the compiled program; it exists only in the debug info as a container. While the string could have been placed elsewhere, for reasons outside the scope of this blog post, it resides on this fake function DIE, with the trap reason encoded in the `DW_TAG_subprogram`'s name. For a deeper dive into this design decision, you can see [15](https://github.com/llvm/llvm-project/pull/145967#issuecomment-3054319138).
+To accomplish this, we needed to find a place to "stuff" the string in the DWARF DIE tree. Using a `DW_TAG_subprogram` was deemed the most straightforward and space-efficient location. This means we create a synthetic `DISubprogram` which is not a real function in the compiled program; it exists only in the debug info as a container. While the string could have been placed elsewhere, for reasons outside the scope of this blog post, it resides on this fake function DIE, with the trap reason encoded in the `DW_TAG_subprogram`'s name. For a deeper dive into this design decision, you can see [[15]](https://github.com/llvm/llvm-project/pull/145967#issuecomment-3054319138).
 
 Let's look at the LLVM IR of the previous example to see how this is implemented:
 
@@ -202,7 +202,7 @@ Using bloaty, I tested a release build of clang with the `-fsanitize-debug-trap-
 
 Note it is likely the code size difference is negligible because because in optimized builds trap instructions in a function get merged together which causes the additional debug info my patch adds to be dropped. 
 
-An increase of size would likely be the result of extra bytes per-UBSan trap in debug_info. It would also be contingent on the number of traps emitted since a new `DW_TAG_subprogram` DIE is emitted for each trap with this new feature. [A later comparison on a larger code base ("Big Google Binary")](https://github.com/llvm/llvm-project/pull/154618#issuecomment-3225724300), actually found a rather significant size increase of about 18% with trap reasons enabled. Future work may involve looking into why this is happening, and how such drastic size increases can be reduced.
+Realistically this will add a few more abbreviations into .debug_abbrev (the DWARF abbreviation section) and only a few extra bytes per-UBSAN trap (abbreviation code + 1 ULEB128 for the index into the string offset table) into .debug_info (the DWARF debug-info section). The rest of the DW_TAG_subprogram is encoded in the abbreviation for that fake frame [[16]](https://github.com/llvm/llvm-project/pull/145967#issuecomment-3068862442). It would also be contingent on the number of traps emitted since a new `DW_TAG_subprogram` DIE is emitted for each trap with this new feature. [A later comparison on a larger code base ("Big Google Binary")](https://github.com/llvm/llvm-project/pull/154618#issuecomment-3225724300), actually found a rather significant size increase of about 18% with trap reasons enabled. Future work may involve looking into why this is happening, and how such drastic size increases can be reduced.
 
 
 ### Displaying the trap reason in the debugger
@@ -376,3 +376,5 @@ https://github.com/llvm/llvm-project/commits?author=anthonyhatran
 [14] https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
 
 [15] https://github.com/llvm/llvm-project/pull/145967#issuecomment-3054319138
+
+[16] https://github.com/llvm/llvm-project/pull/145967#issuecomment-3068862442
