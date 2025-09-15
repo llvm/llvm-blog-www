@@ -1,6 +1,6 @@
 ---
 author: "Erick Velez (evelez7)"
-date: "2025-08-28"
+date: "2025-09-22"
 tags: ["GSoC", "clang-doc", "clang-tools-extra", "documentation"]
 title: "GSoC 2025: Improving Core Clang-Doc Functionality"
 ---
