@@ -37,10 +37,10 @@ Here's a quick overview on Clang-Doc's architecture, which follows a map-reduce 
   <img src="/img/gsoc-2025-clang-doc-architecture.png"><br/>
 </div>
 
-1. Visit source declarations via Clang's ASTVisitor.
-2. Serialize relevant source information into an Info (Clang-Doc's main data entity).
-3. Write Infos into bitcode, reduce, and reread.
-4. Serialize Infos into the desired format with a target backend.
+1. Visit source declarations via Clang's `ASTVisitor`.
+2. Serialize relevant source information into an `Info` (Clang-Doc's main data entity).
+3. Write `Info`s into bitcode, reduce, and reread.
+4. Serialize `Info`s into the desired format with a target backend.
 
 The architecture seems straightforward at a glance, but Clang-Doc has critical flaws at step 4.
 
@@ -56,7 +56,7 @@ That sounds great in principal, but the backend pipeline's execution made develo
 Unlike in LLVM, Clang-Doc doesn't have a framework like CodeGen that shares functionality across different targets.
 To document a `class`, every backend needs to independently implement logic to serialize the `class` into its target format.
 Each backend also has separate logic to write all of the documented entities to disk.
-There is also no IR where Infos can be preprocessed, which means that any organizational preprocessing done in a backend cant be shared.
+There is also no IR where `Info`s can be preprocessed, which means that any organizational preprocessing done in a backend can't be shared.
 
 Here's the code for serializing the bases and virtual bases of a class in the HTML backend:
 
@@ -107,7 +107,7 @@ There's a logical disconnect: what's serialized in YAML isn't guaranteed to refl
 ## The Good
 
 The good news is that Clang-Doc's recent improvements had brought in changes that could rectify these problems, with a bit more work.
-Last year's GSoC brought in great improvements that became the basis of my summer.
+[Last year's GSoC](https://blog.llvm.org/posts/2024-12-04-improve-clang-doc/) brought in great improvements that became the basis of my summer.
 First, last year's GSoC contributor landed a large performance improvement.
 I might not have been able to test Clang-Doc on Clang itself without it.
 
@@ -136,7 +136,7 @@ Markdown generation would be a similar case where templates would be used to aut
 This diagram models the architecture that Clang-Doc would follow given a unified JSON backend.
 Note the similarities to Clang, where our frontend (the visitation/serialization) gathers all the information we need and emits an intermediate representation (JSON).
 The JSON is then fed to the desired templates to produce our documentation, similar to how IR is used for different LLVM backends.
-Following this pattern would reduce the logic maintenance to only the JSON generation; all the formatting for HTML, Markdown, etc. would exist in template files that are very simple to change and neatly separates documentation logic from display/formatting logic.
+Following this pattern would reduce the maintenance to only the JSON generation; all the formatting for HTML, Markdown, etc. would exist in template files that are very simple to change and neatly separates documentation logic from display/formatting logic.
 Also note how much more streamlined it is compared to the previous diagram where serialization logic was separated among Clang-Doc's backends.
 
 Thus, I adapted the JSON logic from the Mustache backend and create a separate JSON backend.
@@ -191,25 +191,25 @@ All of the logic to order them needs to be done in the serialization to JSON its
 
 Previously, Clang-Doc's comments were organized exactly as in Clang's AST like the following:
 
-- FullComment
-  - BriefComment
-    - ParagraphComment
-      - TextComment
-      - TextComment
-  - BriefComment
-    - ParagraphComment
+- `FullComment`
+  - `BriefComment`
+    - `ParagraphComment`
+      - `TextComment`
+      - `TextComment`
+  - `BriefComment`
+    - `ParagraphComment`
 
-Everything was unnecessarily nested under a FullComment, and TextComments were also unnecessarily nested.
-Every non-verbatim comment's text was held in one ParagraphComment.
-Since there was only one, we could reduce some boilerplate by directly mapping to the array of TextComments.
+Everything was unnecessarily nested under a `FullComment`, and `TextComment`s were also unnecessarily nested.
+Every non-verbatim comment's text was held in one `ParagraphComment`.
+Since there was only one, we could reduce some boilerplate by directly mapping to the array of `TextComment`s.
 
 After the change, Clang-Doc's comments were structured like this:
 
-- BriefComments
-  - TextCommentArray
-  - TextCommentArray
-- ParagraphComments
-  - TextCommentArray
+- `BriefComments`
+  - `TextCommentArray`
+  - `TextCommentArray`
+- `ParagraphComments`
+  - `TextCommentArray`
 
 Now, we can just iterate over every type of comment, which means iterating over every array.
 This left our JSON documentation with a few more fields, since one is needed for every Doxygen command, but with easier identification of what comments exist in the documentation.
@@ -255,7 +255,7 @@ We would have to parse any potential HTML in comments anyways.
 ## A Parser Solution
 Without an out-of-the-box solution, we were left with implementing our own parser.
 When I considered this in my proposal, I knew an in-tree parser would want to conform to the simplest possible standard.
-Markdown has no official standard, so I opted for CommonMark conformance.
+Markdown has no official standard, so I opted for [CommonMark](https://commonmark.org/) conformance.
 
 The summer ended without a complete solution since a couple weeks were spent researching whether or not this could be integrated directly in the Clang comment parser or whether we'd need to build our own solution or not.
 You can see my initial draft [here](https://github.com/llvm/llvm-project/pull/155887).
@@ -315,12 +315,11 @@ Here are the pull requests I made for refactors during the project:
 - [refactor JSON for better Mustache compatibility](https://github.com/llvm/llvm-project/pull/149588)
 
 # Overview
-I implemented a new JSON generator that will serve as the basis for Clang-Doc's documentation generation.
-This will vastly reduce overall lines of code and maintenance burdens.
-I added a lot of tests to increase code coverage and ensure we are serializing all the information necessary for high-quality documentation.
-I refactored our comment handling to streamline the logic that handles them and for better output in the HTML.
-I also explored options for rendering Markdown and began an implementation for a parser that I plan on working on in the future.
-Along the way, I also did some refactoring to improve code reuse and improved maintenance burdens by reducing boilerplate code.
+- I implemented a new JSON generator that will serve as the basis for Clang-Doc's documentation generation. This will vastly reduce overall lines of code and maintenance burdens.
+- I added a lot of tests to increase code coverage and ensure we are serializing all the information necessary for high-quality documentation.
+- I refactored our comment handling to streamline the logic that handles them and for better output in the HTML.
+- I also explored options for rendering Markdown and began an implementation for a parser that I plan on working on in the future.
+- Along the way, I also did some refactoring to improve code reuse and improved maintenance burdens by reducing boilerplate code.
 
 After my work this summer, Clang-Doc is nearly ready to switch to HTML generation via Mustache templates, which will be a huge milestone.
 It is backed by the JSON generator which will allow for a much more flexible architecture that will change how we generate other documentation formats like our existing Markdown backend.
@@ -365,7 +364,7 @@ Doxygen also displays where an entity is referenced, like where a function is in
 Clang-Doc currently has no support for this kind of behavior.
 
 Clang-Doc would need a preprocessing step where any reference to another entity is identified and then resolved somewhere.
-One of my mentors pointed out that it would be great to do during the reduction step where every Info is being visited anyways.
+One of my mentors pointed out that it would be great to do during the reduction step where every `Info` is being visited anyways.
 This actually wasn't something I had even considered in my proposal besides identifying that `@copydoc` wasn't supported by the comment parser.
 It's a common feature of modern documentation, so hopefully someday soon Clang-Doc can acquire it.
 
