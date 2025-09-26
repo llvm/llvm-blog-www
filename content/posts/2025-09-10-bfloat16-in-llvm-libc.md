@@ -1,6 +1,6 @@
 ---
 author: "Krishna Pandey"
-date: "2025-09-10"
+date: "2025-09-29"
 tags: ["GSoC", "libc", "math", "c++23"]
 title: "GSoC 2025: Bfloat16 in LLVM libc"
 ---
