@@ -1,6 +1,6 @@
 ---
 author: "Naveen Seth Hanig"
-date: "2025-08-31"
+date: "2025-10-06"
 tags: ["clang", "modules"]
 title: "GSoC 2025 - Support simple C++20 modules use from the Clang driver without a build system"
 ---
