@@ -9,7 +9,7 @@ This summer, I had the incredible opportunity to work on an LLVM project through
 
 ## The Problem: Information Overload
 
-LLVM generates a wealth of valuable data during compilation—optimization remarks, profiling information, timing data, and more. However, this information is often difficult to process and analyze, especially for developers new to LLVM or those working with offloading toolchains. The typical workflow involves:
+LLVM generates a wealth of valuable data during compilation-optimization, including optimization remarks, profiling information, timing data, and more. However, this information is often difficult to process and analyze, especially for developers new to LLVM or those working with offloading toolchains. The typical workflow involves:
 
 - Searching through thousands of remarks using grep
 - Manually correlating data across compilation units  
@@ -92,7 +92,7 @@ The tool could be valuable for:
 
 You can explore a live demo of LLVM Advisor at: https://llvm-advisor.onrender.com/
 
-The complete implementation is available in PR [#147451](https://github.com/llvm/llvm-project/pull/147451), and you can see the development timeline at: https://time.graphics/line/999689/
+The complete implementation is available in PR [#147451](https://github.com/llvm/llvm-project/pull/147451), and you can see the development timeline at: https://time.graphics/line/999689/.
 
 ## Looking Forward
 
