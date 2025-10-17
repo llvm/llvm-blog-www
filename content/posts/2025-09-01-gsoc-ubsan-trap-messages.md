@@ -1,6 +1,6 @@
 ---
 author: "Anthony Tran"
-date: "2025-09-01"
+date: "2025-10-20"
 tags: ["GSoC", "Clang", "CodeGen"]
 title: "GSoC 2025: Usability Improvements for the Undefined Behavior Sanitizer"
 ---
