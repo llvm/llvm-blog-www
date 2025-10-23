@@ -1,6 +1,6 @@
 ---
 author: "Narayan Sreekumar (vortex73)"
-date: "2025-08-25"
+date: "2025-10-27"
 tags: ["GSoC", "abi", "codegen", "sysv"]
 title: "GSoC 2025: Introducing an ABI Lowering Library"
 ---
