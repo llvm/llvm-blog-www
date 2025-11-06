@@ -1,6 +1,6 @@
 ---
 author: "Abdullah Amin"
-date: "2025-08-31"
+date: "2025-11-10"
 tags: ["GSoC", "LLDB"]
 title: "GSoC 2025: Rich Disassembler for LLDB"
 ---
