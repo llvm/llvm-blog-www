@@ -5,30 +5,28 @@ tags: ["GSoC", "clang-repl", "orc-jit"]
 title: "GSoC 2025: Advanced symbol resolution for Clang-Repl"
 ---
 
-### **Introduction**
+## Introduction
 
-Hello! I’m **Sahil Patidar**, and this summer I had the opportunity to participate in **Google Summer of Code (GSoC) 2025** with the **LLVM project**.
+Hello! I’m **Sahil Patidar**, and this summer I had the opportunity to participate in **Google Summer of Code (GSoC) 2025** with the **LLVM organization**.
 My project focused on enhancing **ORC-JIT** and **Clang-Repl** by introducing a new feature for **advanced symbol resolution**, aimed at improving runtime symbol handling and flexibility.
 
 **Mentors**: Vassil Vassilev, Aaron Jomy
 
-### **Overview of the Project**
+## Overview of the Project
 
 [Clang-Repl](https://clang.llvm.org/docs/ClangRepl.html) is an interactive C++ interpreter built on top of LLVM’s **ORC JIT**, enabling incremental compilation and execution.
 However, when user code references symbols from external libraries, those libraries must currently be loaded manually. This happens because **ORC JIT** does not automatically resolve symbols from libraries that haven’t been loaded yet.
 
 To overcome this limitation, my project introduces an **automatic library resolver** for unresolved symbols in **ORC JIT**, improving Clang-Repl’s runtime by making external symbol handling seamless and user-friendly.
 
-### **Project Goals**
+## Project Goals
 
 The main goal of my project was to design and implement a new **Library-Resolution API** for **ORC-JIT**.
 This API acts as a **smart symbol resolver** — when ORC-JIT encounters an unresolved symbol, it can call this API to find **where** the symbol exists and **which library** provides it.
 
 The next step is to **integrate this API into ORC-JIT**, so that **Clang-Repl** can automatically use it to handle missing symbols without requiring manual library loading.
 
----
-
-### **Library-Resolution: Smarter Symbol Resolver**
+## Library-Resolution: Smarter Symbol Resolver
 
 During my GSoC project, one of the major components I worked on was **Library-Resolution** — an API we re-designed and re-implemented based on Cling’s original *library-resolver*.
 
@@ -38,10 +36,10 @@ It doesn’t actually *load* libraries — instead, it finds **where** the missi
 This makes it a powerful helper when dealing with unresolved symbols during execution.
 
 
-#### **How It Works**
+### How It Works
 
 When system (Orc-JIT or any) encounters an **unresolved symbol**, system can call the resolver to find symbols that not found.
-It scans through user-defined library paths, checks potential matches, and identifies the libraries that contain the missing symbols — all without directly loading them.
+It scans through user-provided library paths, checks potential matches, and identifies the libraries that contain the missing symbols — all without directly loading them.
 
 At the heart of this system is the **LibraryResolver**, which runs the resolution process by:
 
@@ -52,16 +50,16 @@ At the heart of this system is the **LibraryResolver**, which runs the resolutio
 The result: symbols are mapped to their correct library paths, and system can continue execution seamlessly.
 
 
-#### **Core Components Overview**
+### Core Components Overview
 
 Here’s a quick breakdown of the key components that make Library-Resolution work:
 
-#### **1. LibraryResolver**
+#### 1. LibraryResolver
 
 The main coordinator that controls the entire flow — from scanning libraries to managing symbol lookups.
 It ensures that unresolved symbols are systematically matched to libraries.
 
-#### **2. LibraryScanner**
+#### 2. LibraryScanner
 
 Handles the actual scanning of directories and library paths.
 It detects valid shared libraries and registers them with the **LibraryManager**.
@@ -71,7 +69,7 @@ It detects valid shared libraries and registers them with the **LibraryManager**
 * **PathResolver** → Normalizes and resolves file paths efficiently.
 * **LibraryPathCache** → Stores already-resolved paths and symbolic links to prevent repeated filesystem checks.
 
-#### **3. LibraryManager**
+#### 3. LibraryManager
 
 Maintains metadata about all discovered libraries.
 Each library is represented by a **LibraryInfo** object containing:
@@ -81,7 +79,7 @@ Each library is represented by a **LibraryInfo** object containing:
 * A **Bloom filter** for fast symbol existence checks
 
 
-#### **Symbol Resolution Flow**
+### Symbol Resolution Flow
 
 Here’s how everything fits together in the resolution process:
 
@@ -92,11 +90,9 @@ Here’s how everything fits together in the resolution process:
 5. **Repeat** → This continues until all symbols are resolved or no more valid libraries remain.
 6. **Complete** → The results are returned through a completion callback.
 
----
+## Summary of accomplished tasks
 
-### **Summary of accomplished tasks**
-
-#### **ExecutorResolver:**
+### ExecutorResolver:
 [143654](https://github.com/llvm/llvm-project/pull/143654)
 suggested by @lhames.we introduced a `DylibSymbolResolver` that helps resolve symbols for each loaded dylib.
 
@@ -104,17 +100,17 @@ Previously, we returned a DylibHandle to the controller. Now, we wrap the native
 
 with this changes this will help us to integrate LibraryResolver API using some future through new `AutoDylibResolver`.
 
-#### **Library-Resolver API:**
+### Library-Resolver API:
 [#165360](https://github.com/llvm/llvm-project/pull/165360)
 
 This is the main API we redesigned based on cling auto library-resolver. this api provide way to user to add search-path and ask for symbols to search and provide resolved library for each symbols.
 
-### **Additional Improvements**
+### Additional Improvements
 
 During this phase, I worked on **value-printing support** for both **in-process** and **out-of-process** execution in `clang-repl`.
 Previously, `clang-repl` only supported value printing in the in-process mode, and the same implementation couldn’t be directly applied to the out-of-process case.
 
-#### **Challenges**
+#### Challenges
 
 1. **Dependency on type information**
 
@@ -126,16 +122,14 @@ Previously, `clang-repl` only supported value printing in the in-process mode, a
 
    In the out-of-process model, we cannot directly invoke controller-side functions from the JIT-compiled code running in the executor. This limitation made the previous mechanism unsuitable.
 
----
-
-#### **Approach**
+#### Approach
 
 **Pull Request:** [#156649](https://github.com/llvm/llvm-project/pull/156649)
 
 We **reimplemented the value-printing infrastructure** on top of the **ORC MemoryAccess** API.
 The old design supported only in-process evaluation; the new design works in both **in-process** and **out-of-process** environments.
 
-#### **How it works**
+#### How it works
 
 1. **Capturing the JIT Expression Result**
 
@@ -198,7 +192,7 @@ The old design supported only in-process evaluation; the new design works in bot
    On receiving the address, the `ValueResultManager` calls into a `ValueReaderDispatcher`, which uses **MemoryAccess** to read values from memory using the address and type information.
    The evaluated data is then wrapped in a redesigned **`Value` class** and finally converted to a string via a **`ValueToString` printer**.
 
-#### **New `Value` class design**
+#### New `Value` class design
 
 The new `Value` implementation is inspired by `APValue` and designed to handle both local and remote execution enviroment.
 
@@ -208,13 +202,12 @@ Key improvements:
 * Works safely in out-of-process mode — the old design, which assumed arrays lived in controller-side memory (invalid in remote execution).
 * Provides a unified way to represent, store, and print evaluated results across environments.
 
-#### **Other PRs**
+### Other PRs
 [166510](https://github.com/llvm/llvm-project/pull/166510)
 [166147](https://github.com/llvm/llvm-project/pull/166147)
 
----
 
-### **Result: What the Library-Resolution API Enables**
+## Result: What the Library-Resolution API Enables
 
 With these updates, we now have a **fully functional Library-Resolution API** that can dynamically **resolve missing symbols to their correct shared libraries** — all **without loading the libraries directly**.
 
@@ -261,9 +254,7 @@ Controller->resolveSymbols(
     Config);
 ```
 
----
-
-### **Future Work**
+## Future Work
 
 The next step will be to **continue development on the ORC-JIT side**, aligned with the ongoing evolution of the **Executor** layer.
 Once the new Executor design stabilizes, we’ll **revisit the Library-Resolution API** and make any necessary adjustments for compatibility and cleaner integration.
@@ -280,29 +271,22 @@ Specifically, we plan to:
 
 This next step will complete the feature chain — from symbol detection to automatic library resolution and loading — making Clang-Repl more user-friendly.
 
----
-
-### **Conclusion**
+## Conclusion
 
 Through this project, we now have a working **Library-Resolver API** implementation in **ORC-JIT**.
 Moving forward, the focus will be on **integrating this API into ORC-JIT** to enable **automatic library loading** and further improve **Clang-Repl** and other projects that use ORC-JIT as their execution engine.
 
 Thank you for being part of my **GSoC 2025** journey!
 
-
-### **Acknowledgements**
+## Acknowledgements
 
 I would like to express my heartfelt thanks to **Google Summer of Code (GSoC)** and **LLVM Org** for the amazing opportunity to work on this project.
 A special thanks to my mentor **Vassil Vassilev** for his continuous guidance and support, and to **Lang Hames** for his valuable insights on ORC-JIT and Clang-Repl.
 
 This experience has been truly rewarding, and I’m excited to keep contributing to the **LLVM** and open-source community in the future.
 
----
-
-### **Related Links**
+## Related Links
 
 - [LLVM Repository](https://github.com/llvm/llvm-project)
 - [Project Description](https://discourse.llvm.org/t/gsoc2025-advanced-symbol-resolution-and-reoptimization-for-clang-repl/84624/3)
 - [My GitHub Profile](https://github.com/SahilPatidar)
-
----
