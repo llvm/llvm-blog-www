@@ -107,6 +107,8 @@ This is the main API we redesigned based on cling auto library-resolver. this ap
 
 ### Additional Improvements
 
+> **Note:** This post describes ongoing design work. The implementation is still under review and may evolve as feedback is incorporated.
+
 During this phase, I worked on **value-printing support** for both **in-process** and **out-of-process** execution in `clang-repl`.
 Previously, `clang-repl` only supported value printing in the in-process mode, and the same implementation couldn’t be directly applied to the out-of-process case.
 
@@ -122,7 +124,7 @@ Previously, `clang-repl` only supported value printing in the in-process mode, a
 
    In the out-of-process model, we cannot directly invoke controller-side functions from the JIT-compiled code running in the executor. This limitation made the previous mechanism unsuitable.
 
-#### Approach
+#### Approach (Initial design — under review)
 
 **Pull Request:** [#156649](https://github.com/llvm/llvm-project/pull/156649)
 
