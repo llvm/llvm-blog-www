@@ -1,6 +1,6 @@
 ---
 author: "Amr Hesham (amrdeveloper)"
-date: "2025-11-08"
+date: "2025-12-01"
 tags: ["GSoC", "LLVM", "MLIR", "ClangIR", "C++"]
 title: "GSoC 2025: ClangIR upstreaming"
 ---
