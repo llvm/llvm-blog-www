@@ -1,6 +1,6 @@
 ---
 author: "Sahil Patidar"
-date: "2025-11-11"
+date: "2026-01-19"
 tags: ["GSoC", "clang-repl", "orc-jit"]
 title: "GSoC 2025: Advanced symbol resolution for Clang-Repl"
 ---
