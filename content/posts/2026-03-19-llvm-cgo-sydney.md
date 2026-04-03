@@ -7,7 +7,7 @@ title: "Summer Vibes and Compilers: My LLVM CGO 2026 Experience in Sydney"
 
 # Summer Vibes and Compilers: My LLVM CGO 2026 Experience in Sydney
 
-It’s me again! Many of you might remember my [post from last year](https://blog.llvm.org/posts/2025-03-26-llvmcgo-carts/) where I talked about presenting CARTS in Las Vegas. Well, thanks to the incredibly generous support of the LLVM Foundation, I was funded once more to attend the LLVM Workshop at the CGO 2026 conference. This time, the trip took me halfway across the globe to embrace the beautiful, sunny summer in Sydney, Australia.
+It’s me again! Many of you might remember my [post from last year](https://blog.llvm.org/posts/2025-03-26-llvmcgo-carts/) where I talked about presenting CARTS in Las Vegas. Well, thanks to the incredibly generous support of the LLVM Foundation, I was funded once more to attend the [Tenth LLVM Performance Workshop at CGO](https://llvm.org/devmtg/2026-01/) (co-located with CGO 2026). This time, the trip took me halfway across the globe to embrace the beautiful, sunny summer in Sydney, Australia.
 
 Trading the winter chill of the US for Sydney’s brilliant summer was surreal. The energy of the city, the fantastic local coffee, and the welcoming warmth of the Australian compiler community made this trip unforgettable. But beyond the sunny vibes and the sightseeing, this year carried a special weight for me personally: this could very well be my last year as a PhD student. 
 
@@ -16,9 +16,11 @@ Attending this workshop wasn't just a routine conference trip—it felt like a c
 
 ## Taking the Stage: Agentic AI and Dataflow Execution
 
-This year, my technical contribution to the workshop was as a co-author of the presentation **"Compiling Agentic AI Programs for Dataflow Execution: An MLIR Approach,"** alongside my colleagues: Miguel Andrés Cárdenas Sierra, Isaac David Bermudez Lara, and Jose M Monsalve Diaz.
+This year, my technical contribution to the workshop was as a co-author of [**"Compiling Agentic AI Programs for Dataflow Execution: An MLIR Approach"**](https://llvm.org/devmtg/2026-01/#talk1), alongside my colleagues: Miguel Andrés Cárdenas Sierra, Isaac David Bermudez Lara, and Jose M Monsalve Diaz.
 
-It’s always a privilege to present our hard work to this community. Our work takes a fascinating look at the explosive growth of Agentic AI programs and how their unique execution models can be mapped into intermediate representations using MLIR to leverage spatial and dataflow execution. The community was eager to engage with the concepts, and the resulting Q&A gave us a rich stream of insights that can only happen when brilliant minds gather in one room.
+In the talk, we explained why agentic AI is a poor fit for a traditional “optimize the hot loop” story: steps can be very slow, may call out to remote tools, and the real opportunity is overlapping independent work. We presented an MLIR dialect that captures these programs as explicit dataflow (inference, tiered memory, tool calls, and synchronization), three passes that exploit that structure—reasoning fusion, context deduplication, and capability scheduling—and how we lower to a graph where execution advances when data is ready rather than in strict program order.
+
+It’s always a privilege to present our hard work to this community. The audience was eager to engage with the ideas, and the Q&A gave us a rich stream of insights that can only happen when brilliant minds gather in one room.
 
 ## A Vibrant Program of Presentations
 
