@@ -28,7 +28,7 @@ struct Widget {
 };
 ```
 
-A name-only entry for `setValue` can apply to the whole overload set, but it cannot assign different annotations to `setValue(int)` and `setValue(double)`.
+A name-only entry for `setValue` applies to the whole overload set, so it cannot assign different annotations to `setValue(int)` and `setValue(double)`.
 
 The main challenge was therefore not only to select individual overloads, but to do so without changing the behavior of existing name-only API Notes files.
 
@@ -102,7 +102,7 @@ The parameter selector describes the complete explicit parameter list, so parame
 
 Matching parameter types requires more than comparing raw strings.
 
-Consider a declaration that uses an alias:
+Consider a method whose parameter uses a type alias:
 
 ```cpp
 using Count = int;
@@ -137,9 +137,7 @@ The goal is not to implement complete semantic type equivalence. Instead, the ma
 
 ## Matching the Implicit Object
 
-Explicit parameters are not enough to distinguish every C++ method overload.
-
-Member functions can differ through qualifiers on their implicit object parameter:
+Explicit parameters are not enough to distinguish every C++ method overload. Member functions can differ through qualifiers on their implicit object parameter:
 
 ```cpp
 struct Builder {
@@ -149,9 +147,9 @@ struct Builder {
 };
 ```
 
-All three methods have the same name and no explicit parameters. `Where.Parameters: []` alone cannot distinguish them.
+All three methods have the same name and no explicit parameters, so `Where.Parameters: []` alone cannot distinguish them.
 
-The selector model therefore includes an `Object` constraint:
+Method selectors can therefore also include an `Object` constraint:
 
 ```yaml
 Tags:
@@ -222,7 +220,7 @@ The result is an overload-aware selector model that supports both global functio
 
 ## Future Template Design
 
-The future template design work explored how the overload selector model might eventually extend from concrete functions and methods to C++ templates. Template matching was not implemented in the current patches, but the design work helped identify which parts of the selector model should remain extensible.
+The overload selector model only applies to concrete methods and functions. As part of my project, I also explored how the overload selector model could be extended to support C++ templates in the future. Function template matching is not currently implemented, but this design work helped identify which parts of the selector model should remain extensible.
 
 Ordinary `Where.Parameters` matching works for concrete function parameter types. Templates add several harder questions. One selector might need to identify a function template or one of its specializations, such as `f<int>`. Another selector might need to match an ordinary function overload whose parameter type contains a class template specialization or dependent template parameter.
 
