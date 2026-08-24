@@ -28,7 +28,7 @@ The exact goals of this project were to:
 1. Add software emulation classes for the `float80` and `float128` formats.
 2. Provide the operator overloads and conversions needed for these classes to be used in place of the native types.
 3. Integrate the emulated types into the existing floating-point support infrastructure.
-4. Migrate the existing `float128` math functions to work correctly with the emulated type.
+4. Modify the existing `float128` math functions to work correctly with the emulated type.
 
 ## Interesting Challenges
 
