@@ -34,7 +34,7 @@ The main challenge was therefore not only to select individual overloads, but to
 
 ## Selecting C++ Overloads
 
-The design keeps the existing `Functions`, `Tags`, and `Methods` API Notes structure. The declaration name remains the primary lookup key, while an optional `Where` block narrows the candidate set.
+API Notes are structured according to the kind of declaration they apply to, like `Functions`, `Tags`, and `Methods`. The C++ overload selectors I designed for my project extend the `Functions` and `Methods` schemas with an optional `Where` block that narrows a name-based lookup to a specific C++ overload.
 
 ```yaml
 Tags:
@@ -54,6 +54,15 @@ Tags:
 ```
 
 This API Notes file uses the `Where.Parameters` selector to apply separate `SwiftName` annotations to the `int`- and `double`-parameter overloads of `setValue`.
+
+Conceptually, this is equivalent to applying separate Swift name annotations to the two overloads:
+
+```cpp
+struct Widget {
+  SWIFT_NAME(setIntValue(_:)) void setValue(int);
+  SWIFT_NAME(setDoubleValue(_:)) void setValue(double);
+};
+```
 
 The same selector is available for overloaded global functions:
 
@@ -137,7 +146,43 @@ The goal is not to implement complete semantic type equivalence. Instead, the ma
 
 ## Matching the Implicit Object
 
-Explicit parameters are not enough to distinguish every C++ method overload. Member functions can differ through qualifiers on their implicit object parameter:
+Explicit parameters are not enough to distinguish every C++ method overload. Member functions can differ through qualifiers on their implicit object parameter. A common example is `operator[]`, the subscript operator, with separate mutable and read-only overloads:
+
+```cpp
+struct Buffer {
+  Element &operator[](int);
+  const Element &operator[](int) const;
+};
+```
+
+Both overloads have the same name and explicit parameter list. `Where.Parameters` can identify the `int` parameter, but it cannot distinguish the non-`const` overload from the `const` overload by itself.
+
+The selector model therefore includes an `Object` constraint:
+
+```yaml
+Tags:
+  - Name: Buffer
+    Methods:
+      - Name: operator[]
+        Where:
+          Parameters:
+            - int
+          Object:
+            Const: false
+        SwiftName: mutableElement(at:)
+
+      - Name: operator[]
+        Where:
+          Parameters:
+            - int
+          Object:
+            Const: true
+        SwiftName: element(at:)
+```
+
+The `Object` selector describes `const`, `volatile`, and reference qualification on the implicit C++ object.
+
+The same model can also distinguish lvalue- and rvalue-qualified methods:
 
 ```cpp
 struct Builder {
@@ -147,43 +192,7 @@ struct Builder {
 };
 ```
 
-All three methods have the same name and no explicit parameters, so `Where.Parameters: []` alone cannot distinguish them.
-
-Method selectors can therefore also include an `Object` constraint:
-
-```yaml
-Tags:
-  - Name: Builder
-    Methods:
-      - Name: build
-        Where:
-          Parameters: []
-        Availability: nonswift
-
-      - Name: build
-        Where:
-          Parameters: []
-          Object:
-            Ref: lvalue
-        SwiftName: buildFromLValue()
-
-      - Name: build
-        Where:
-          Parameters: []
-          Object:
-            Ref: rvalue
-        SwiftName: buildFromRValue()
-
-      - Name: build
-        Where:
-          Parameters: []
-          Object:
-            Const: true
-            Ref: lvalue
-        SwiftName: buildFromConstLValue()
-```
-
-The first entry omits `Where.Object`, so it can still match all `build()` overloads with no explicit parameters. The following entries add `Where.Object` to distinguish `const`, `volatile`, and reference qualification on the implicit C++ object.
+For these overloads, `Where.Parameters: []` identifies the empty explicit parameter list, while `Where.Object.Ref` distinguishes lvalue and rvalue receivers.
 
 As with `Where.Parameters`, omitted properties remain unconstrained, while present properties narrow the candidate set.
 
@@ -210,9 +219,7 @@ The first changes added [YAML parsing and data-model support](https://github.com
 
 The next part extended the [binary API Notes format](https://github.com/llvm/llvm-project/pull/204147). Overload-specific entries must remain distinct when API Notes are compiled and later loaded again. The serialization also preserves the difference between an omitted parameter constraint and an explicitly empty parameter list.
 
-The [Sema integration](https://github.com/llvm/llvm-project/pull/205307) first finds API Notes by declaration context and name, then uses the declaration’s explicit parameter types to select the overload-specific entry and apply its effects.
-
-Legacy name-only lookup remains unchanged. An explicit selector, however, does not silently fall back to an unrelated broad match when it fails. Such a fallback could apply an annotation intended for one overload to another declaration with the same name.
+The [Sema integration](https://github.com/llvm/llvm-project/pull/205307) preserves legacy name-only lookup while adding overload-specific matching: it first finds API Notes by declaration context and name, then uses the declaration’s explicit parameter types to select the overload-specific entry and apply its effects.
 
 Additional work adds [diagnostics for malformed, duplicate, and unmatched selectors](https://github.com/llvm/llvm-project/pull/209408). The [normalization patch](https://github.com/llvm/llvm-project/pull/213043) refines selector lookup for aliases, nullability, qualifiers, and supported spelling differences, while the [object-qualifier patch](https://github.com/llvm/llvm-project/pull/216148) adds `Where.Object` matching. A small [diagnostics follow-up](https://github.com/llvm/llvm-project/pull/216272) makes generic `-Wapinotes` warnings visible for system headers, which matters because API Notes are commonly attached to SDK headers. Tests cover the parser, serialization, Sema lookup, normalization behavior, aliases, default arguments, static methods, zero-parameter declarations, and object-qualified member functions.
 
