@@ -2,7 +2,7 @@
 author: "Sukumar Sawant"
 date: "2026-08-22"
 tags: ["GSoC", "libc", "math", "floating-point"]
-title: "GSoC 2026: Float80 and Float128 Emulation in LLVM libc"
+title: "GSoC 2026: Enable float80/float128 on Unsupported Targets for LLVM libc"
 ---
 
 ## Introduction
@@ -11,7 +11,7 @@ Hi, my name is Sukumar Sawant and I had the pleasure of working on the project o
 
 ## "Why"?
 
-`float80` and `float128` are the two extended-precision floating-point formats LLVM libc relies on. `float80` is the 80-bit x87 extended precision format, with 1 sign bit, 15 exponent bits, and a 64-bit significand carrying an explicit integer bit. `float128` is the IEEE 754 `binary128` ("quad precision") format, with 1 sign bit, 15 exponent bits, and 112 stored mantissa bits.
+`float80` and `float128` are the two extended-precision floating-point formats LLVM libc supports. `float80` is the 80-bit x87 extended precision format, with 1 sign bit, 15 exponent bits, and a 64-bit significand carrying an explicit integer bit. `float128` is the IEEE 754 `binary128` ("quad precision") format, with 1 sign bit, 15 exponent bits, and 112 stored mantissa bits.
 
 Both formats are already natively supported on several platforms, but not on all of them. For example:
 
@@ -32,17 +32,48 @@ The exact goals of this project were to:
 
 ## Interesting Challenges
 
-### 1. A `bit_cast` failure that only showed on Windows
+### 1. A `bit_cast` compile error that only showed on Windows
 
-`Float128` stores its value in a `UInt128`, which on Windows, without a native 128-bit integer, is `BigInt`. Everything that goes through `cpp::bit_cast` requires it to be trivially constructible and trivially copyable, which was failing in this case.
+`Float128` stores its value in a `UInt128`, which on Windows, without a native 128-bit integer type, is `BigInt`. LLVM-libc's `cpp::bit_cast` requires the target type to be trivially constructible and trivially copyable, which was causing the compiler error in this case.
 
 ```cpp
-cpp::is_trivially_constructible<To>::value && cpp::is_trivially_copyable<To>::value
+// This implementation of bit_cast requires trivially-constructible To, to avoid
+// UB in the implementation.
+template <typename To, typename From>
+LIBC_INLINE static constexpr cpp::enable_if_t<
+    (sizeof(To) == sizeof(From)) &&
+        cpp::is_trivially_constructible<To>::value &&
+        cpp::is_trivially_copyable<To>::value &&
+        cpp::is_trivially_copyable<From>::value,
+    To>
+bit_cast(const From &from) {
+  // ...
+}
 ```
-The culprit was `BigInt` being zero-initialized in many places (in `libc/src/__support/big_int.h`).
+``` sh
+D:\a\llvm-project\llvm-project\libc\src/__support/FPUtil\FPBits.h(863,12): error: no matching function for call to 'bit_cast'
+  863 |     return cpp::bit_cast<T>(UP::bits);
+      |            ^~~~~~~~~~~~~~~~
+...
+D:\a\llvm-project\llvm-project\libc\test\src\math\smoke\float128_test.cpp(21,12): note: in instantiation of function template specialization '__llvm_libc_23_0_0_git::fputil::Float128::Float128<double>' requested here
+   21 |   Float128 a(1.0), b(1.0), c(2.0);
+      |            ^
+```
+
+The culprit was `BigInt` being zero-initialized in `libc/src/__support/big_int.h`.
+
+```
+template <size_t Bits, bool Signed, typename WordType = uint64_t>
+struct BigInt {
+  // ...
+  cpp::array<WordType, WORD_COUNT> val{}; // zero initialized.
+  // ...
+};
+```
+
 The default member initializer was enough to make the condition fail.
 
-The fix was to drop the zero-init from the declaration and push it into the constructors that actually need it
+The fix was to drop the zero initialization from the declaration and push it into the constructors that actually need it
 ([#206277](https://github.com/llvm/llvm-project/pull/206277)).
 
 With the member initializer gone, the defaulted constructor is genuinely trivial, both traits become true, and `bit_cast` accepts the type, which fixed the Windows build.
@@ -50,8 +81,8 @@ With the member initializer gone, the defaulted constructor is genuinely trivial
 ### 2. The persistent ABI issue with `CORE-MATH`
 
 A native `float128` uses different registers than the emulated types like `Float128`, which under the hood uses a `UInt128` container.
-When comparing against other projects such as CORE-MATH, the `bfloat16` functions consistently failed.
-So we tested our `float128` functions with CORE-MATH and modified them to use the emulation internally for calculations, and the native `float128` when available for input/output, so that in the end the registers used for I/O remain the same and the ABI mismatch is prevented.
+While testing LLVM-libc with the CORE-MATH project's test suite, the `bfloat16` (also emulated) functions consistently failed.
+So we tested our `float128` functions with CORE-MATH and modified them to use the emulation internally for calculations, and the native `float128` when available for input/output, so that in the end the registers used for parameters/returns remain the same and the ABI mismatch is prevented.
 
 The work below on modifying the `float128` functions already uses this idea, making the `float128` functions ABI compatible.
 
@@ -69,29 +100,29 @@ The work below on modifying the `float128` functions already uses this idea, mak
 - Existing `float128` math functions were migrated to use the emulated type, one function (or function family) at a time, tracked under [#216576](https://github.com/llvm/llvm-project/issues/216576) (see table below).
 
 
-| Function / Family                                                                                     | PR                                                             |
-|--------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
-| `ceilf128`                                                                                              | [#207735](https://github.com/llvm/llvm-project/pull/207735)     |
-| `floorf128`                                                                                             | [#216552](https://github.com/llvm/llvm-project/pull/216552)     |
-| `truncf128`                                                                                             | [#216560](https://github.com/llvm/llvm-project/pull/216560)     |
-| `roundf128`                                                                                             | [#216563](https://github.com/llvm/llvm-project/pull/216563)     |
-| `roundevenf128`                                                                                          | [#216568](https://github.com/llvm/llvm-project/pull/216568)     |
-| `nearbyintf128`                                                                                          | [#217025](https://github.com/llvm/llvm-project/pull/217025)     |
-| `lrintf128`, `llrintf128`, `rintf128`                                                                   | [#217070](https://github.com/llvm/llvm-project/pull/217070)     |
-| `lroundf128`, `llroundf128`                                                                             | [#216829](https://github.com/llvm/llvm-project/pull/216829)     |
-| `fromfpf128`, `fromfpxf128`, `ufromfpf128`, `ufromfpxf128`                                              | [#216578](https://github.com/llvm/llvm-project/pull/216578)     |
-| `fabsf128`, `copysignf128`                                                                              | [#217389](https://github.com/llvm/llvm-project/pull/217389)     |
-| `fmaxf128`, `fminf128`                                                                                   | [#216575](https://github.com/llvm/llvm-project/pull/216575)     |
-| `fmaximumf128`, `fminimumf128`                                                                           | [#217390](https://github.com/llvm/llvm-project/pull/217390)     |
-| `fmaximum_numf128`, `fminimum_numf128`                                                                   | [#217409](https://github.com/llvm/llvm-project/pull/217409)     |
-| `fmaximum_magf128`, `fminimum_magf128`                                                                   | [#217539](https://github.com/llvm/llvm-project/pull/217539)     |
-| `fmaximum_mag_numf128`, `fminimum_mag_numf128`                                                           | [#217549](https://github.com/llvm/llvm-project/pull/217549)     |
-| `fdimf128`                                                                                               | [#217567](https://github.com/llvm/llvm-project/pull/217567)     |
-| `iscanonicalf128`, `isnanf128`, `issignalingf128`                                                       | [#217134](https://github.com/llvm/llvm-project/pull/217134)     |
-| `nextafterf128`, `nextupf128`, `nextdownf128`                                                           | [#217575](https://github.com/llvm/llvm-project/pull/217575)     |
-| `fmodf128`, `remainderf128`                                                                              | [#217578](https://github.com/llvm/llvm-project/pull/217578)     |
-| `sqrtf128`                                                                                               | [#216500](https://github.com/llvm/llvm-project/pull/216500)     |
-| `atan2f128`                                                                                              | [#216508](https://github.com/llvm/llvm-project/pull/216508)     |
+| Function / Family                                          | PR                                                          |
+|------------------------------------------------------------|-------------------------------------------------------------|
+| `ceilf128`                                                 | [#207735](https://github.com/llvm/llvm-project/pull/207735) |
+| `floorf128`                                                | [#216552](https://github.com/llvm/llvm-project/pull/216552) |
+| `truncf128`                                                | [#216560](https://github.com/llvm/llvm-project/pull/216560) |
+| `roundf128`                                                | [#216563](https://github.com/llvm/llvm-project/pull/216563) |
+| `roundevenf128`                                            | [#216568](https://github.com/llvm/llvm-project/pull/216568) |
+| `nearbyintf128`                                            | [#217025](https://github.com/llvm/llvm-project/pull/217025) |
+| `lrintf128`, `llrintf128`, `rintf128`                      | [#217070](https://github.com/llvm/llvm-project/pull/217070) |
+| `lroundf128`, `llroundf128`                                | [#216829](https://github.com/llvm/llvm-project/pull/216829) |
+| `fromfpf128`, `fromfpxf128`, `ufromfpf128`, `ufromfpxf128` | [#216578](https://github.com/llvm/llvm-project/pull/216578) |
+| `fabsf128`, `copysignf128`                                 | [#217389](https://github.com/llvm/llvm-project/pull/217389) |
+| `fmaxf128`, `fminf128`                                     | [#216575](https://github.com/llvm/llvm-project/pull/216575) |
+| `fmaximumf128`, `fminimumf128`                             | [#217390](https://github.com/llvm/llvm-project/pull/217390) |
+| `fmaximum_numf128`, `fminimum_numf128`                     | [#217409](https://github.com/llvm/llvm-project/pull/217409) |
+| `fmaximum_magf128`, `fminimum_magf128`                     | [#217539](https://github.com/llvm/llvm-project/pull/217539) |
+| `fmaximum_mag_numf128`, `fminimum_mag_numf128`             | [#217549](https://github.com/llvm/llvm-project/pull/217549) |
+| `fdimf128`                                                 | [#217567](https://github.com/llvm/llvm-project/pull/217567) |
+| `iscanonicalf128`, `isnanf128`, `issignalingf128`          | [#217134](https://github.com/llvm/llvm-project/pull/217134) |
+| `nextafterf128`, `nextupf128`, `nextdownf128`              | [#217575](https://github.com/llvm/llvm-project/pull/217575) |
+| `fmodf128`, `remainderf128`                                | [#217578](https://github.com/llvm/llvm-project/pull/217578) |
+| `sqrtf128`                                                 | [#216500](https://github.com/llvm/llvm-project/pull/216500) |
+| `atan2f128`                                                | [#216508](https://github.com/llvm/llvm-project/pull/216508) |
 
 ## Conclusion
 
