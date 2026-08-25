@@ -192,7 +192,36 @@ struct Builder {
 };
 ```
 
-For these overloads, `Where.Parameters: []` identifies the empty explicit parameter list, while `Where.Object.Ref` distinguishes lvalue and rvalue receivers.
+An API Notes file can combine the empty explicit-parameter selector with `Object.Ref` to select each ref-qualified overload:
+
+```yaml
+Tags:
+  - Name: Builder
+    Methods:
+      - Name: build
+        Where:
+          Parameters: []
+          Object:
+            Ref: lvalue
+        SwiftName: buildFromLValue()
+
+      - Name: build
+        Where:
+          Parameters: []
+          Object:
+            Ref: rvalue
+        SwiftName: buildFromRValue()
+
+      - Name: build
+        Where:
+          Parameters: []
+          Object:
+            Const: true
+            Ref: lvalue
+        SwiftName: buildFromConstLValue()
+```
+
+Here, `Where.Parameters: []` identifies the empty explicit parameter list, while `Where.Object.Ref` distinguishes lvalue and rvalue receivers.
 
 As with `Where.Parameters`, omitted properties remain unconstrained, while present properties narrow the candidate set.
 
