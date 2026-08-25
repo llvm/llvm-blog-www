@@ -78,7 +78,7 @@ The fix was to drop the zero initialization from the declaration and push it int
 
 With the member initializer gone, the defaulted constructor is genuinely trivial, both traits become true, and `bit_cast` accepts the type, which fixed the Windows build.
 
-### 2. The persistent ABI issue with `CORE-MATH`
+### 2. The ABI issue with emulated types
 
 A native `float128` uses different registers than the emulated types like `Float128`, which under the hood uses a `UInt128` container.
 While testing LLVM-libc with the CORE-MATH project's test suite, the `bfloat16` (also emulated) functions consistently failed.
@@ -128,7 +128,7 @@ The work below on modifying the `float128` functions already uses this idea, mak
 
 - We would now be able to use, test and build the `Float128` and `Float80` types even on platforms where they are not natively available.
 - The `float128` functions are now enabled on targets like Windows with MSVC, macOS, and GPU targets.
-- The `Float128` functions can now also be tested with `CORE-MATH` to verify correctness.
+- The `Float128` functions can now also be tested with `CORE-MATH` test-suite to verify correctness.
 
 ## What did I learn?
 
