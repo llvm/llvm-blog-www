@@ -62,7 +62,7 @@ D:\a\llvm-project\llvm-project\libc\test\src\math\smoke\float128_test.cpp(21,12)
 
 The culprit was `BigInt` being zero-initialized in `libc/src/__support/big_int.h`.
 
-```
+```CPP
 template <size_t Bits, bool Signed, typename WordType = uint64_t>
 struct BigInt {
   // ...
@@ -81,8 +81,8 @@ With the member initializer gone, the defaulted constructor is genuinely trivial
 ### 2. The ABI issue with emulated types
 
 A native `float128` uses different registers than the emulated types like `Float128`, which under the hood uses a `UInt128` container.
-While testing LLVM-libc with the CORE-MATH project's test suite, the `bfloat16` (also emulated) functions consistently failed.
-So we tested our `float128` functions with CORE-MATH and modified them to use the emulation internally for calculations, and the native `float128` when available for input/output, so that in the end the registers used for parameters/returns remain the same and the ABI mismatch is prevented.
+While testing LLVM-libc with the CORE-MATH project's test suite, the `bfloat16` (also emulated) functions consistently failed. This was because when compiler support bfloat16 under the name __bf16 is available, it uses different registers than the emulation [BFloat16](https://github.com/llvm/llvm-project/pull/144463) type previously implemented in LLVM libc .
+So we tested our `float128` functions with CORE-MATH and modified them to use the emulation internally for calculations, and the native `float128` when available for parameters/returns, so that in the end the registers used for parameters/returns remain the same and the ABI mismatch is prevented.
 
 The work below on modifying the `float128` functions already uses this idea, making the `float128` functions ABI compatible.
 
@@ -128,7 +128,7 @@ The work below on modifying the `float128` functions already uses this idea, mak
 
 - We would now be able to use, test and build the `Float128` and `Float80` types even on platforms where they are not natively available.
 - The `float128` functions are now enabled on targets like Windows with MSVC, macOS, and GPU targets.
-- The `Float128` functions can now also be tested with `CORE-MATH` test-suite to verify correctness.
+- We wil soon also be able to test `bfloat16` functions with core-math test suite.
 
 ## What did I learn?
 
