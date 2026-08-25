@@ -146,7 +146,7 @@ The goal is not to implement complete semantic type equivalence. Instead, the ma
 
 ## Matching the Implicit Object
 
-Explicit parameters are not enough to distinguish every C++ method overload. Member functions can differ through qualifiers on their implicit object parameter. A common example is `operator[]`, the subscript operator, with separate mutable and read-only overloads:
+Explicit parameters are not enough to distinguish every C++ method overload. Member functions can differ through qualifiers on their implicit object parameter. A common example is `operator[]`, the subscript operator, with separate `const` and non-`const` overloads:
 
 ```cpp
 struct Buffer {
