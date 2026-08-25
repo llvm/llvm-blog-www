@@ -127,7 +127,7 @@ The work below on modifying the `float128` functions already uses this idea, mak
 ## Conclusion
 
 - We would now be able to use, test and build the `Float128` and `Float80` types even on platforms where they are not natively available.
-- The `Float80` and `Float128` functions can now use these emulated types for testing on almost every target.
+- The `float128` functions are now enabled on targets like Windows with MSVC, macOS, and GPU targets.
 - The `Float128` functions can now also be tested with `CORE-MATH` to verify correctness.
 
 ## What did I learn?
