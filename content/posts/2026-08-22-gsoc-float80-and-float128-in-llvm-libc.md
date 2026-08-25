@@ -50,7 +50,7 @@ bit_cast(const From &from) {
   // ...
 }
 ```
-``` sh
+```sh
 D:\a\llvm-project\llvm-project\libc\src/__support/FPUtil\FPBits.h(863,12): error: no matching function for call to 'bit_cast'
   863 |     return cpp::bit_cast<T>(UP::bits);
       |            ^~~~~~~~~~~~~~~~
@@ -62,7 +62,7 @@ D:\a\llvm-project\llvm-project\libc\test\src\math\smoke\float128_test.cpp(21,12)
 
 The culprit was `BigInt` being zero-initialized in `libc/src/__support/big_int.h`.
 
-```CPP
+```cpp
 template <size_t Bits, bool Signed, typename WordType = uint64_t>
 struct BigInt {
   // ...
@@ -81,7 +81,7 @@ With the member initializer gone, the defaulted constructor is genuinely trivial
 ### 2. The ABI issue with emulated types
 
 A native `float128` uses different registers than the emulated types like `Float128`, which under the hood uses a `UInt128` container.
-While testing LLVM-libc with the CORE-MATH project's test suite, the `bfloat16` (also emulated) functions consistently failed. This was because when compiler support bfloat16 under the name __bf16 is available, it uses different registers than the emulation [BFloat16](https://github.com/llvm/llvm-project/pull/144463) type previously implemented in LLVM libc .
+While testing LLVM-libc with the CORE-MATH project's test suite, the `bfloat16` (also emulated) functions consistently failed. This was because CORE-MATH uses the native `__bf16` type provided by the compiler, which uses different registers than the emulated [BFloat16](https://github.com/llvm/llvm-project/pull/144463) type previously implemented in LLVM libc.
 So we tested our `float128` functions with CORE-MATH and modified them to use the emulation internally for calculations, and the native `float128` when available for parameters/returns, so that in the end the registers used for parameters/returns remain the same and the ABI mismatch is prevented.
 
 The work below on modifying the `float128` functions already uses this idea, making the `float128` functions ABI compatible.
