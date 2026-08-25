@@ -128,7 +128,6 @@ The work below on modifying the `float128` functions already uses this idea, mak
 
 - We would now be able to use, test and build the `Float128` and `Float80` types even on platforms where they are not natively available.
 - The `float128` functions are now enabled on targets like Windows with MSVC, macOS, and GPU targets.
-- We wil soon also be able to test `bfloat16` functions with core-math test suite.
 
 ## What did I learn?
 
