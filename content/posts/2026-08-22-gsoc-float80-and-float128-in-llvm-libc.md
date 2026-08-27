@@ -7,7 +7,7 @@ title: "GSoC 2026: Enable float80/float128 on Unsupported Targets for LLVM libc"
 
 ## Introduction
 
-Hi, my name is Sukumar Sawant and I had the pleasure of working on the project on introducing `float80` and `float128` (emulated) in LLVM libc this Google Summer of Code 2026 along with my mentors Tue Ly, Nicolas Celik and Krishna Pandey.
+Hello LLVM Community! I am Sukumar Sawant, Computer Science student at Mumbai University (VIT Mumbai), India. I had the pleasure of working on the project on introducing `float80` and `float128` (emulated) in LLVM libc as part of Google Summer of Code 2026 along with my mentors Tue Ly, Nicolas Celik and Krishna Pandey.
 
 ## "Why"?
 
