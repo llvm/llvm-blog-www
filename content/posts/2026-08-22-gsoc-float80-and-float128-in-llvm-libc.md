@@ -148,6 +148,6 @@ One of the most important things I learned was more about floating-point formats
 
 ## Acknowledgements
 
-I’m grateful to Google Summer of Code and the LLVM organization for giving me this opportunity. I would like to sincerely thank my mentors, Tue Ly, Nicolas Celik, and Krishna Pandey, for their guidance, support, and valuable feedback throughout this project and making this a great learning experience.
+I would like to sincerely thank my mentors, Tue Ly, Nicolas Celik, and Krishna Pandey, for their guidance, support, and valuable feedback throughout this project and making this a great learning experience. I’m grateful to Google Summer of Code admins and the LLVM organization for giving me this opportunity.
 
 I look forward to continuing my contributions to LLVM and the open-source community.
