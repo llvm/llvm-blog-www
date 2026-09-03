@@ -15,18 +15,17 @@ actually looked like.
 
 ## The Problem
 
-Modern ML and HPC workloads compiled through MLIR often go through the
-bufferization pipeline, which converts value-semantic tensor operations into
-explicit `memref.alloc` / `memref.dealloc` pairs. At that point, buffer
-lifetimes are fully explicit in the IR: the compiler knows exactly when each
-allocation starts and ends. Yet there was no upstream pass that used this
-information to eliminate redundant heap allocations.
+After bufferization, buffer lifetimes in MLIR IR are fully explicit: the
+compiler knows exactly when each allocation starts and ends. We use this
+information to eliminate redundant heap allocations through a static memory
+planner.
 
 This matters for accelerator-oriented compilation. On many targets (embedded
-CPUs, DSPs, custom accelerators) heap allocation is either slow, forbidden, or
-simply unavailable. Even where it is available, individual small allocations
-hurt performance through fragmentation and cache pressure. What you want instead
-is a single static arena whose layout is computed at compile time:
+CPUs, DSPs, custom accelerators) heap allocation is either slow or access to
+main memory can be expensive. Even where heap allocation is available,
+individual small allocations hurt performance through fragmentation and cache
+pressure. What you want instead is a single static arena whose layout is
+computed at compile time:
 
 ```mlir
 // Before: three separate heap allocations
@@ -41,7 +40,7 @@ memref.dealloc %b : memref<512xf32>
 %b = memref.view %arena[4096][]: memref<6144xi8> to memref<512xf32>
 ```
 
-The arena is `memref<Nxi8>` so it can hold mixed element types.
+The arena is `memref<Nxi8>` so it can hold buffers of different datatypes.
 `memref.view` reinterprets slices back to their original types with zero
 overhead. This is the core transformation the planner performs.
 
@@ -89,7 +88,7 @@ and put in place the architecture everything else builds on:
   (the arena is passed as a function argument, useful for external memory
   management).
 - **Alignment**: the arena alignment is the LCM of all individual alignments,
-  ensuring every view is correctly aligned regardless of element type.
+  ensuring every view is correctly aligned regardless of datatype.
 
 The review process surfaced an important point early: upstream contribution
 culture expects every design decision to be justified and every edge case
@@ -269,15 +268,40 @@ The final pass lives in `StaticMemoryPlannerAnalysis.cpp`.
 
 ## Future Work
 
-The immediate open question is lifting the entry-block restriction. Right now,
-only allocs in the function's entry block are planned. Allocs nested inside
-loop or conditional bodies are skipped. Extending this to nested regions
-requires reasoning about nested lifetime intervals and is a natural next step.
+The immediate open question is lifting the entry-block restriction: only allocs
+in the function's entry block are planned today. Two concrete directions we
+discussed:
 
-Beyond that, the `timeStart`/`timeEnd` metadata infrastructure is in place for
-more sophisticated planning algorithms: polyhedral lifetime analysis, memory
-space awareness for heterogeneous targets, and integration with the broader
-bufferization pipeline for end-to-end static allocation.
+**Path-sensitive lifetime tightening.** The current `[timeStart, timeEnd]`
+interval model treats branches conservatively: a buffer freed inside an
+`scf.if` then-branch is considered live until the entire `scf.if` completes,
+even though the else path never held it. Adding dominance-based non-overlap
+detection (using MLIR's existing `DominanceInfo`) would let mutually exclusive
+branches share arena slots, unlocking patterns like:
+
+```mlir
+%0 = alloc()
+%1 = scf.if %c {
+  %2 = alloc()    // could share %0's slot -- they never co-exist
+  dealloc(%0)
+  yield %2
+} else {
+  yield %0
+}
+dealloc(%1)
+```
+
+**Plugging in stronger planning algorithms.** The planner function is pure and
+separately testable, so dropping in a better algorithm is straightforward.
+Best-fit is already there. Beyond that, interval graph / graph-coloring
+approaches and algorithms like
+[minimalloc](https://github.com/google/minimalloc) map directly onto the
+`(size, alignment, timeStart, timeEnd)` interface the planner already expects.
+
+**Memory space awareness.** Heterogeneous targets have multiple distinct memory
+regions with different capacity constraints. Extending the planner to assign
+buffers to specific memory spaces while respecting per-space limits is a natural
+follow-on.
 
 ## Acknowledgements
 
