@@ -1,6 +1,6 @@
 ---
 author: "Dominic Stöcker"
-date: "2026-08-21"
+date: "2026-09-14"
 tags: ["GSoC", "Clang", "API Notes", "Swift", "C++"]
 title: "GSoC 2026: Extending Clang API Notes for C++: Overload-Specific Annotations for Functions and Methods"
 ---
