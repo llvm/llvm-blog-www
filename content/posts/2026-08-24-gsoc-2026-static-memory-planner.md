@@ -16,16 +16,17 @@ actually looked like.
 ## The Problem
 
 After bufferization, buffer lifetimes in MLIR IR are fully explicit: the
-compiler knows exactly when each allocation starts and ends. We use this
+compiler knows exactly when each allocation starts and ends (for static
+shapes; runtime-dependent allocations are handled conservatively). We use this
 information to eliminate redundant heap allocations through a static memory
 planner.
 
 This matters for accelerator-oriented compilation. On many targets (embedded
-CPUs, DSPs, custom accelerators) heap allocation is either slow or access to
-main memory can be expensive. Even where heap allocation is available,
-individual small allocations hurt performance through fragmentation and cache
-pressure. What you want instead is a single static arena whose layout is
-computed at compile time:
+CPUs, DSPs, custom accelerators) heap allocation is either not allowed or
+slow, because access to main memory is expensive. Even where heap allocation
+is available, individual small allocations hurt performance through
+fragmentation and cache pressure. What you want instead is a single static
+arena whose layout is computed at compile time:
 
 ```mlir
 // Before: three separate heap allocations
@@ -38,6 +39,8 @@ memref.dealloc %b : memref<512xf32>
 %arena = memref.alloc() : memref<6144xi8>
 %a = memref.view %arena[0][]  : memref<6144xi8> to memref<1024xf32>
 %b = memref.view %arena[4096][]: memref<6144xi8> to memref<512xf32>
+// ... uses of %a and %b ...
+memref.dealloc %arena : memref<6144xi8>
 ```
 
 The arena is `memref<Nxi8>` so it can hold buffers of different datatypes.
