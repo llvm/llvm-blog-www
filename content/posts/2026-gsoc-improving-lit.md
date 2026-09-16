@@ -17,12 +17,12 @@ My mentors were [Aiden Grossman](https://github.com/boomanaiden154), [Paul Kirth
 # The Project
 
 lit is LLVM's test runner.
-Every `RUN:` line in every test file, in every subproject in the monorepo, ends up executed by it, under `ninja check-*`.
-`RUN:` lines look like shell commands, but they aren't run by a shell.
-LLVM switched to lit's own integrated shell a while back, so it's lit's own code, not `/bin/sh`, doing the parsing and executing.
-None of that compiles or checks anything on its own.
-It's just the overhead sitting between a developer pushing a change and finding out whether it passed.
-lit hadn't gotten much dedicated performance work before this project.
+`RUN:` lines look like shell commands.
+Until a couple of years ago, that's exactly what they were, lit wrote each one out to a script file and ran it with `/bin/sh`.
+LLVM proposed replacing that with its own integrated shell in 2024 ([RFC](https://discourse.llvm.org/t/rfc-enabling-the-lit-internal-shell-by-default/80179)), rolling it out subproject by subproject as missing features landed.
+By the time I started this project, it was lit's own Python code, not `/bin/sh`, parsing and executing every `RUN:` line, in every subproject in the monorepo, under `ninja check-*` (lit also runs a smaller set of tests in GoogleTest's format, which skip `RUN:` entirely).
+None of that compiles or checks anything itself, it's the overhead sitting between a developer pushing a change and finding out whether it passed.
+lit hadn't gotten much dedicated performance work before this project, even though every second it spends is a second not spent running an actual test.
 It's testing infrastructure, and testing infrastructure tends to get left alone once it works well enough.
 
 [Petr Hosek](https://github.com/petrhosek)'s [project idea](https://discourse.llvm.org/t/gsoc-2026-improving-lit/89663) flagged three areas as worth a closer look:
@@ -31,8 +31,14 @@ It's testing infrastructure, and testing infrastructure tends to get left alone 
 2. **Execution engine & IPC bottlenecks**: Locking and queueing overhead in the execution engine (`multiprocessing.Pool`), causing scaling limits on modern high core count systems.
 3. **Legacy codebase idioms**: Python 2 patterns, redundant string concatenations, and sub-optimal loop structures remaining across lit's execution paths.
 
-Before I wrote the proposal for GSoC, I ran lit under a debugger to see how testing actually happened underneath: where it spent its time, which paths were hot, and which of those hot paths had obviously unoptimized code sitting in them.
-That's how the proposal ended up as about twenty numbered items across four parts instead of three paragraphs, each one tied to a line I'd actually stepped through rather than a guess.
+Before I wrote [the proposal](https://docs.google.com/document/d/1lanuwZ7W1L7vjLYSCLA7SACOkt9QJJm-DM8EHZSj0AY/edit?tab=t.0) for GSoC, I ran lit under a debugger to see how testing actually happened underneath: where it spent its time, which paths were hot, and which of those hot paths had obviously unoptimized code sitting in them.
+That's how the proposal ended up as about twenty numbered items across four parts, each one tied to a line I'd actually stepped through rather than a guess:
+
+1. **Modernizing the Python implementation**: cleaning up legacy Python 2 idioms and picking up things like `@dataclass(slots=True)` and `functools.cache` on lit's hot paths.
+2. **Reducing process overhead**: moving the execution engine off `multiprocessing.Pool` and onto `asyncio`.
+3. **Improving internal shell utilities**: moving `cat` and `diff` in-process, and fixing a pipeline bug in `env`.
+4. **Performance tuning via profiling**: using Scalene to catch whatever the first three parts didn't.
+
 The sections below go through what actually happened once those turned into pull requests over the summer, which was not always what the proposal predicted.
 
 <div style="margin:0 auto;">
@@ -40,17 +46,19 @@ The sections below go through what actually happened once those turned into pull
 </div>
 
 Work was organized into four key areas: codebase modernization, execution engine refactoring, in-process shell builtins, and profiling-driven optimizations.
+I also wrote a small script around hyperfine early on, and later added a peak-RSS measurement pass to it.
+Most of the timing numbers below come from it.
 
 # Modernizing the Codebase
 
-The first two weeks focused on eliminating legacy Python 2 idioms remaining in lit's codebase:
+The first two weeks focused on eliminating legacy Python 2 idioms remaining in lit's codebase, found by reading through every file in `lit/` end to end:
 
 - A suffix map implemented as a plain `dict` was replaced with an `IntEnum`.
 - `zip(range(len(x)), x)` loops were refactored to `enumerate(x)`.
 - Explicit argument calls like `super(Class, self)` were updated to modern `super()`.
 - String concatenation in the shell lexer's (`ShLexer`) hottest method was changed from repeated `+=` string building to list joins.
 
-Because `ShLexer` runs on every character of every `RUN:` line across every test file, optimizing string construction was worth benchmarking directly.
+Because `ShLexer` runs on every character of every `RUN:` line across every test file, something I'd already flagged as hot while stepping through lit under a debugger before writing the proposal, optimizing string construction was worth benchmarking directly.
 
 <div style="margin:0 auto;">
   <img src="/img/gsoc26-improving-lit-shlexer-before.png"><br/>
@@ -64,12 +72,12 @@ It reduced the `CodeGen/X86` test suite execution time from 99.31s to 94.96s (4.
 </div>
 
 However, one planned change didn't land the way the proposal described it.
-The plan called for `@dataclass(slots=True)` on lit's hot data objects (`ShellCommandResult`, `ShellEnvironment`, `DiffFlags`), but `slots=True` on `@dataclass` needs Python 3.10, and LLVM's minimum supported Python is 3.8.
-I used plain `__slots__` instead, which works back to 3.8 and gets the same memory and attribute-access win, leaving a `# Replace __slots__ with @dataclass(slots=True)` comment in the code pointing at [GitHub issue #200531](https://github.com/llvm/llvm-project/issues/200531), filed to track the switch once the minimum version moves.
+The plan called for `@dataclass(slots=True)` on lit's hot data objects (`ShellCommandResult`, `ShellEnvironment`, `DiffFlags`), to cut their per-instance `__dict__` overhead and speed up attribute access since they get created once per test, but `slots=True` on `@dataclass` needs Python 3.10, and LLVM's minimum supported Python is 3.8.
+I used plain `__slots__` instead, which works back to 3.8 and gets the same win, leaving a `# Replace __slots__ with @dataclass(slots=True)` comment in the code pointing at [GitHub issue #200531](https://github.com/llvm/llvm-project/issues/200531), filed to track the switch once the minimum version moves.
 This kept coming up over the summer: LLVM's Python 3.8 floor ruled out several other modern constructs too, and each time the resolution was the same, ship the best version 3.8 supports, and a code comment pointing at what should replace it once the floor moves.
 
-Two other Phase 1 items didn't ship early either, despite being planned as modernization PRs: replacing the hand-rolled `_caching_re_compile` with `functools.lru_cache`, and switching `discovery.py` from `os.listdir()` plus `isdir()` to `os.scandir()`.
-Both only came back months later, through Scalene profiling near the end of the summer, with the numbers to justify them that the proposal didn't have.
+Two other Phase 1 items were nice-to-have cleanups that didn't ship early: replacing the hand-rolled `_caching_re_compile` with `functools.lru_cache`, and switching `discovery.py` from `os.listdir()` plus `isdir()` to `os.scandir()`.
+I didn't have numbers showing either one would matter yet, so I put time into the changes above instead, and both only came back months later, once Scalene profiling near the end of the summer gave me the numbers to justify them.
 They're under Future Work below.
 
 ### Pull Requests
@@ -99,7 +107,7 @@ Migrating to `concurrent.futures.ProcessPoolExecutor` fixed both, through `as_co
 It also decoupled lit's execution engine from the rest of the runner.
 That's what let me swap in different backends later without touching anything else, more on that further down.
 
-My own proposal sketched this part as wrapping the whole thing in `asyncio`, an `async def _execute_async` coroutine awaiting `asyncio.as_completed()` inside `asyncio.run()`.
+Part 2 of the proposal sketched this migration as wrapping the whole thing in `asyncio` from the start, an `async def _execute_async` coroutine awaiting `asyncio.as_completed()` inside `asyncio.run()`.
 What actually shipped left `asyncio` out entirely: a synchronous loop around plain `concurrent.futures.as_completed()`, since that alone fixed both bugs.
 `asyncio` did come back later, but as a completely separate experimental engine rather than this migration, covered further down.
 
@@ -133,8 +141,8 @@ Calling `wait()` re-registers listener callbacks against every outstanding futur
 
 Replacing the `wait()` rescan with a `SimpleQueue` and `add_done_callback()`, registered once per future at submit time instead of rescanning the whole pending set, reduced the 56% regression on 64 cores down to ~8%.
 
-My mentor [Paul Kirth](https://github.com/ilovepi) built on that, adding worker-side task batching (`execute_batch()`) on top of the same `SimpleQueue` model.
-Paul ran the combined change on a 64-core Threadripper workstation I didn't have access to, and measured `check-llvm` dropping from 105.2s to 48.38s, 4.6% faster than the pre-migration baseline of 50.7s.
+My mentor, [Paul Kirth](https://github.com/ilovepi), built on that, adding worker-side task batching (`execute_batch()`) on top of the same `SimpleQueue` model.
+Paul had access to a 64-core Threadripper workstation, so it was easy for him to test scaling well past what I could reach, and he measured `check-llvm` dropping from 105.2s to 48.38s, 4.6% faster than the pre-migration baseline of 50.7s.
 
 ### Pull Requests
 - [collect completed tests via callbacks, not wait()](https://github.com/llvm/llvm-project/pull/214386) (closed, superseded by Paul Kirth's fix below)
@@ -142,10 +150,11 @@ Paul ran the combined change on a 64-core Threadripper workstation I didn't have
 
 # Evaluating Execution Engine Architectures
 
-With the `ProcessPoolExecutor` migration in place, I built and benchmarked three alternative execution engine designs, to see if process creation overhead or IPC pickling costs could be cut further.
+With the `ProcessPoolExecutor` migration in place, and Part 2 already calling out an `asyncio` engine as worth trying, I built and benchmarked three alternative execution engine designs to see if process creation overhead or IPC pickling costs could be cut further.
 
 ### Thread-Based Execution (`ThreadPoolExecutor`)
 
+Every test still meant a full process fork and a pickle round-trip of its `Test` object and result, even with the windowed-submission fix above.
 The most direct way to eliminate process creation and object pickling overhead is to use worker threads instead of processes.
 In theory, a single process with multiple threads running tests should perform much better.
 
@@ -207,7 +216,7 @@ None of that is a difference worth asking reviewers to take on a hard `--order=r
 | **ProcessPoolExecutor (Baseline)** | Worker process pool with windowed submission | Baseline (`check-llvm`: ~50.7s) | **Shipped as default** |
 | **ThreadPoolExecutor** | Worker thread pool | 1.86x to 5.42x slower | Rejected (GIL contention) |
 | **Phase-Pipeline Engine** | Dedicated process per test phase | 0% to 4% difference vs baseline | Rejected (adds pickle crossings) |
-| **Asyncio Engine** | Single-process event loop | 1.8x–2.3x faster at `-j1`, slower at `-j4+` | Experimental prototype |
+| **Asyncio Engine** | Single-process event loop | 1.8x–2.3x faster at `-j1`, slower at `-j4+` | Not pursued further (doesn't scale past a few cores) |
 | **Dispatch Chunking** | Submitting test batches per worker task | No measurable win at `-j10` under `--order=random` | Left as a draft |
 
 ### Pull Requests
@@ -268,21 +277,23 @@ It performed far worse than processes because of GIL contention, and I wrote up 
 
 - **Type Annotations**: Adding type annotations across lit to improve maintainability and catch type errors early.
 - **Testing PPE under Random Ordering**: Evaluating `ProcessPoolExecutor` with `--order=random` by default or exploring better load-balancing heuristics for batched execution.
+- **Executor and IPC Overhead at Full-Suite Scale**: A separate Scalene profile of the full `check-llvm` suite showed `ProcessPoolExecutor`'s own manager thread and the pickled-result IPC pipe write together account for about 71% of CPU time, while lit's own code stays under 16%.
+Filed as [issue #218095](https://github.com/llvm/llvm-project/issues/218095): the IPC share grows with test count, from about 2% on `llvm-mca` to about 10% on `check-llvm`, rather than staying fixed.
 
-Profiling with Scalene late in the project highlighted additional targeted optimizations for future work:
+An earlier, smaller-scale round of Scalene profiling had already turned up three more targeted fixes:
 
 <div style="margin:0 auto;">
   <img src="/img/gsoc26-improving-lit-scalene-high-level.png"><br/>
 </div>
 
 - **LRU Cache regex compilation**: Replacing `TestRunner.py`'s custom `_caching_re_compile` with `functools.lru_cache` saves ~0.10s self-CPU time on `llvm-mca`.
-Already upstreamed: [use functools.lru_cache instead of lit.util.memoize](https://github.com/llvm/llvm-project/pull/217757).
+Already upstreamed: [use functools.lru_cache instead of lit.util.memoize](https://github.com/llvm/llvm-project/pull/217757), followed by [removing the now-unused memoize function itself](https://github.com/llvm/llvm-project/pull/217772).
 - **Directory scanning with `os.scandir()`**: Replacing `os.listdir()` + `os.path.isdir()` with `os.scandir()` avoids redundant `stat()` calls during test discovery, cutting ~18% of warm discovery overhead on `llvm/test` and `clang/test`.
 - **Pre-compiling `kPdbgRegex`**: Compiling `kPdbgRegex` once at module load saves 108MB in allocations and ~0.048s on full `llvm-mca` test runs.
 
 Profiling ruled some things out too.
-The proposal had breaking up `TestRunner.py`, over 2,400 lines in one file, listed as a possible refactor if profiling justified it.
-I tried a few substitution-engine rewrites on top of the `lru_cache` fix above and none of them beat the noise floor, so there wasn't a real case for it, and it's still one file.
+The proposal listed breaking up `TestRunner.py`, over 2,400 lines in one file, as a possible refactor if profiling justified it.
+I tried a few substitution-engine rewrites on top of the `lru_cache` fix above and none of them measured faster than run-to-run variance, so there wasn't a real case for it, and it's still one file.
 
 # What I've Learned
 
@@ -291,7 +302,7 @@ I tried a few substitution-engine rewrites on top of the `lru_cache` fix above a
 Syscall-heavy work spends most of its time exactly where threads can't help.
 - **Duck-typed abstractions**: `InProcessPipe` mimicking `subprocess.Popen` meant the rest of the pipeline code didn't need to know or care that `cat` and `diff` weren't spawning a process anymore.
 
-Beyond GSoC, I'd like to keep contributing to LLVM's testing infrastructure, particularly finishing off the async engine evaluation and the type-annotation pass listed under Future Work above.
+Beyond GSoC, I'd like to keep contributing to LLVM's testing infrastructure, particularly digging into the executor and IPC overhead from [issue #218095](https://github.com/llvm/llvm-project/issues/218095), and the type-annotation pass listed under Future Work above.
 
 I've also been reading up on MLIR on the side this summer, working through it with an LLM whenever I got stuck, and I'd like to get more directly involved there next, especially on the GPU-facing dialects.
 It's a jump from testing infrastructure to compiler internals, but it's the direction I actually want my work to go in.
@@ -302,4 +313,4 @@ Thank you to my mentors, [Aiden Grossman](https://github.com/boomanaiden154), [P
 
 Thanks also to [Douglas Yung](https://github.com/dyung) and [David Candler](https://github.com/dcandler) for reporting and verifying the macOS/AArch64 shutdown fixes, [Cullen Rhodes](https://github.com/c-rhodes) for identifying and verifying the high core count scaling regression, and [Alexander Richardson](https://github.com/arichardson) for reviewing several pull requests throughout the summer.
 
-I am grateful to the LLVM Foundation for this opportunity.
+Thank you to the LLVM Foundation for organizing everything, and to Google Summer of Code for the opportunity.
