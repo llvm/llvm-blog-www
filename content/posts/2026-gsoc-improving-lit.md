@@ -9,7 +9,7 @@ This summer I worked on improving lit, the LLVM Integrated Tester, as part of Go
 
 I got interested in compilers after seeing how much heavy lifting happens underneath a single line of code, especially on parallel accelerators like GPUs.
 Two courses at IIT Bombay, [SysML](https://www.cse.iitb.ac.in/~mythili/sysml/) and Advanced Computer Architecture, turned that from a passing interest into something I actually wanted to work on.
-I'd like to eventually move toward compilers or microarchitecture for parallel compute engines as a career, and LLVM felt like the right place to start: it's compiler infrastructure already deployed at a scale few individual projects reach, so any performance work here has an immediate, wide blast radius.
+I'd like to eventually move toward compilers or microarchitecture for parallel compute engines as a career, and LLVM felt like the right place to start: it's the compiler infrastructure behind a large share of the toolchains people actually use, so performance work here doesn't stay contained to one project.
 lit specifically appealed to me because the problems in it turned out to be systems problems, process scheduling, IPC, syscall overhead, GIL contention, not surface-level scripting fixes, which is exactly the kind of low-level work I wanted hands-on experience with before jumping into compiler internals directly.
 
 My mentors were [Aiden Grossman](https://github.com/boomanaiden154), [Paul Kirth](https://github.com/ilovepi), and [Petr Hosek](https://github.com/petrhosek).
@@ -17,11 +17,12 @@ My mentors were [Aiden Grossman](https://github.com/boomanaiden154), [Paul Kirth
 # The Project
 
 lit is LLVM's test runner.
-`RUN:` lines look like shell commands.
-Until a couple of years ago, that's exactly what they were, lit wrote each one out to a script file and ran it with `/bin/sh`.
-LLVM proposed replacing that with its own integrated shell in 2024 ([RFC](https://discourse.llvm.org/t/rfc-enabling-the-lit-internal-shell-by-default/80179)), rolling it out subproject by subproject as missing features landed.
-By the time I started this project, it was lit's own Python code, not `/bin/sh`, parsing and executing every `RUN:` line, in every subproject in the monorepo, under `ninja check-*` (lit also runs a smaller set of tests in GoogleTest's format, which skip `RUN:` entirely).
-None of that compiles or checks anything itself, it's the overhead sitting between a developer pushing a change and finding out whether it passed.
+`RUN:` lines look like shell commands, but lit's own internal shell parses and runs them itself.
+A 2024 RFC made that the default everywhere, arguing it's faster and more consistent across platforms than spawning an actual shell process for every line ([RFC](https://discourse.llvm.org/t/rfc-enabling-the-lit-internal-shell-by-default/80179)).
+The option to spawn a shell process instead still exists in the code, but now raises an error unless explicitly forced, and is on track for removal.
+By the time I started this project, it was lit's own Python code, not a spawned shell process, parsing and executing every `RUN:` line, in every subproject in the monorepo, under `ninja check-*` (lit also runs a smaller set of tests in GoogleTest's format, which skip `RUN:` entirely).
+None of that, parsing and executing `RUN:` lines, compiles or checks anything on its own.
+It's the overhead sitting between a developer pushing a change and finding out whether it passed.
 lit hadn't gotten much dedicated performance work before this project, even though every second it spends is a second not spent running an actual test.
 It's testing infrastructure, and testing infrastructure tends to get left alone once it works well enough.
 
@@ -31,8 +32,8 @@ It's testing infrastructure, and testing infrastructure tends to get left alone 
 2. **Execution engine & IPC bottlenecks**: Locking and queueing overhead in the execution engine (`multiprocessing.Pool`), causing scaling limits on modern high core count systems.
 3. **Legacy codebase idioms**: Python 2 patterns, redundant string concatenations, and sub-optimal loop structures remaining across lit's execution paths.
 
-Before I wrote [the proposal](https://docs.google.com/document/d/1lanuwZ7W1L7vjLYSCLA7SACOkt9QJJm-DM8EHZSj0AY/edit?tab=t.0) for GSoC, I ran lit under a debugger to see how testing actually happened underneath: where it spent its time, which paths were hot, and which of those hot paths had obviously unoptimized code sitting in them.
-That's how the proposal ended up as about twenty numbered items across four parts, each one tied to a line I'd actually stepped through rather than a guess:
+Before writing the GSoC proposal, I ran lit under a debugger to see how testing actually happened underneath: where it spent its time, which paths were hot, and which of those hot paths had obviously unoptimized code sitting in them.
+That debugging pass is what the proposal's four parts below are built from:
 
 1. **Modernizing the Python implementation**: cleaning up legacy Python 2 idioms and picking up things like `@dataclass(slots=True)` and `functools.cache` on lit's hot paths.
 2. **Reducing process overhead**: moving the execution engine off `multiprocessing.Pool` and onto `asyncio`.
@@ -58,7 +59,8 @@ The first two weeks focused on eliminating legacy Python 2 idioms remaining in l
 - Explicit argument calls like `super(Class, self)` were updated to modern `super()`.
 - String concatenation in the shell lexer's (`ShLexer`) hottest method was changed from repeated `+=` string building to list joins.
 
-Because `ShLexer` runs on every character of every `RUN:` line across every test file, something I'd already flagged as hot while stepping through lit under a debugger before writing the proposal, optimizing string construction was worth benchmarking directly.
+`ShLexer` was one of the hot paths that debugger pass turned up: it runs on every character of every `RUN:` line, across every test file in the suite, and it built each token with `str +=` inside a character loop, worst-case O(N²) on long tokens.
+That made its string-construction method worth optimizing and benchmarking directly.
 
 <div style="margin:0 auto;">
   <img src="/img/gsoc26-improving-lit-shlexer-before.png"><br/>
@@ -154,8 +156,10 @@ With the `ProcessPoolExecutor` migration in place, and Part 2 already calling ou
 
 ### Thread-Based Execution (`ThreadPoolExecutor`)
 
-Every test still meant a full process fork and a pickle round-trip of its `Test` object and result, even with the windowed-submission fix above.
-The most direct way to eliminate process creation and object pickling overhead is to use worker threads instead of processes.
+Even with the windowed-submission fix above, every test still meant a full process fork plus a pickle round-trip of its `Test` object and result.
+A Scalene profile of `llvm-mca` at `-j1` showed the fork/exec syscall alone costing 4.5% of wall-clock time, more than every line of lit's own Python combined.
+The combined process-and-pickle dispatch overhead was attributable for 5.23% of wall-clock at `-j1`, rising to 22.25% at `-j40` as concurrency increased.
+The most direct way to cut that cost is to stop paying for a process per test at all, and rather use worker threads.
 In theory, a single process with multiple threads running tests should perform much better.
 
 Before testing this, I had to fix three thread-safety issues in lit: `os.umask` (which is process-global and was mutated around every subprocess launch), the regex compilation cache in `_caching_re_compile` (an unlocked dictionary), and the per-suite environment dictionary in GoogleTest formats.
