@@ -1,5 +1,6 @@
 ---
 title: "GSoC 2026: Improving HLSL Support in clangd"
+date: "2026-09-21"
 author: "Maria Fernanda Guimarães"
 Mentors: Finn Plummer, Ashley Coleman
 tags: ["GSoC", "clangd", "HLSL", "Clang"]
