@@ -1,0 +1,2169 @@
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: '/usr/include/stdlib.h', Line: 487, Column: 16 }
+Function:        atoi
+Args:
+  - Callee:          strtol
+    DebugLoc:        { File: '/usr/include/stdlib.h', Line: 0, Column: 0 }
+  - String:          ' will not be inlined into '
+  - Caller:          atoi
+    DebugLoc:        { File: '/usr/include/stdlib.h', Line: 486, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NeverInline
+DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+Function:        process
+Args:
+  - String:          ''''
+  - Callee:          work
+    DebugLoc:        { File: baseline.c, Line: 4, Column: 0 }
+  - String:          ''' not inlined into '''
+  - Caller:          process
+    DebugLoc:        { File: baseline.c, Line: 8, Column: 0 }
+  - String:          ''' because it should never be inlined '
+  - String:          '(cost=never)'
+  - String:          ': '
+  - Reason:          noinline function attribute
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        process
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: baseline.c, Line: 15, Column: 19 }
+Function:        main
+Args:
+  - Callee:          malloc
+    DebugLoc:        { File: '/usr/include/stdlib.h', Line: 0, Column: 0 }
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: baseline.c, Line: 13, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: baseline.c, Line: 23, Column: 3 }
+Function:        main
+Args:
+  - Callee:          free
+    DebugLoc:        { File: '/usr/include/stdlib.h', Line: 0, Column: 0 }
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: baseline.c, Line: 13, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Passed
+Pass:            inline
+Name:            Inlined
+DebugLoc:        { File: baseline.c, Line: 14, Column: 22 }
+Function:        main
+Args:
+  - String:          ''''
+  - Callee:          atoi
+    DebugLoc:        { File: '/usr/include/stdlib.h', Line: 486, Column: 0 }
+  - String:          ''' inlined into '''
+  - Caller:          main
+    DebugLoc:        { File: baseline.c, Line: 13, Column: 0 }
+  - String:          ''''
+  - String:          ' with '
+  - String:          '(cost='
+  - Cost:            '10'
+  - String:          ', threshold='
+  - Threshold:       '487'
+  - String:          ')'
+  - String:          ' at callsite '
+  - String:          main
+  - String:          ':'
+  - Line:            '1'
+  - String:          ':'
+  - Column:          '22'
+  - String:          ';'
+...
+--- !Passed
+Pass:            inline
+Name:            Inlined
+DebugLoc:        { File: baseline.c, Line: 19, Column: 5 }
+Function:        main
+Args:
+  - String:          ''''
+  - Callee:          process
+    DebugLoc:        { File: baseline.c, Line: 8, Column: 0 }
+  - String:          ''' inlined into '''
+  - Caller:          main
+    DebugLoc:        { File: baseline.c, Line: 13, Column: 0 }
+  - String:          ''''
+  - String:          ' with '
+  - String:          '(cost='
+  - Cost:            '30'
+  - String:          ', threshold='
+  - Threshold:       '250'
+  - String:          ')'
+  - String:          ' at callsite '
+  - String:          main
+  - String:          ':'
+  - Line:            '6'
+  - String:          ':'
+  - Column:          '5'
+  - String:          ';'
+...
+--- !Missed
+Pass:            inline
+Name:            NeverInline
+DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+Function:        main
+Args:
+  - String:          ''''
+  - Callee:          work
+    DebugLoc:        { File: baseline.c, Line: 4, Column: 0 }
+  - String:          ''' not inlined into '''
+  - Caller:          main
+    DebugLoc:        { File: baseline.c, Line: 13, Column: 0 }
+  - String:          ''' because it should never be inlined '
+  - String:          '(cost=never)'
+  - String:          ': '
+  - Reason:          noinline function attribute
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: baseline.c, Line: 9, Column: 21 }
+Function:        main
+Args:
+  - String:          'hoisting '
+  - Inst:            icmp
+    DebugLoc:        { File: baseline.c, Line: 9, Column: 21 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: baseline.c, Line: 9, Column: 21 }
+Function:        main
+Args:
+  - String:          'hoisting '
+  - Inst:            zext
+    DebugLoc:        { File: baseline.c, Line: 9, Column: 21 }
+...
+--- !Passed
+Pass:            loop-delete
+Name:            Invariant
+DebugLoc:        { File: baseline.c, Line: 18, Column: 3 }
+Function:        main
+Args:
+  - String:          Loop deleted because it is invariant
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 18, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            loop-unroll
+Name:            FullyUnrolled
+DebugLoc:        { File: baseline.c, Line: 18, Column: 3 }
+Function:        main
+Args:
+  - String:          'completely unrolled loop with '
+  - UnrollCount:     '10'
+  - String:          ' iterations'
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 17, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 22, Column: 12 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 22, Column: 12 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 17, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 17, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 10, Column: 17 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 22, Column: 12 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: baseline.c, Line: 22, Column: 12 }
+Function:        main
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: baseline.c, Line: 17, Column: 10 }
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: baseline.c, Line: 5, Column: 12 }
+Function:        work
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantVectorizeLibcall
+DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+Function:        process
+Args:
+  - String:          'loop not vectorized: '
+  - String:          call instruction cannot be vectorized
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        process
+Args:
+  - String:          loop not vectorized
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        process
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            loop-vectorize
+Name:            Vectorized
+DebugLoc:        { File: baseline.c, Line: 16, Column: 3 }
+Function:        main
+Args:
+  - String:          'vectorized '
+  - String:          ''
+  - String:          'loop (vectorization width: '
+  - VectorizationFactor: '4'
+  - String:          ', interleaved count: '
+  - InterleaveCount: '2'
+  - String:          ')'
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantVectorizeLibcall
+DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          call instruction cannot be vectorized
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          loop not vectorized
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantVectorizeLibcall
+DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          call instruction cannot be vectorized
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          loop not vectorized
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantVectorizeLibcall
+DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          call instruction cannot be vectorized
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          loop not vectorized
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantVectorizeLibcall
+DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          call instruction cannot be vectorized
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          loop not vectorized
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantVectorizeLibcall
+DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          call instruction cannot be vectorized
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          loop not vectorized
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantVectorizeLibcall
+DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          call instruction cannot be vectorized
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          loop not vectorized
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantVectorizeLibcall
+DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          call instruction cannot be vectorized
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          loop not vectorized
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantVectorizeLibcall
+DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          call instruction cannot be vectorized
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          loop not vectorized
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantVectorizeLibcall
+DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          call instruction cannot be vectorized
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          loop not vectorized
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantVectorizeLibcall
+DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          call instruction cannot be vectorized
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          loop not vectorized
+...
+--- !Passed
+Pass:            loop-vectorize
+Name:            Vectorized
+DebugLoc:        { File: baseline.c, Line: 21, Column: 3 }
+Function:        main
+Args:
+  - String:          'vectorized '
+  - String:          ''
+  - String:          'loop (vectorization width: '
+  - VectorizationFactor: '4'
+  - String:          ', interleaved count: '
+  - InterleaveCount: '2'
+  - String:          ')'
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: baseline.c, Line: 9, Column: 3 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: baseline.c, Line: 10, Column: 12 }
+...
+--- !Analysis
+Pass:            prologepilog
+Name:            StackSize
+DebugLoc:        { File: baseline.c, Line: 4, Column: 0 }
+Function:        work
+Args:
+  - NumStackBytes:   '0'
+  - String:          ' stack bytes in function '''
+  - Function:        work
+  - String:          ''''
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        work
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      entry
+  - String:          "\n"
+  - String:          ADD32rr
+  - String:          ': '
+  - INST_ADD32rr:    '1'
+  - String:          "\n"
+  - String:          LEA64_32r
+  - String:          ': '
+  - INST_LEA64_32r:  '1'
+  - String:          "\n"
+  - String:          RET64
+  - String:          ': '
+  - INST_RET64:      '1'
+  - String:          "\n"
+  - String:          SAR32ri
+  - String:          ': '
+  - INST_SAR32ri:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionCount
+DebugLoc:        { File: baseline.c, Line: 4, Column: 0 }
+Function:        work
+Args:
+  - NumInstructions: '4'
+  - String:          ' instructions in function'
+...
+--- !Missed
+Pass:            regalloc
+Name:            SpillReloadCopies
+DebugLoc:        { File: baseline.c, Line: 8, Column: 1 }
+Function:        process
+Args:
+  - NumVRCopies:     '1'
+  - String:          ' virtual registers copies '
+  - TotalCopiesCost: '1.000000e+00'
+  - String:          ' total copies cost '
+  - String:          generated in function
+...
+--- !Analysis
+Pass:            prologepilog
+Name:            StackSize
+DebugLoc:        { File: baseline.c, Line: 8, Column: 0 }
+Function:        process
+Args:
+  - NumStackBytes:   '24'
+  - String:          ' stack bytes in function '''
+  - Function:        process
+  - String:          ''''
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        process
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      entry
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          TEST32rr
+  - String:          ': '
+  - INST_TEST32rr:   '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        process
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.preheader
+  - String:          "\n"
+  - String:          PUSH64r
+  - String:          ': '
+  - INST_PUSH64r:    '3'
+  - String:          "\n"
+  - String:          MOV32rr
+  - String:          ': '
+  - INST_MOV32rr:    '1'
+  - String:          "\n"
+  - String:          MOV64rr
+  - String:          ': '
+  - INST_MOV64rr:    '1'
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        process
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32mr
+  - String:          ': '
+  - INST_MOV32mr:    '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        process
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          POP64r
+  - String:          ': '
+  - INST_POP64r:     '3'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        process
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.cond.cleanup
+  - String:          "\n"
+  - String:          RET64
+  - String:          ': '
+  - INST_RET64:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionCount
+DebugLoc:        { File: baseline.c, Line: 8, Column: 0 }
+Function:        process
+Args:
+  - NumInstructions: '18'
+  - String:          ' instructions in function'
+...
+--- !Missed
+Pass:            regalloc
+Name:            LoopSpillReloadCopies
+DebugLoc:        { File: baseline.c, Line: 16, Column: 3 }
+Function:        main
+Args:
+  - NumVRCopies:     '2'
+  - String:          ' virtual registers copies '
+  - TotalCopiesCost: '2.000000e+01'
+  - String:          ' total copies cost '
+  - String:          generated in loop
+...
+--- !Missed
+Pass:            regalloc
+Name:            SpillReloadCopies
+DebugLoc:        { File: baseline.c, Line: 13, Column: 1 }
+Function:        main
+Args:
+  - NumVRCopies:     '9'
+  - String:          ' virtual registers copies '
+  - TotalCopiesCost: '2.443750e+01'
+  - String:          ' total copies cost '
+  - String:          generated in function
+...
+--- !Analysis
+Pass:            prologepilog
+Name:            StackSize
+DebugLoc:        { File: baseline.c, Line: 13, Column: 0 }
+Function:        main
+Args:
+  - NumStackBytes:   '40'
+  - String:          ' stack bytes in function '''
+  - Function:        main
+  - String:          ''''
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      entry
+  - String:          "\n"
+  - String:          PUSH64r
+  - String:          ': '
+  - INST_PUSH64r:    '5'
+  - String:          "\n"
+  - String:          CMP32ri
+  - String:          ': '
+  - INST_CMP32ri:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32ri
+  - String:          ': '
+  - INST_MOV32ri:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      cond.true
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          MOV32ri
+  - String:          ': '
+  - INST_MOV32ri:    '1'
+  - String:          "\n"
+  - String:          MOV64rm
+  - String:          ': '
+  - INST_MOV64rm:    '1'
+  - String:          "\n"
+  - String:          MOV64rr
+  - String:          ': '
+  - INST_MOV64rr:    '1'
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      cond.end
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          LEA64r
+  - String:          ': '
+  - INST_LEA64r:     '1'
+  - String:          "\n"
+  - String:          MOV64rr
+  - String:          ': '
+  - INST_MOV64rr:    '1'
+  - String:          "\n"
+  - String:          MOVSX64rr32
+  - String:          ': '
+  - INST_MOVSX64rr32: '1'
+  - String:          "\n"
+  - String:          TEST32rr
+  - String:          ': '
+  - INST_TEST32rr:   '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.preheader
+  - String:          "\n"
+  - String:          CMP32ri
+  - String:          ': '
+  - INST_CMP32ri:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32rr
+  - String:          ': '
+  - INST_MOV32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          JMP_1
+  - String:          ': '
+  - INST_JMP_1:      '1'
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          JMP_1
+  - String:          ': '
+  - INST_JMP_1:      '1'
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      vector.ph
+  - String:          "\n"
+  - String:          MOVDQArm
+  - String:          ': '
+  - INST_MOVDQArm:   '4'
+  - String:          "\n"
+  - String:          AND32ri
+  - String:          ': '
+  - INST_AND32ri:    '2'
+  - String:          "\n"
+  - String:          MOV32rr
+  - String:          ': '
+  - INST_MOV32rr:    '2'
+  - String:          "\n"
+  - String:          SHL64ri
+  - String:          ': '
+  - INST_SHL64ri:    '1'
+  - String:          "\n"
+  - String:          SHR32ri
+  - String:          ': '
+  - INST_SHR32ri:    '1'
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      vector.body
+  - String:          "\n"
+  - String:          MOVDQArr
+  - String:          ': '
+  - INST_MOVDQArr:   '2'
+  - String:          "\n"
+  - String:          MOVDQUmr
+  - String:          ': '
+  - INST_MOVDQUmr:   '2'
+  - String:          "\n"
+  - String:          PADDDrr
+  - String:          ': '
+  - INST_PADDDrr:    '2'
+  - String:          "\n"
+  - String:          PANDrr
+  - String:          ': '
+  - INST_PANDrr:     '2'
+  - String:          "\n"
+  - String:          ADD64ri32
+  - String:          ': '
+  - INST_ADD64ri32:  '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      middle.block
+  - String:          "\n"
+  - String:          CMP32rr
+  - String:          ': '
+  - INST_CMP32rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32mr
+  - String:          ': '
+  - INST_MOV32mr:    '1'
+  - String:          "\n"
+  - String:          MOVZX32rr8
+  - String:          ': '
+  - INST_MOVZX32rr8: '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.preheader
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32mr
+  - String:          ': '
+  - INST_MOV32mr:    '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.1.preheader
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.1
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32mr
+  - String:          ': '
+  - INST_MOV32mr:    '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.2.preheader
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.2
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32mr
+  - String:          ': '
+  - INST_MOV32mr:    '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.3.preheader
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.3
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32mr
+  - String:          ': '
+  - INST_MOV32mr:    '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.4.preheader
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.4
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32mr
+  - String:          ': '
+  - INST_MOV32mr:    '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.5.preheader
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.5
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32mr
+  - String:          ': '
+  - INST_MOV32mr:    '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.6.preheader
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.6
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32mr
+  - String:          ': '
+  - INST_MOV32mr:    '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.7.preheader
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.7
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32mr
+  - String:          ': '
+  - INST_MOV32mr:    '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.8.preheader
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.8
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32mr
+  - String:          ': '
+  - INST_MOV32mr:    '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.9.preheader
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.us.9
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32mr
+  - String:          ': '
+  - INST_MOV32mr:    '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body18.preheader
+  - String:          "\n"
+  - String:          CMP32ri
+  - String:          ': '
+  - INST_CMP32ri:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '2'
+  - String:          "\n"
+  - String:          JMP_1
+  - String:          ': '
+  - INST_JMP_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      vector.ph60
+  - String:          "\n"
+  - String:          PXORrr
+  - String:          ': '
+  - INST_PXORrr:     '2'
+  - String:          "\n"
+  - String:          AND32ri
+  - String:          ': '
+  - INST_AND32ri:    '1'
+  - String:          "\n"
+  - String:          MOV32rr
+  - String:          ': '
+  - INST_MOV32rr:    '1'
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      vector.body63
+  - String:          "\n"
+  - String:          MOVDQUrm
+  - String:          ': '
+  - INST_MOVDQUrm:   '2'
+  - String:          "\n"
+  - String:          PADDDrr
+  - String:          ': '
+  - INST_PADDDrr:    '2'
+  - String:          "\n"
+  - String:          ADD64ri32
+  - String:          ': '
+  - INST_ADD64ri32:  '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      middle.block68
+  - String:          "\n"
+  - String:          PADDDrr
+  - String:          ': '
+  - INST_PADDDrr:    '3'
+  - String:          "\n"
+  - String:          PSHUFDri
+  - String:          ': '
+  - INST_PSHUFDri:   '2'
+  - String:          "\n"
+  - String:          CMP32rr
+  - String:          ': '
+  - INST_CMP32rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOVPDI2DIrr
+  - String:          ': '
+  - INST_MOVPDI2DIrr: '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body18
+  - String:          "\n"
+  - String:          ADD32rm
+  - String:          ': '
+  - INST_ADD32rm:    '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.cond.cleanup17.loopexit
+  - String:          "\n"
+  - String:          AND32ri
+  - String:          ': '
+  - INST_AND32ri:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: baseline.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.cond.cleanup17
+  - String:          "\n"
+  - String:          POP64r
+  - String:          ': '
+  - INST_POP64r:     '5'
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          MOV32rr
+  - String:          ': '
+  - INST_MOV32rr:    '1'
+  - String:          "\n"
+  - String:          MOV64rr
+  - String:          ': '
+  - INST_MOV64rr:    '1'
+  - String:          "\n"
+  - String:          RET64
+  - String:          ': '
+  - INST_RET64:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionCount
+DebugLoc:        { File: baseline.c, Line: 13, Column: 0 }
+Function:        main
+Args:
+  - NumInstructions: '164'
+  - String:          ' instructions in function'
+...
