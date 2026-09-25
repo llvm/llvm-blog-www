@@ -46,7 +46,10 @@ The sections below go through what actually happened once those turned into pull
   <img src="/img/gsoc26-improving-lit-four-phases.png"><br/>
 </div>
 
-Work was organized into four key areas: codebase modernization, execution engine refactoring, in-process shell builtins, and profiling-driven optimizations.
+The figure above shows how these fit together.
+Profiling (part 4) sits at the top because it feeds the other three tracks: Python modernization (part 1), reduced process overhead (part 2) and shell utility correctness (part 3).
+All four aim at one goal, making lit faster without changing test verdicts.
+The sections below are organized by these same four areas.
 I also wrote a small script around hyperfine early on, and later added a peak-RSS measurement pass to it.
 Most of the timing numbers below come from it.
 
@@ -55,11 +58,19 @@ Most of the timing numbers below come from it.
 The first two weeks focused on eliminating legacy Python 2 idioms remaining in lit's codebase, found by reading through every file in `lit/` end to end:
 
 - A suffix map implemented as a plain `dict` was replaced with an `IntEnum`.
+  The dict mapped a fixed set of parser kinds to values with no structure tying them together.
+  An enum names each member, gives it one definition site, and makes membership and iteration explicit.
+  This was an idiom change and I did not measure a speed difference.
 - `zip(range(len(x)), x)` loops were refactored to `enumerate(x)`.
+  Both yield (index, item) pairs, but `enumerate` says so directly and drops the separate `range` and `len` calls.
+  Again an idiom change with no measured difference.
 - Explicit argument calls like `super(Class, self)` were updated to modern `super()`.
+  The two-argument form repeats the class name, so renaming the class silently breaks it.
+  The Python 3 form has no such coupling.
 - String concatenation in the shell lexer's (`ShLexer`) hottest method was changed from repeated `+=` string building to list joins.
+  This one was a performance fix, covered below.
 
-`ShLexer` was one of the hot paths that debugger pass turned up: it runs on every character of every `RUN:` line, across every test file in the suite, and it built each token with `str +=` inside a character loop, worst-case O(N²) on long tokens.
+`ShLexer` was one of the hot paths that my initial profiling turned up: it runs on every character of every `RUN:` line, across every test file in the suite, and it built each token with `str +=` inside a character loop continually reallocating intermediate strings, worst-case O(N²) on long tokens.
 That made its string-construction method worth optimizing and benchmarking directly.
 
 <div style="margin:0 auto;">
@@ -73,12 +84,13 @@ It reduced the `CodeGen/X86` test suite execution time from 99.31s to 94.96s (4.
   <img src="/img/gsoc26-improving-lit-shlexer-after.png"><br/>
 </div>
 
-However, one planned change didn't land the way the proposal described it.
-The plan called for `@dataclass(slots=True)` on lit's hot data objects (`ShellCommandResult`, `ShellEnvironment`, `DiffFlags`), to cut their per-instance `__dict__` overhead and speed up attribute access since they get created once per test, but `slots=True` on `@dataclass` needs Python 3.10, and LLVM's minimum supported Python is 3.8.
-I used plain `__slots__` instead, which works back to 3.8 and gets the same win, leaving a `# Replace __slots__ with @dataclass(slots=True)` comment in the code pointing at [GitHub issue #200531](https://github.com/llvm/llvm-project/issues/200531), filed to track the switch once the minimum version moves.
-This kept coming up over the summer: LLVM's Python 3.8 floor ruled out several other modern constructs too, and each time the resolution was the same, ship the best version 3.8 supports, and a code comment pointing at what should replace it once the floor moves.
+The proposal also planned to put `@dataclass(slots=True)` on lit's hot data objects (`ShellCommandResult`, `ShellEnvironment`, `DiffFlags`).
+These get created once per test, and a slotted class drops the per-instance `__dict__`, which cuts memory and speeds up attribute access.
+That part did not go according to the plan because `slots=True` on `@dataclass` needs Python 3.10, and the minimum Python version LLVM supports is 3.8.
+I used plain `__slots__` instead, which works on 3.8 and gets the same benefit, and left a `# Replace __slots__ with @dataclass(slots=True)` comment in the code pointing at [GitHub issue #200531](https://github.com/llvm/llvm-project/issues/200531), filed so the switch happens once the minimum version is raised.
+This kept coming up over the summer: the 3.8 minimum ruled out several other modern constructs too, and each time the resolution was the same, ship the best version 3.8 supports with a code comment naming what should replace it once the minimum moves.
 
-Two other Phase 1 items were nice-to-have cleanups that didn't ship early: replacing the hand-rolled `_caching_re_compile` with `functools.lru_cache`, and switching `discovery.py` from `os.listdir()` plus `isdir()` to `os.scandir()`.
+Two other part 1 items were nice-to-have cleanups that didn't ship early: replacing the hand-rolled `_caching_re_compile` with `functools.lru_cache`, and switching `discovery.py` from `os.listdir()` plus `isdir()` to `os.scandir()`.
 I didn't have numbers showing either one would matter yet, so I put time into the changes above instead, and both only came back months later, once Scalene profiling near the end of the summer gave me the numbers to justify them.
 They're under Future Work below.
 
@@ -94,7 +106,7 @@ They're under Future Work below.
 
 # Moving lit to ProcessPoolExecutor
 
-lit previously dispatched tests through `multiprocessing.Pool` and collected results in a loop calling `ar.get(timeout)`.
+At the start of the project, lit dispatched tests through `multiprocessing.Pool` and collected results in a loop calling `ar.get(timeout)`.
 
 <div style="margin:0 auto;">
   <img src="/img/gsoc26-improving-lit-current-exec.png"><br/>
@@ -106,10 +118,18 @@ That collection loop contained two issues:
 2. Test results were matched back to tests by list index rather than by identity, meaning out-of-order task completions could attribute results to the wrong test.
 
 Migrating to `concurrent.futures.ProcessPoolExecutor` fixed both, through `as_completed()` and an explicit mapping from futures to tests.
+For the first issue, `as_completed()` takes the deadline once and yields each future as it finishes.
+The remaining time is then always measured against a single absolute point in time, so `--timeout` means what it says.
+For the second issue, each future is a handle to exactly one submitted test.
+A `future: test` dict therefore returns the right test whichever order tasks finish in, where the old code relied on list position.
 It also decoupled lit's execution engine from the rest of the runner.
 That's what let me swap in different backends later without touching anything else, more on that further down.
 
-Part 2 of the proposal sketched this migration as wrapping the whole thing in `asyncio` from the start, an `async def _execute_async` coroutine awaiting `asyncio.as_completed()` inside `asyncio.run()`.
+Part 2 of the proposal aimed to reduce process overhead in the execution engine, which came from two costs paid for every test.
+The first is pickling: the main process serializes each `Test` object to send it to a worker over a pipe, and the worker serializes the result to send it back, so every test crosses the process boundary twice.
+The second is process creation: running a test means forking and exec-ing a fresh process for the tools in its `RUN:` lines, and that cost is paid again for every test.
+The proposal's plan was to attack both by changing the execution engine.
+It sketched this migration as wrapping the whole thing in `asyncio` from the start, an `async def _execute_async` coroutine awaiting `asyncio.as_completed()` inside `asyncio.run()`.
 What actually shipped left `asyncio` out entirely: a synchronous loop around plain `concurrent.futures.as_completed()`, since that alone fixed both bugs.
 `asyncio` did come back later, but as a completely separate experimental engine rather than this migration, covered further down.
 
@@ -126,7 +146,11 @@ Each submission writes an empty `send_bytes(b"")` call into the executor's inter
 The OS pipe buffer defaults to 64 KiB, and 65,536 bytes divided by 4 bytes per write is exactly 16,384 writes before it fills, at which point `submit()` blocks while holding `_shutdown_lock`, which the manager thread also needs to drain the pipe ([CPython gh-105829](https://github.com/python/cpython/issues/105829)).
 Running `check-llvm` submits ~64,500 tests, far exceeding that pipe limit.
 
-The fix implements windowed submission: outstanding futures are bounded to a sliding window, submitting one new test per completed future so the wakeup pipe never fills.
+The fix implements windowed submission.
+lit first submits a window of tests, 8 times the worker count by default (`SUBMISSION_WINDOW_PER_WORKER` in `run.py`), then waits for completions.
+Each time a future finishes, lit submits exactly one more test, so the number of outstanding futures never exceeds the window.
+Since every submission writes one entry into the wakeup pipe and the manager thread drains it as work completes, the undrained writes are bounded by the window rather than by the suite size, so the pipe cannot reach the 16,384 write limit and `submit()` never blocks while holding `_shutdown_lock`.
+The window still exceeds the worker count, so every worker stays busy.
 After verification across macOS and AArch64 test environments, the relanded migration merged cleanly.
 
 ### Pull Requests
