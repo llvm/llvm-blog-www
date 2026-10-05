@@ -1,7 +1,7 @@
 ---
 title: "GSOC26: Sharing LLVM-libc's floating-point routines with compiler-rt"
 author: "Mohamed Emad"
-date: "2026-08-24"
+date: "2026-10-05"
 tags: ["gsoc", "libc", "compiler-rt", "builtins", "floating-point", "math"]
 ---
 
