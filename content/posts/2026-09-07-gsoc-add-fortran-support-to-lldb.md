@@ -17,9 +17,7 @@ Specifically, this work introduces native support for:
 
 ## Current Status & Running the Code
 
-Because the upstreaming process for a project of this scale is ongoing, not all features have been merged into the LLVM main branch yet. However, the complete, working implementation is available for anyone to test.
-
-You can view the full set of changes, clone the code, and compile it yourself from my [personal branch](https://github.com/Iasonaskrpr/llvm-project/tree/Fortran-support-stable-branch).
+Because the upstreaming process for a project of this scale is ongoing, not all features have been merged into the LLVM main branch yet. However a working implementation is available for anyone to test. You can view the full set of changes, clone the code, and compile it yourself from my [personal branch](https://github.com/Iasonaskrpr/llvm-project/tree/Fortran-support-stable-branch).
 
 To keep up to date with the ongoing integration of this project, you can follow the [tracking issue](https://github.com/llvm/llvm-project/issues/109119).
 
