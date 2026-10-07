@@ -206,7 +206,7 @@ Below is a representation of how arrays are stored in the TypeSystem:
 +-----------------------------------------------------------+
 ```
 
-**Note:**  Star describes assumed-size arrays and colon describes allocatable arrays.
+**Note:**  Star describes [assumed-size](https://fortran-lang.org/learn/best_practices/arrays/) arrays and colon describes [allocatable](https://fortran-lang.org/learn/best_practices/allocatable_arrays/) arrays.
 
 #### TypeSystem Implementation
 
