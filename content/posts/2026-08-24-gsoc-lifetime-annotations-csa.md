@@ -12,10 +12,10 @@ requests](https://github.com/llvm/llvm-project/pulls?q=is%3Apr+author%3Abenedeka
 
 ## Motivation
 
-Clang can warn about lifetime bugs. Behind `-Wlifetime-safety` [1] it reads the lifetime annotations a function carries and reports a pointer or a reference that outlives the object it points to. The analysis runs on every
-translation unit of every build and examines one function at a time, so it stops at the first call it cannot look into: if that function carries no annotation, the bug goes unreported. This project extends the Clang
-Static Analyzer to cover those cases. It reads the same annotations and follows the value through the calls the compiler cannot enter, and the two checkers that came out of it are in Clang today, reporting bugs the compiler
-does not.
+Clang can warn about lifetime bugs. Behind `-Wlifetime-safety` [1] it reads the lifetime annotations a function carries and reports a pointer or a reference that outlives the object it refers to when it escapes the function
+or the dead object is accessed through it. The analysis runs on every translation unit of every build and examines one function at a time, so an unannotated call is treated optimistically as having no lifetime effects:
+the origin of the value is lost at the call and bugs that depend on it go unreported. This project extends the Clang Static Analyzer (later referred to as CSA) to cover those cases. It reads the same annotations and follows the value through the calls
+the compiler cannot enter, and the two checkers that came out of it are in Clang today, reporting bugs the compiler does not.
 
 ## Patches
 
@@ -43,13 +43,10 @@ These are the patches that closed the gap, taking the analyzer from missing this
 
 ## From an attribute to a report
 
-Nothing can be reported before the analyzer records where a value borrows from, so that recording came first. Clang attaches `[[clang::lifetimebound]]` to the
+Nothing can be reported before the **Clang Static Analyzer** records where a value borrows from, so that recording came first. Clang attaches `[[clang::lifetimebound]]` to the
 annotated `ParmVarDecl`, so the contract is in the AST before the analyzer starts. It becomes usable in `checkPostCall`: the call has been evaluated, so the
 return value and every argument have an `SVal` and the checker can pair the returned value with the region of the argument it borrows from.
-
-That pair goes into the `ProgramState`, the object the analyzer carries from node to node. A state belongs to one node, so what a checker records on one path
-never shows up on another, and a borrow that only exists when a condition holds stays on the branch where it holds. Path-sensitivity is what separates this from
-the intra-procedural analysis.
+That pair goes into the `ProgramState`, the object the analyzer carries from node to node and a state belongs to one node.
 
 ```cpp
 int *test_func(int *p [[clang::lifetimebound]]);
@@ -68,6 +65,10 @@ node later, after `LifetimeModeling` ran, and it carries the borrow as `Origin .
 ![State 603, the call has been evaluated and there is no lifetime state yet](/img/ProgramState-603.png)
 
 ![State 550, checkPostCall has recorded the borrow](/img/ProgramState-550.png)
+
+`-Wlifetime-safety` is intra-procedural by default and path-insensitive: it analyzes one function at a time and merges the states that meet at a join, so a borrow taken on one branch
+is indistinguishable from one taken on the other. The analyzer performs an inter-procedural and path-sensitive analysis: it can enter a callee whose body is
+available (if the analyzer's budget allows it) and explores each path separately, so what it records on one path never shows up on the other.
 
 ## One writer for the state
 
