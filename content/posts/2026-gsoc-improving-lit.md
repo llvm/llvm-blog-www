@@ -1,6 +1,6 @@
 ---
 author: "Prasoon Kumar (prasoon054)"
-date: "2026-08-21"
+date: "2026-10-12"
 tags: ["GSoC", "lit", "testing", "performance", "python"]
 title: "GSoC 2026: Improving lit"
 ---
