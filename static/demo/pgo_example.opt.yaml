@@ -1,0 +1,1833 @@
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: '/usr/include/stdlib.h', Line: 487, Column: 16 }
+Function:        atoi
+Args:
+  - Callee:          strtol
+  - String:          ' will not be inlined into '
+  - Caller:          atoi
+    DebugLoc:        { File: '/usr/include/stdlib.h', Line: 486, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: '/usr/include/stdlib.h', Line: 487, Column: 16 }
+Function:        atoi
+Args:
+  - Callee:          strtol
+  - String:          ' will not be inlined into '
+  - Caller:          atoi
+    DebugLoc:        { File: '/usr/include/stdlib.h', Line: 486, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: pgo_example.c, Line: 20, Column: 19 }
+Function:        main
+Args:
+  - Callee:          malloc
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: pgo_example.c, Line: 30, Column: 3 }
+Function:        main
+Args:
+  - Callee:          printf
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: pgo_example.c, Line: 31, Column: 3 }
+Function:        main
+Args:
+  - Callee:          free
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: pgo_example.c, Line: 20, Column: 19 }
+Function:        main
+Args:
+  - Callee:          malloc
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: pgo_example.c, Line: 30, Column: 3 }
+Function:        main
+Args:
+  - Callee:          printf
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: pgo_example.c, Line: 31, Column: 3 }
+Function:        main
+Args:
+  - Callee:          free
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Passed
+Pass:            inline
+Name:            Inlined
+DebugLoc:        { File: pgo_example.c, Line: 19, Column: 22 }
+Function:        main
+Args:
+  - String:          ''''
+  - Callee:          atoi
+    DebugLoc:        { File: '/usr/include/stdlib.h', Line: 486, Column: 0 }
+  - String:          ''' inlined into '''
+  - Caller:          main
+    DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+  - String:          ''''
+  - String:          ' with '
+  - String:          '(cost='
+  - Cost:            '10'
+  - String:          ', threshold='
+  - Threshold:       '487'
+  - String:          ')'
+  - String:          ' at callsite '
+  - String:          main
+  - String:          ':'
+  - Line:            '1'
+  - String:          ':'
+  - Column:          '22'
+  - String:          ';'
+...
+--- !Passed
+Pass:            inline
+Name:            Inlined
+DebugLoc:        { File: pgo_example.c, Line: 26, Column: 14 }
+Function:        main
+Args:
+  - String:          ''''
+  - Callee:          hot_work
+    DebugLoc:        { File: pgo_example.c, Line: 4, Column: 0 }
+  - String:          ''' inlined into '''
+  - Caller:          main
+    DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+  - String:          ''''
+  - String:          ' with '
+  - String:          '(cost='
+  - Cost:            '-10'
+  - String:          ', threshold='
+  - Threshold:       '75'
+  - String:          ')'
+  - String:          ' at callsite '
+  - String:          main
+  - String:          ':'
+  - Line:            '8'
+  - String:          ':'
+  - Column:          '14'
+  - String:          ';'
+...
+--- !Passed
+Pass:            inline
+Name:            Inlined
+DebugLoc:        { File: pgo_example.c, Line: 28, Column: 14 }
+Function:        main
+Args:
+  - String:          ''''
+  - Callee:          cold_work
+    DebugLoc:        { File: pgo_example.c, Line: 11, Column: 0 }
+  - String:          ''' inlined into '''
+  - Caller:          main
+    DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+  - String:          ''''
+  - String:          ' with '
+  - String:          '(cost='
+  - Cost:            '-10'
+  - String:          ', threshold='
+  - Threshold:       '75'
+  - String:          ')'
+  - String:          ' at callsite '
+  - String:          main
+  - String:          ':'
+  - Line:            '10'
+  - String:          ':'
+  - Column:          '14'
+  - String:          ';'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: '/usr/include/stdlib.h', Line: 487, Column: 16 }
+Function:        main
+Hotness:         1
+Args:
+  - Callee:          strtol
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: pgo_example.c, Line: 20, Column: 19 }
+Function:        main
+Hotness:         1
+Args:
+  - Callee:          malloc
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: pgo_example.c, Line: 30, Column: 3 }
+Function:        main
+Hotness:         1
+Args:
+  - Callee:          printf
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: pgo_example.c, Line: 31, Column: 3 }
+Function:        main
+Hotness:         1
+Args:
+  - Callee:          free
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: pgo_example.c, Line: 6, Column: 21 }
+Function:        main
+Hotness:         1000224
+Args:
+  - String:          'hoisting '
+  - Inst:            icmp
+    DebugLoc:        { File: pgo_example.c, Line: 6, Column: 21 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: pgo_example.c, Line: 13, Column: 21 }
+Function:        main
+Hotness:         100
+Args:
+  - String:          'hoisting '
+  - Inst:            icmp
+    DebugLoc:        { File: pgo_example.c, Line: 13, Column: 21 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: pgo_example.c, Line: 7, Column: 10 }
+Function:        main
+Hotness:         100022527
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: pgo_example.c, Line: 22, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: pgo_example.c, Line: 14, Column: 10 }
+Function:        main
+Hotness:         10000
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: pgo_example.c, Line: 22, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: pgo_example.c, Line: 7, Column: 10 }
+Function:        main
+Hotness:         100022527
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: pgo_example.c, Line: 22, Column: 10 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: pgo_example.c, Line: 14, Column: 10 }
+Function:        main
+Hotness:         10000
+Args:
+  - String:          'load of type '
+  - Type:            i32
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: pgo_example.c, Line: 22, Column: 10 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: pgo_example.c, Line: 6, Column: 21 }
+Function:        main
+Hotness:         1000224
+Args:
+  - String:          'hoisting '
+  - Inst:            zext
+    DebugLoc:        { File: pgo_example.c, Line: 6, Column: 21 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: pgo_example.c, Line: 13, Column: 21 }
+Function:        main
+Hotness:         100
+Args:
+  - String:          'hoisting '
+  - Inst:            zext
+    DebugLoc:        { File: pgo_example.c, Line: 13, Column: 21 }
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            VectorizationNotBeneficial
+DebugLoc:        { File: pgo_example.c, Line: 6, Column: 3 }
+Function:        hot_work
+Hotness:         0
+Args:
+  - String:          the cost-model indicates that vectorization is not beneficial
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            InterleavingNotBeneficial
+DebugLoc:        { File: pgo_example.c, Line: 6, Column: 3 }
+Function:        hot_work
+Hotness:         0
+Args:
+  - String:          the cost-model indicates that interleaving is not beneficial
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            VectorizationNotBeneficial
+DebugLoc:        { File: pgo_example.c, Line: 13, Column: 3 }
+Function:        cold_work
+Hotness:         0
+Args:
+  - String:          the cost-model indicates that vectorization is not beneficial
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            InterleavingNotBeneficial
+DebugLoc:        { File: pgo_example.c, Line: 13, Column: 3 }
+Function:        cold_work
+Hotness:         0
+Args:
+  - String:          the cost-model indicates that interleaving is not beneficial
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            VectorizationNotBeneficial
+DebugLoc:        { File: pgo_example.c, Line: 21, Column: 3 }
+Function:        main
+Hotness:         100
+Args:
+  - String:          the cost-model indicates that vectorization is not beneficial
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            InterleavingNotBeneficial
+DebugLoc:        { File: pgo_example.c, Line: 21, Column: 3 }
+Function:        main
+Hotness:         100
+Args:
+  - String:          the cost-model indicates that interleaving is not beneficial
+...
+--- !Passed
+Pass:            loop-vectorize
+Name:            Vectorized
+DebugLoc:        { File: pgo_example.c, Line: 6, Column: 3 }
+Function:        main
+Hotness:         100022527
+Args:
+  - String:          'vectorized '
+  - String:          ''
+  - String:          'loop (vectorization width: '
+  - VectorizationFactor: '4'
+  - String:          ', interleaved count: '
+  - InterleaveCount: '2'
+  - String:          ')'
+...
+--- !Passed
+Pass:            loop-vectorize
+Name:            Vectorized
+DebugLoc:        { File: pgo_example.c, Line: 13, Column: 3 }
+Function:        main
+Hotness:         10000
+Args:
+  - String:          'vectorized '
+  - String:          ''
+  - String:          'loop (vectorization width: '
+  - VectorizationFactor: '4'
+  - String:          ', interleaved count: '
+  - InterleaveCount: '2'
+  - String:          ')'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+Function:        main
+Hotness:         100
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+Function:        main
+Hotness:         1000225
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+Function:        main
+Hotness:         1000225
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+Function:        main
+Hotness:         1000225
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Passed
+Pass:            loop-unroll
+Name:            Peeled
+DebugLoc:        { File: pgo_example.c, Line: 6, Column: 3 }
+Function:        main
+Hotness:         3504692
+Args:
+  - String:          'peeled loop by '
+  - PeelCount:       '4'
+  - String:          ' iterations'
+...
+--- !Passed
+Pass:            loop-unroll
+Name:            Peeled
+DebugLoc:        { File: pgo_example.c, Line: 13, Column: 3 }
+Function:        main
+Hotness:         436
+Args:
+  - String:          'peeled loop by '
+  - PeelCount:       '5'
+  - String:          ' iterations'
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: pgo_example.c, Line: 6, Column: 3 }
+Function:        main
+Hotness:         1000224
+Args:
+  - String:          'hoisting '
+  - Inst:            icmp
+    DebugLoc:        { File: pgo_example.c, Line: 6, Column: 3 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+Function:        main
+Hotness:         992410
+Args:
+  - String:          'hoisting '
+  - Inst:            and
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: pgo_example.c, Line: 6, Column: 3 }
+Function:        main
+Hotness:         992410
+Args:
+  - String:          'hoisting '
+  - Inst:            icmp
+    DebugLoc:        { File: pgo_example.c, Line: 6, Column: 3 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: pgo_example.c, Line: 13, Column: 3 }
+Function:        main
+Hotness:         100
+Args:
+  - String:          'hoisting '
+  - Inst:            icmp
+    DebugLoc:        { File: pgo_example.c, Line: 13, Column: 3 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+Function:        main
+Hotness:         99
+Args:
+  - String:          'hoisting '
+  - Inst:            and
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: pgo_example.c, Line: 13, Column: 3 }
+Function:        main
+Hotness:         99
+Args:
+  - String:          'hoisting '
+  - Inst:            icmp
+    DebugLoc:        { File: pgo_example.c, Line: 13, Column: 3 }
+...
+--- !Analysis
+Pass:            prologepilog
+Name:            StackSize
+DebugLoc:        { File: pgo_example.c, Line: 4, Column: 0 }
+Function:        hot_work
+Hotness:         0
+Args:
+  - NumStackBytes:   '0'
+  - String:          ' stack bytes in function '''
+  - Function:        hot_work
+  - String:          ''''
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 6, Column: 21 }
+Function:        hot_work
+Hotness:         0
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      entry
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          TEST32rr
+  - String:          ': '
+  - INST_TEST32rr:   '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 6, Column: 21 }
+Function:        hot_work
+Hotness:         0
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.preheader
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '2'
+  - String:          "\n"
+  - String:          MOV32rr
+  - String:          ': '
+  - INST_MOV32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 7, Column: 10 }
+Function:        hot_work
+Hotness:         0
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          LEA64_32r
+  - String:          ': '
+  - INST_LEA64_32r:  '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 8, Column: 3 }
+Function:        hot_work
+Hotness:         0
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.cond.cleanup
+  - String:          "\n"
+  - String:          RET64
+  - String:          ': '
+  - INST_RET64:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+Function:        hot_work
+Hotness:         0
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          JMP_1
+  - String:          ': '
+  - INST_JMP_1:      '1'
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionCount
+DebugLoc:        { File: pgo_example.c, Line: 4, Column: 0 }
+Function:        hot_work
+Hotness:         0
+Args:
+  - NumInstructions: '13'
+  - String:          ' instructions in function'
+...
+--- !Analysis
+Pass:            prologepilog
+Name:            StackSize
+DebugLoc:        { File: pgo_example.c, Line: 11, Column: 0 }
+Function:        cold_work
+Hotness:         0
+Args:
+  - NumStackBytes:   '0'
+  - String:          ' stack bytes in function '''
+  - Function:        cold_work
+  - String:          ''''
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 13, Column: 21 }
+Function:        cold_work
+Hotness:         0
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      entry
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          TEST32rr
+  - String:          ': '
+  - INST_TEST32rr:   '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 13, Column: 21 }
+Function:        cold_work
+Hotness:         0
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.preheader
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '2'
+  - String:          "\n"
+  - String:          MOV32rr
+  - String:          ': '
+  - INST_MOV32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 14, Column: 10 }
+Function:        cold_work
+Hotness:         0
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body
+  - String:          "\n"
+  - String:          ADD32rr
+  - String:          ': '
+  - INST_ADD32rr:    '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          LEA64_32r
+  - String:          ': '
+  - INST_LEA64_32r:  '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 15, Column: 3 }
+Function:        cold_work
+Hotness:         0
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.cond.cleanup
+  - String:          "\n"
+  - String:          RET64
+  - String:          ': '
+  - INST_RET64:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+Function:        cold_work
+Hotness:         0
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          JMP_1
+  - String:          ': '
+  - INST_JMP_1:      '1'
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionCount
+DebugLoc:        { File: pgo_example.c, Line: 11, Column: 0 }
+Function:        cold_work
+Hotness:         0
+Args:
+  - NumInstructions: '14'
+  - String:          ' instructions in function'
+...
+--- !Missed
+Pass:            regalloc
+Name:            LoopSpillReloadCopies
+DebugLoc:        { File: pgo_example.c, Line: 13, Column: 3 }
+Function:        main
+Hotness:         1185
+Args:
+  - NumVRCopies:     '2'
+  - String:          ' virtual registers copies '
+  - TotalCopiesCost: '2.369344e+03'
+  - String:          ' total copies cost '
+  - String:          generated in loop
+...
+--- !Missed
+Pass:            regalloc
+Name:            LoopSpillReloadCopies
+DebugLoc:        { File: pgo_example.c, Line: 27, Column: 3 }
+Function:        main
+Hotness:         100
+Args:
+  - NumVRCopies:     '4'
+  - String:          ' virtual registers copies '
+  - TotalCopiesCost: '2.566789e+03'
+  - String:          ' total copies cost '
+  - String:          generated in loop
+...
+--- !Missed
+Pass:            regalloc
+Name:            LoopSpillReloadCopies
+DebugLoc:        { File: pgo_example.c, Line: 25, Column: 3 }
+Function:        main
+Hotness:         1000225
+Args:
+  - NumVRCopies:     '1'
+  - String:          ' virtual registers copies '
+  - TotalCopiesCost: '9.924100e+05'
+  - String:          ' total copies cost '
+  - String:          generated in loop
+...
+--- !Missed
+Pass:            regalloc
+Name:            SpillReloadCopies
+DebugLoc:        { File: pgo_example.c, Line: 18, Column: 1 }
+Function:        main
+Hotness:         1
+Args:
+  - NumVRCopies:     '12'
+  - String:          ' virtual registers copies '
+  - TotalCopiesCost: '9.949838e+05'
+  - String:          ' total copies cost '
+  - String:          generated in function
+...
+--- !Analysis
+Pass:            prologepilog
+Name:            StackSize
+DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+Function:        main
+Hotness:         1
+Args:
+  - NumStackBytes:   '24'
+  - String:          ' stack bytes in function '''
+  - Function:        main
+  - String:          ''''
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 19, Column: 16 }
+Function:        main
+Hotness:         1
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      entry
+  - String:          "\n"
+  - String:          PUSH64r
+  - String:          ': '
+  - INST_PUSH64r:    '3'
+  - String:          "\n"
+  - String:          CMP32ri
+  - String:          ': '
+  - INST_CMP32ri:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 19, Column: 27 }
+Function:        main
+Hotness:         1
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      cond.true
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          MOV32ri
+  - String:          ': '
+  - INST_MOV32ri:    '1'
+  - String:          "\n"
+  - String:          MOV64rm
+  - String:          ': '
+  - INST_MOV64rm:    '1'
+  - String:          "\n"
+  - String:          MOV64rr
+  - String:          ': '
+  - INST_MOV64rr:    '1'
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 20, Column: 26 }
+Function:        main
+Hotness:         1
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      cond.end
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          LEA64r
+  - String:          ': '
+  - INST_LEA64r:     '1'
+  - String:          "\n"
+  - String:          MOV32rr
+  - String:          ': '
+  - INST_MOV32rr:    '1'
+  - String:          "\n"
+  - String:          MOV64rr
+  - String:          ': '
+  - INST_MOV64rr:    '1'
+  - String:          "\n"
+  - String:          MOVSX64rr32
+  - String:          ': '
+  - INST_MOVSX64rr32: '1'
+  - String:          "\n"
+  - String:          TEST32rr
+  - String:          ': '
+  - INST_TEST32rr:   '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+Function:        main
+Hotness:         1
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.preheader
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 22, Column: 14 }
+Function:        main
+Hotness:         100
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32mr
+  - String:          ': '
+  - INST_MOV32mr:    '1'
+  - String:          "\n"
+  - String:          MOVZX32rr8
+  - String:          ': '
+  - INST_MOVZX32rr8: '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+Function:        main
+Hotness:         1
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.cond5.preheader
+  - String:          "\n"
+  - String:          AND32ri
+  - String:          ': '
+  - INST_AND32ri:    '2'
+  - String:          "\n"
+  - String:          MOV32rr
+  - String:          ': '
+  - INST_MOV32rr:    '2'
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '2'
+  - String:          "\n"
+  - String:          JMP_1
+  - String:          ': '
+  - INST_JMP_1:      '1'
+  - String:          "\n"
+  - String:          SHL64ri
+  - String:          ': '
+  - INST_SHL64ri:    '1'
+  - String:          "\n"
+  - String:          SHR32ri
+  - String:          ': '
+  - INST_SHR32ri:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 26, Column: 11 }
+Function:        main
+Hotness:         1000225
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      hot_work.exit
+  - String:          "\n"
+  - String:          ADD32rr
+  - String:          ': '
+  - INST_ADD32rr:    '1'
+  - String:          "\n"
+  - String:          CMP32ri
+  - String:          ': '
+  - INST_CMP32ri:    '1'
+  - String:          "\n"
+  - String:          INC32r
+  - String:          ': '
+  - INST_INC32r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+Function:        main
+Hotness:         1000225
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.cond.i.preheader
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32ri
+  - String:          ': '
+  - INST_MOV32ri:    '1'
+  - String:          "\n"
+  - String:          TEST32rr
+  - String:          ': '
+  - INST_TEST32rr:   '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+Function:        main
+Hotness:         1000224
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.preheader
+  - String:          "\n"
+  - String:          CMP32ri
+  - String:          ': '
+  - INST_CMP32ri:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+Function:        main
+Hotness:         992410
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      vector.body.preheader
+  - String:          "\n"
+  - String:          PXORrr
+  - String:          ': '
+  - INST_PXORrr:     '2'
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 7, Column: 10 }
+Function:        main
+Hotness:         11908920
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      vector.body
+  - String:          "\n"
+  - String:          PADDDrr
+  - String:          ': '
+  - INST_PADDDrr:    '4'
+  - String:          "\n"
+  - String:          MOVDQUrm
+  - String:          ': '
+  - INST_MOVDQUrm:   '2'
+  - String:          "\n"
+  - String:          ADD64ri32
+  - String:          ': '
+  - INST_ADD64ri32:  '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 6, Column: 3 }
+Function:        main
+Hotness:         992410
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      middle.block
+  - String:          "\n"
+  - String:          PADDDrr
+  - String:          ': '
+  - INST_PADDDrr:    '3'
+  - String:          "\n"
+  - String:          PSHUFDri
+  - String:          ': '
+  - INST_PSHUFDri:   '2'
+  - String:          "\n"
+  - String:          CMP32rr
+  - String:          ': '
+  - INST_CMP32rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV64rr
+  - String:          ': '
+  - INST_MOV64rr:    '1'
+  - String:          "\n"
+  - String:          MOVPDI2DIrr
+  - String:          ': '
+  - INST_MOVPDI2DIrr: '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 7, Column: 10 }
+Function:        main
+Hotness:         876173
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.peel
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          LEA64_32r
+  - String:          ': '
+  - INST_LEA64_32r:  '1'
+  - String:          "\n"
+  - String:          LEA64r
+  - String:          ': '
+  - INST_LEA64r:     '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 7, Column: 10 }
+Function:        main
+Hotness:         657130
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.peel100
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          LEA64_32r
+  - String:          ': '
+  - INST_LEA64_32r:  '1'
+  - String:          "\n"
+  - String:          LEA64r
+  - String:          ': '
+  - INST_LEA64r:     '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 7, Column: 10 }
+Function:        main
+Hotness:         492847
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.peel107
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          LEA64_32r
+  - String:          ': '
+  - INST_LEA64_32r:  '1'
+  - String:          "\n"
+  - String:          LEA64r
+  - String:          ': '
+  - INST_LEA64r:     '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 7, Column: 10 }
+Function:        main
+Hotness:         369635
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i.peel114
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          LEA64_32r
+  - String:          ': '
+  - INST_LEA64_32r:  '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+  - String:          OR64ri32
+  - String:          ': '
+  - INST_OR64ri32:   '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 7, Column: 10 }
+Function:        main
+Hotness:         1108906
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          JMP_1
+  - String:          ': '
+  - INST_JMP_1:      '1'
+  - String:          "\n"
+  - String:          LEA64_32r
+  - String:          ': '
+  - INST_LEA64_32r:  '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+Function:        main
+Hotness:         7814
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '2'
+  - String:          "\n"
+  - String:          JMP_1
+  - String:          ': '
+  - INST_JMP_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+Function:        main
+Hotness:         1
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.cond15.preheader
+  - String:          "\n"
+  - String:          AND32ri
+  - String:          ': '
+  - INST_AND32ri:    '2'
+  - String:          "\n"
+  - String:          MOV32rr
+  - String:          ': '
+  - INST_MOV32rr:    '2'
+  - String:          "\n"
+  - String:          SHL64ri
+  - String:          ': '
+  - INST_SHL64ri:    '1'
+  - String:          "\n"
+  - String:          SHR32ri
+  - String:          ': '
+  - INST_SHR32ri:    '1'
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+Function:        main
+Hotness:         100
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.cond.i39.preheader
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32ri
+  - String:          ': '
+  - INST_MOV32ri:    '1'
+  - String:          "\n"
+  - String:          TEST32rr
+  - String:          ': '
+  - INST_TEST32rr:   '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+Function:        main
+Hotness:         100
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i43.preheader
+  - String:          "\n"
+  - String:          CMP32ri
+  - String:          ': '
+  - INST_CMP32ri:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+Function:        main
+Hotness:         99
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      vector.body82.preheader
+  - String:          "\n"
+  - String:          PXORrr
+  - String:          ': '
+  - INST_PXORrr:     '2'
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 14, Column: 15 }
+Function:        main
+Hotness:         1185
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      vector.body82
+  - String:          "\n"
+  - String:          PADDDrr
+  - String:          ': '
+  - INST_PADDDrr:    '6'
+  - String:          "\n"
+  - String:          MOVDQArr
+  - String:          ': '
+  - INST_MOVDQArr:   '2'
+  - String:          "\n"
+  - String:          MOVDQUrm
+  - String:          ': '
+  - INST_MOVDQUrm:   '2'
+  - String:          "\n"
+  - String:          ADD64ri32
+  - String:          ': '
+  - INST_ADD64ri32:  '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 13, Column: 3 }
+Function:        main
+Hotness:         99
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      middle.block89
+  - String:          "\n"
+  - String:          PADDDrr
+  - String:          ': '
+  - INST_PADDDrr:    '3'
+  - String:          "\n"
+  - String:          PSHUFDri
+  - String:          ': '
+  - INST_PSHUFDri:   '2'
+  - String:          "\n"
+  - String:          CMP32rr
+  - String:          ': '
+  - INST_CMP32rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          MOV32rr
+  - String:          ': '
+  - INST_MOV32rr:    '1'
+  - String:          "\n"
+  - String:          MOV64rr
+  - String:          ': '
+  - INST_MOV64rr:    '1'
+  - String:          "\n"
+  - String:          MOVPDI2DIrr
+  - String:          ': '
+  - INST_MOVPDI2DIrr: '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 14, Column: 10 }
+Function:        main
+Hotness:         87
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i43.peel
+  - String:          "\n"
+  - String:          ADD32rr
+  - String:          ': '
+  - INST_ADD32rr:    '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          LEA64_32r
+  - String:          ': '
+  - INST_LEA64_32r:  '1'
+  - String:          "\n"
+  - String:          LEA64r
+  - String:          ': '
+  - INST_LEA64r:     '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 14, Column: 10 }
+Function:        main
+Hotness:         70
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i43.peel122
+  - String:          "\n"
+  - String:          ADD32rr
+  - String:          ': '
+  - INST_ADD32rr:    '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          LEA64_32r
+  - String:          ': '
+  - INST_LEA64_32r:  '1'
+  - String:          "\n"
+  - String:          LEA64r
+  - String:          ': '
+  - INST_LEA64r:     '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 14, Column: 10 }
+Function:        main
+Hotness:         56
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i43.peel129
+  - String:          "\n"
+  - String:          ADD32rr
+  - String:          ': '
+  - INST_ADD32rr:    '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          LEA64_32r
+  - String:          ': '
+  - INST_LEA64_32r:  '1'
+  - String:          "\n"
+  - String:          LEA64r
+  - String:          ': '
+  - INST_LEA64r:     '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 14, Column: 10 }
+Function:        main
+Hotness:         45
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i43.peel136
+  - String:          "\n"
+  - String:          ADD32rr
+  - String:          ': '
+  - INST_ADD32rr:    '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          LEA64_32r
+  - String:          ': '
+  - INST_LEA64_32r:  '1'
+  - String:          "\n"
+  - String:          LEA64r
+  - String:          ': '
+  - INST_LEA64r:     '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 14, Column: 10 }
+Function:        main
+Hotness:         36
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i43.peel143
+  - String:          "\n"
+  - String:          ADD32rr
+  - String:          ': '
+  - INST_ADD32rr:    '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          LEA64_32r
+  - String:          ': '
+  - INST_LEA64_32r:  '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+  - String:          OR64ri32
+  - String:          ': '
+  - INST_OR64ri32:   '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 14, Column: 10 }
+Function:        main
+Hotness:         143
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.body.i43
+  - String:          "\n"
+  - String:          ADD32rr
+  - String:          ': '
+  - INST_ADD32rr:    '1'
+  - String:          "\n"
+  - String:          CMP64rr
+  - String:          ': '
+  - INST_CMP64rr:    '1'
+  - String:          "\n"
+  - String:          INC64r
+  - String:          ': '
+  - INST_INC64r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          LEA64_32r
+  - String:          ': '
+  - INST_LEA64_32r:  '1'
+  - String:          "\n"
+  - String:          MOV32rm
+  - String:          ': '
+  - INST_MOV32rm:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 28, Column: 11 }
+Function:        main
+Hotness:         100
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      cold_work.exit
+  - String:          "\n"
+  - String:          ADD32rr
+  - String:          ': '
+  - INST_ADD32rr:    '1'
+  - String:          "\n"
+  - String:          CMP32ri
+  - String:          ': '
+  - INST_CMP32ri:    '1'
+  - String:          "\n"
+  - String:          INC32r
+  - String:          ': '
+  - INST_INC32r:     '1'
+  - String:          "\n"
+  - String:          JCC_1
+  - String:          ': '
+  - INST_JCC_1:      '1'
+  - String:          "\n"
+  - String:          JMP_1
+  - String:          ': '
+  - INST_JMP_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+Function:        main
+Hotness:         1
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '2'
+  - String:          "\n"
+  - String:          JMP_1
+  - String:          ': '
+  - INST_JMP_1:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: pgo_example.c, Line: 30, Column: 3 }
+Function:        main
+Hotness:         1
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      for.cond.cleanup18
+  - String:          "\n"
+  - String:          POP64r
+  - String:          ': '
+  - INST_POP64r:     '3'
+  - String:          "\n"
+  - String:          CALL64pcrel32
+  - String:          ': '
+  - INST_CALL64pcrel32: '2'
+  - String:          "\n"
+  - String:          XOR32rr
+  - String:          ': '
+  - INST_XOR32rr:    '2'
+  - String:          "\n"
+  - String:          LEA64r
+  - String:          ': '
+  - INST_LEA64r:     '1'
+  - String:          "\n"
+  - String:          MOV64rr
+  - String:          ': '
+  - INST_MOV64rr:    '1'
+  - String:          "\n"
+  - String:          RET64
+  - String:          ': '
+  - INST_RET64:      '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+Function:        main
+Hotness:         0
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          JMP_1
+  - String:          ': '
+  - INST_JMP_1:      '1'
+  - String:          "\n"
+  - String:          MOV32ri
+  - String:          ': '
+  - INST_MOV32ri:    '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionCount
+DebugLoc:        { File: pgo_example.c, Line: 18, Column: 0 }
+Function:        main
+Hotness:         1
+Args:
+  - NumInstructions: '185'
+  - String:          ' instructions in function'
+...
