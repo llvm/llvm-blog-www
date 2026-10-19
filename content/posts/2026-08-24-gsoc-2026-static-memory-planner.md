@@ -1,6 +1,6 @@
 ---
 author: "Krish Gupta"
-date: "2026-08-24"
+date: "2026-10-19"
 tags: ["gsoc", "mlir", "bufferization", "memory-planning"]
 title: "Static Memory Planner for MLIR: A GSoC 2026 Journey"
 ---
