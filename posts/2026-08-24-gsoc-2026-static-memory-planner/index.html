@@ -1,0 +1,189 @@
+<!doctype html><html lang=en><head><title>Static Memory Planner for MLIR: A GSoC 2026 Journey - The LLVM Project Blog</title>
+<meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="LLVM Project News and Details from the Trenches"><meta name=author content="Krish Gupta"><meta property="og:url" content="https://blog.llvm.org/posts/2026-08-24-gsoc-2026-static-memory-planner/"><meta property="og:site_name" content="The LLVM Project Blog"><meta property="og:title" content="Static Memory Planner for MLIR: A GSoC 2026 Journey"><meta property="og:description" content="Hi, I am Krish Gupta. Over the summer I worked with the LLVM Foundation as part of Google Summer of Code 2026 on building a static memory planner for MLIR, mentored by Matthias Springer and Javed Absar."><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2026-10-19T00:00:00+00:00"><meta property="article:modified_time" content="2026-10-19T00:00:00+00:00"><meta property="article:tag" content="GSoC"><meta property="article:tag" content="Mlir"><meta property="article:tag" content="Bufferization"><meta property="article:tag" content="Memory-Planning"><meta name=twitter:card content="summary"><meta name=twitter:title content="Static Memory Planner for MLIR: A GSoC 2026 Journey"><meta name=twitter:description content="Hi, I am Krish Gupta. Over the summer I worked with the LLVM Foundation as part of Google Summer of Code 2026 on building a static memory planner for MLIR, mentored by Matthias Springer and Javed Absar."><meta name=generator content="Hugo 0.128.0"><link rel=stylesheet href=https://blog.llvm.org/css/normalize.min.css><link rel=stylesheet href=https://blog.llvm.org/fontawesome/css/all.min.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda"><link rel=stylesheet type=text/css href=https://blog.llvm.org/css/styles.css></head><body><div id=container><header><h1><a href=https://blog.llvm.org/>The LLVM Project Blog</a></h1><ul id=social-media><li><a href=https://www.facebook.com/llvmorg title=Facebook><i class="fab fa-facebook fa-lg"></i></a></li><li><a href=https://github.com/llvm title=GitHub><i class="fab fa-github fa-lg"></i></a></li><li><a href=https://twitter.com/llvmorg title=Twitter><i class="fab fa-twitter fa-lg"></i></a></li><li><a href=https://www.youtube.com/c/LLVMPROJ title=Youtube><i class="fab fa-youtube fa-lg"></i></a></li></ul><p><em>LLVM Project News and Details from the Trenches</em></p></header><nav><ul><li><a href=https://blog.llvm.org/about><i class="fa-li fa fa-lg"></i><span>About</span></a></li><li><a href=https://blog.llvm.org/posts><i class="fa-li fa fa-lg"></i><span>Posts</span></a></li><li><a href=https://blog.llvm.org/tags><i class="fa-li fa fa-lg"></i><span>Tags</span></a></li><li><a href=https://llvm.org/><i class="fa-li fa fa-lg"></i><span>llvm.org</span></a></li></ul></nav><main><article><h1>Static Memory Planner for MLIR: A GSoC 2026 Journey</h1><aside><ul><li>By Krish Gupta</li><li><time class=post-date datetime=2026-10-19T00:00:00Z>Oct 19, 2026</time></li><li><em><a href=https://blog.llvm.org/tags/gsoc>#gsoc</a>
+,
+<a href=https://blog.llvm.org/tags/mlir>#mlir</a>
+,
+<a href=https://blog.llvm.org/tags/bufferization>#bufferization</a>
+,
+<a href=https://blog.llvm.org/tags/memory-planning>#memory-planning</a></em></li><li>10 minute read</li></ul></aside><p>Hi, I am Krish Gupta. Over the summer I worked with the LLVM Foundation as part
+of <a href=https://summerofcode.withgoogle.com/programs/2026/projects/XsjxBQ9o>Google Summer of Code 2026</a>
+on building a <strong>static memory planner for MLIR</strong>, mentored by
+<a href=https://github.com/matthias-springer>Matthias Springer</a> and
+<a href=https://github.com/javedabsar1>Javed Absar</a>. This post walks through what we
+built, why it matters, and what the iterative process of landing it upstream
+actually looked like.</p><h2 id=the-problem>The Problem</h2><p>After bufferization, buffer lifetimes in MLIR IR are fully explicit: the
+compiler knows exactly when each allocation starts and ends (for static
+shapes; runtime-dependent allocations are handled conservatively). We use this
+information to eliminate redundant heap allocations through a static memory
+planner.</p><p>This matters for accelerator-oriented compilation. On many targets (embedded
+CPUs, DSPs, custom accelerators) heap allocation is either not allowed or
+slow, because access to main memory is expensive. Even where heap allocation
+is available, individual small allocations hurt performance through
+fragmentation and cache pressure. What you want instead is a single static
+arena whose layout is computed at compile time:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-mlir data-lang=mlir><span style=display:flex><span><span style=color:#75715e>// Before: three separate heap allocations
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>%a = <span style=color:#66d9ef>memref</span>.alloc() : <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>1024x</span><span style=color:#66d9ef>f32</span>&gt;  <span style=color:#75715e>// 4096 bytes
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>%b = <span style=color:#66d9ef>memref</span>.alloc() : <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>512x</span><span style=color:#66d9ef>f32</span>&gt;   <span style=color:#75715e>// 2048 bytes
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span><span style=color:#66d9ef>memref</span>.dealloc %a : <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>1024x</span><span style=color:#66d9ef>f32</span>&gt;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>memref</span>.dealloc %b : <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>512x</span><span style=color:#66d9ef>f32</span>&gt;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// After: one arena, two views
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>%arena = <span style=color:#66d9ef>memref</span>.alloc() : <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>6144x</span><span style=color:#66d9ef>i8</span>&gt;
+</span></span><span style=display:flex><span>%a = <span style=color:#66d9ef>memref</span>.view %arena[<span style=color:#ae81ff>0</span>][]  : <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>6144x</span><span style=color:#66d9ef>i8</span>&gt; to <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>1024x</span><span style=color:#66d9ef>f32</span>&gt;
+</span></span><span style=display:flex><span>%b = <span style=color:#66d9ef>memref</span>.view %arena[<span style=color:#ae81ff>4096</span>][]: <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>6144x</span><span style=color:#66d9ef>i8</span>&gt; to <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>512x</span><span style=color:#66d9ef>f32</span>&gt;
+</span></span><span style=display:flex><span><span style=color:#75715e>// ... uses of %a and %b ...
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span><span style=color:#66d9ef>memref</span>.dealloc %arena : <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>6144x</span><span style=color:#66d9ef>i8</span>&gt;
+</span></span></code></pre></div><p>The arena is <code>memref&lt;Nxi8></code> so it can hold buffers of different datatypes.
+<code>memref.view</code> reinterprets slices back to their original types with zero
+overhead. This is the core transformation the planner performs.</p><h2 id=how-the-pass-works>How the Pass Works</h2><p>The pass is a <code>FunctionOpInterface</code> pass: it runs per function and processes
+the entire function body in six steps:</p><pre tabindex=0><code>Step 1: Collect candidates: walk all memref.alloc ops, find their deallocs
+        via alias analysis, apply eligibility checks.
+Step 2: Build descriptors: compute (size, alignment, timeStart, timeEnd)
+        for each candidate using a single O(n+m) block scan.
+Step 3: Run the planner: feed descriptors into the chosen algorithm
+        (trivial sequential packing or best-fit with lifetime overlap).
+Step 4: Assign offsets: compute total arena size, assign byte offsets
+        to each candidate.
+Step 5: Create arena: allocate one memref&lt;Nxi8&gt; (or use a passed-in arg).
+Step 6: Rewrite: replace each alloc with a memref.view into the arena,
+        erase all associated deallocs.
+</code></pre><p>The core data structure is <code>AllocationCandidate</code>, which groups a
+<code>memref.alloc</code>, its set of potential deallocs (there can be more than one,
+reachable through alias chains), the computed byte offset, size, and alignment.
+The entire alias reasoning goes through <code>BufferViewFlowAnalysis</code>: a unified
+analysis that models how buffers flow through <code>arith.select</code>,
+<code>scf.if</code>/<code>scf.for</code> results, <code>cf</code> branches, and view ops without any
+op-type-specific code in the pass itself. The rest of the blog explains how we
+got there.</p><h2 id=pr-1-the-foundation-205125httpsgithubcomllvmllvm-projectpull205125>PR 1: The Foundation (<a href=https://github.com/llvm/llvm-project/pull/205125>#205125</a>)</h2><p>The first PR landed in late June and introduced the core pass:
+<code>static-memory-planner-analysis</code>. It handled the straightforward case (allocs
+and deallocs in the same basic block with a direct one-to-one relationship)
+and put in place the architecture everything else builds on:</p><ul><li><strong><code>trivialMemoryPlanner</code></strong>: a pure C++ function that takes a list of
+<code>(size, alignment, timeStart, timeEnd)</code> descriptors and returns offsets. Being
+a pure function means it can be unit tested independently and is easy to swap out.</li><li><strong><code>bestFitMemoryPlanner</code></strong>: a lifetime-aware algorithm that tries to reuse
+arena slots for allocations whose lifetimes do not overlap.</li><li><strong>Arena modes</strong>: <code>allocate</code> (create the arena inside the function) and <code>arg</code>
+(the arena is passed as a function argument, useful for external memory
+management).</li><li><strong>Alignment</strong>: the arena alignment is the LCM of all individual alignments,
+ensuring every view is correctly aligned regardless of datatype.</li></ul><p>The review process surfaced an important point early: upstream contribution
+culture expects every design decision to be justified and every edge case
+explicitly tested. The <code>javedabsar1</code> feedback on adding <code>timeStart</code>/<code>timeEnd</code>
+fields even before they were wired up was a preview of what was coming.</p><h2 id=pr-2-arithselect-deallocs-209106httpsgithubcomllvmllvm-projectpull209106>PR 2: arith.select Deallocs (<a href=https://github.com/llvm/llvm-project/pull/209106>#209106</a>)</h2><p>After the first PR landed, we hit the first real-world blocker. The
+<code>ownership-based-buffer-deallocation</code> pipeline routinely produces patterns like
+this:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-mlir data-lang=mlir><span style=display:flex><span>%a = <span style=color:#66d9ef>memref</span>.alloc() : <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>1024x</span><span style=color:#66d9ef>f32</span>&gt;
+</span></span><span style=display:flex><span>%b = <span style=color:#66d9ef>memref</span>.alloc() : <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>1024x</span><span style=color:#66d9ef>f32</span>&gt;
+</span></span><span style=display:flex><span>%sel = arith.select %cond, %a, %b : <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>1024x</span><span style=color:#66d9ef>f32</span>&gt;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>memref</span>.dealloc %sel : <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>1024x</span><span style=color:#66d9ef>f32</span>&gt;
+</span></span></code></pre></div><p>Here neither <code>%a</code> nor <code>%b</code> has a direct <code>memref.dealloc</code> user. The original
+pass just incremented a skip counter for both and moved on. The fix was a
+forward DFS over the use-def graph, following <code>BufferViewFlowOpInterface</code>
+(which <code>arith.select</code> implements) to find reachable deallocs.</p><p>This also required a <strong>reverse-alias safety guard</strong>: since <code>dealloc %sel</code> may
+free either <code>%a</code> or <code>%b</code>, erasing it after replacing both with arena views is
+only safe if all allocs it might free are managed by the arena. If any is not,
+the dealloc cannot be erased. The review cycle on this PR shaped the final
+approach: drop the group-constraint fixpoint in favour of the guard, emit hard
+errors (not silent skips) for missing deallocs, and improve the
+<code>buildAllocInfos</code> scan from O(n x m) to O(n+m) using a single upfront
+<code>DenseMap</code>.</p><h2 id=pr-3-scfif-and-the-architectural-shift-213634httpsgithubcomllvmllvm-projectpull213634>PR 3: scf.if and the Architectural Shift (<a href=https://github.com/llvm/llvm-project/pull/213634>#213634</a>)</h2><p>The deallocation pipeline also produces structured-control-flow patterns that
+the DFS could not follow:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-mlir data-lang=mlir><span style=display:flex><span><span style=color:#75715e>// Pattern 1: dealloc on the scf.if result
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>%a = <span style=color:#66d9ef>memref</span>.alloc() : <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>1024x</span><span style=color:#66d9ef>f32</span>&gt;
+</span></span><span style=display:flex><span>%0 = scf.if %c -&gt; <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>1024x</span><span style=color:#66d9ef>f32</span>&gt; {
+</span></span><span style=display:flex><span>  scf.yield %a
+</span></span><span style=display:flex><span>} else {
+</span></span><span style=display:flex><span>  scf.yield %b
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>memref</span>.dealloc %0   <span style=color:#75715e>// dealloc is on %0, not %a
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// Pattern 2: dealloc inside the scf.if body
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>%a = <span style=color:#66d9ef>memref</span>.alloc() : <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>1024x</span><span style=color:#66d9ef>f32</span>&gt;
+</span></span><span style=display:flex><span>scf.if %c {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>memref</span>.dealloc %a
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>The mentor pointed to <code>BufferViewFlowAnalysis</code>
+(<code>Transforms/BufferViewFlowAnalysis.h</code>), a unified alias analysis already used
+elsewhere in the bufferization pipeline. It models buffer flow through all
+relevant op types in one graph: <code>BufferViewFlowOpInterface</code> for <code>arith.select</code>,
+<code>RegionBranchOpInterface</code> for <code>scf.if</code>/<code>scf.for</code>, <code>BranchOpInterface</code> for <code>cf</code>
+branches, and <code>ViewLikeOpInterface</code> for <code>memref.view</code>. One analysis covers all cases.</p><p>We deleted the hand-rolled DFS entirely and replaced it with two calls:</p><ul><li><strong><code>analysis.resolve(alloc)</code></strong> gives the forward alias set: every SSA value the alloc
+may flow into. Walking users of each alias finds all potential deallocs.</li><li><strong><code>analysis.resolveReverse(dealloc.getMemref())</code></strong> gives the reverse alias set: every
+alloc that flows into the dealloc&rsquo;s operand. Used by the safety guard.</li></ul><p>Two design decisions made this correct:</p><p><strong>Lifetime anchoring via <code>findAncestorOpInBlock</code>.</strong> A dealloc nested inside an
+<code>scf.if</code> body is in a different block. <code>Block::findAncestorOpInBlock</code> walks up
+the parent chain and returns the enclosing <code>scf.if</code> op in the plan block. That
+op&rsquo;s index becomes <code>timeEnd</code> (conservative, but correct). The buffer is
+considered live until the entire <code>scf.if</code> completes.</p><p><strong>The reverse-alias guard (again, but stronger).</strong> For pattern 2 above, the
+dealloc inside the <code>scf.if</code> body is attributed to <code>%a</code> and correctly anchored.
+For the scf.if-sharing-a-nested-alloc case:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-mlir data-lang=mlir><span style=display:flex><span>%a = <span style=color:#66d9ef>memref</span>.alloc()           <span style=color:#75715e>// entry block
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>%0 = scf.if %c -&gt; <span style=color:#66d9ef>memref</span>&lt;<span style=color:#ae81ff>1024x</span><span style=color:#66d9ef>f32</span>&gt; {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>memref</span>.dealloc %a
+</span></span><span style=display:flex><span>  %b = <span style=color:#66d9ef>memref</span>.alloc()         <span style=color:#75715e>// NESTED -- not arena-managed
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  scf.yield %b
+</span></span><span style=display:flex><span>} else {
+</span></span><span style=display:flex><span>  scf.yield %a
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>memref</span>.dealloc %0   <span style=color:#75715e>// may free EITHER %a OR %b
+</span></span></span></code></pre></div><p><code>resolveReverse(%0)</code> traces back to both <code>%a</code> and <code>%b</code>. Since <code>%b</code> is nested
+(not in the plan block), the guard fires: <code>%a</code> is conservatively skipped. No
+miscompile, no leak.</p><p>The <code>else</code> vs <code>then</code> branch distinction turned out to be irrelevant to the
+analysis: it works on SSA alias sets, not branch structure.</p><h2 id=pr-4-scffor-test-cases-215221httpsgithubcomllvmllvm-projectpull215221>PR 4: scf.for Test Cases (<a href=https://github.com/llvm/llvm-project/pull/215221>#215221</a>)</h2><p>After the <code>BufferViewFlowAnalysis</code> switch, <code>scf.for</code> patterns were handled
+correctly with no additional pass changes. This PR documented the results:</p><ul><li>Allocs nested inside an <code>scf.for</code> body are skipped (same rule as nested <code>scf.if</code>).</li><li><code>scf.for</code> with <code>iter_args</code> passing buffers across iterations hits the guard
+in all three mentor patterns: the per-iteration nested alloc makes erasing
+any shared dealloc unsafe.</li><li>The canonical valid case (entry-block allocs used inside the loop body with
+deallocs in the entry block) transforms cleanly. The loop body gets arena
+views instead of raw alloc pointers.</li></ul><p>This PR was deliberately tests-only. Having a clear separation between &ldquo;this
+was a correct transformation that just needed to be documented&rdquo; and &ldquo;this
+required a new design decision&rdquo; kept the review simple.</p><h2 id=pr-5-edge-and-error-cases-216610httpsgithubcomllvmllvm-projectpull216610>PR 5: Edge and Error Cases (<a href=https://github.com/llvm/llvm-project/pull/216610>#216610</a>)</h2><p>The final PR stress-tested the pass with patterns existing tests did not cover
+and documented the results. Eight new analysis tests and four new error tests:</p><ul><li>Static and dynamic shapes coexisting in one function (static transforms,
+dynamic is skipped without interference).</li><li>Both branches of an <code>scf.if</code> deallocating the same alloc (duplicate dealloc
+ops in the same arena slot, correctly deduplicated).</li><li>Dealloc at depth 3: <code>findAncestorOpInBlock</code> walks up any depth, not just one level.</li><li>Multi-hop alias chain: <code>%a/%b -> %0 -> %1 -> dealloc</code>. The <code>resolve()</code> BFS
+follows the full chain.</li><li>Cross-interface chain: <code>arith.select -> scf.if -> dealloc</code>. Two different
+interface implementations in one alias path, exercised by a single
+<code>resolve()</code> call.</li><li><code>cf.cond_br</code> to a sibling block rejected as unstructured control flow (same
+error as <code>cf.br</code>).</li><li>Walk-stops-on-first-error: <code>WalkResult::interrupt()</code> points the diagnostic at
+the problematic alloc, not at subsequent valid ones.</li></ul><p>One test was removed during review: a dynamic alloc with no dealloc placed in
+the errors file. It had no <code>expected-error</code> annotation since dynamic shapes are
+silently skipped, not errored. A test without a defined diagnostic output does
+not belong in a <code>-verify-diagnostics</code> file. Lesson learned.</p><h2 id=challenges>Challenges</h2><p><strong>The group constraint dead-end.</strong> The first implementation of <code>arith.select</code>
+support used a fixpoint iteration to enforce that all allocs sharing a dealloc
+must either all go into the arena or all be skipped. This was correct but
+complicated and fragile. Switching to the reverse-alias guard removed the
+fixpoint entirely: the guard is a simpler, more direct statement of the same
+invariant.</p><p><strong>Understanding what already exists.</strong> The biggest conceptual shift was
+realizing that <code>BufferViewFlowAnalysis</code> already did everything the hand-rolled
+DFS was trying to do, and more. The lesson: before implementing a bespoke
+traversal, read the existing analysis infrastructure. You will often find that
+the right tool exists and using it both simplifies your code and gives you
+correctness for free on patterns you had not thought about.</p><p><strong>Upstream review culture.</strong> Every error message, every test comment, every
+variable name is scrutinized. Rephrasing &ldquo;unstructured control flow is not
+supported&rdquo; replaced a longer, less precise message. Swapping the order of two
+branches in a test to make the alias chain more obvious. These details matter
+because the tests and messages are the documentation that future contributors
+will read.</p><h2 id=what-was-built>What Was Built</h2><table><thead><tr><th>PR</th><th>What landed</th></tr></thead><tbody><tr><td><a href=https://github.com/llvm/llvm-project/pull/205125>#205125</a></td><td>Core pass, trivial + best-fit planners, alignment, arena modes</td></tr><tr><td><a href=https://github.com/llvm/llvm-project/pull/209106>#209106</a></td><td>arith.select dealloc chains, reverse-alias guard, O(n+m) lifetime scan</td></tr><tr><td><a href=https://github.com/llvm/llvm-project/pull/213634>#213634</a></td><td>BufferViewFlowAnalysis integration, scf.if support (nested deallocs + result aliases)</td></tr><tr><td><a href=https://github.com/llvm/llvm-project/pull/215221>#215221</a></td><td>scf.for test coverage, canonical loop case documented</td></tr><tr><td><a href=https://github.com/llvm/llvm-project/pull/216610>#216610</a></td><td>Edge and error case test suite (26 analysis tests, 4 error tests)</td></tr></tbody></table><p>The final pass lives in <code>StaticMemoryPlannerAnalysis.cpp</code>.</p><h2 id=future-work>Future Work</h2><p>The immediate open question is lifting the entry-block restriction: only allocs
+in the function&rsquo;s entry block are planned today. Two concrete directions we
+discussed:</p><p><strong>Path-sensitive lifetime tightening.</strong> The current <code>[timeStart, timeEnd]</code>
+interval model treats branches conservatively: a buffer freed inside an
+<code>scf.if</code> then-branch is considered live until the entire <code>scf.if</code> completes,
+even though the else path never held it. Adding dominance-based non-overlap
+detection (using MLIR&rsquo;s existing <code>DominanceInfo</code>) would let mutually exclusive
+branches share arena slots, unlocking patterns like:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-mlir data-lang=mlir><span style=display:flex><span>%0 = alloc()
+</span></span><span style=display:flex><span>%1 = scf.if %c {
+</span></span><span style=display:flex><span>  %2 = alloc()    <span style=color:#75715e>// could share %0&#39;s slot -- they never co-exist
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  dealloc(%0)
+</span></span><span style=display:flex><span>  yield %2
+</span></span><span style=display:flex><span>} else {
+</span></span><span style=display:flex><span>  yield %0
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>dealloc(%1)
+</span></span></code></pre></div><p><strong>Plugging in stronger planning algorithms.</strong> The planner function is pure and
+separately testable, so dropping in a better algorithm is straightforward.
+Best-fit is already there. Beyond that, interval graph / graph-coloring
+approaches and algorithms like
+<a href=https://github.com/google/minimalloc>minimalloc</a> map directly onto the
+<code>(size, alignment, timeStart, timeEnd)</code> interface the planner already expects.</p><p><strong>Memory space awareness.</strong> Heterogeneous targets have multiple distinct memory
+regions with different capacity constraints. Extending the planner to assign
+buffers to specific memory spaces while respecting per-space limits is a natural
+follow-on.</p><h2 id=acknowledgements>Acknowledgements</h2><p>Huge thanks to my mentors Matthias Springer and Javed Absar for the patient and
+precise review feedback, for pointing at <code>BufferViewFlowAnalysis</code> at exactly
+the right moment, and for treating every PR as a teaching opportunity. The LLVM
+community&rsquo;s review culture is demanding in the best possible way.</p><p>The project GSoC page is at
+<a href=https://summerofcode.withgoogle.com/programs/2026/projects/XsjxBQ9o>summerofcode.withgoogle.com/programs/2026/projects/XsjxBQ9o</a>.
+Feel free to reach out with questions or to build on this work at
+<a href=mailto:krishgupta2832@gmail.com>krishgupta2832@gmail.com</a>.</p></article><section class=post-nav><ul><li><a href=https://blog.llvm.org/posts/2026-gsoc-improving-lit/><i class="fa fa-chevron-circle-left"></i> GSoC 2026: Improving lit</a></li><li></li></ul></section></main><footer><ul><li><h6>llvm.org |
+Rendered by <a href=https://gohugo.io title=Hugo>Hugo</a> |
+<a href=https://blog.llvm.org/index.xml>Subscribe</a></h6></li></ul></footer></div><script src=https://blog.llvm.org/js/scripts.js></script></body></html>
