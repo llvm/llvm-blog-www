@@ -1,6 +1,6 @@
 ---
 author: "Sukumar Sawant"
-date: "2026-08-22"
+date: "2026-11-02"
 tags: ["GSoC", "libc", "math", "floating-point"]
 title: "GSoC 2026: Enable float80/float128 on Unsupported Targets for LLVM libc"
 ---
