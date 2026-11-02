@@ -7,7 +7,7 @@ title: "GSoC 2026: Merging Host and Device ClangIR for Cross-Boundary CUDA/HIP O
 
 Hi, I'm David Rivera, a third-year computer science undergrad at Ontario Tech University in Canada. For Google Summer of Code 2026 I worked on the [Host-Device CIR Combine Pipeline](https://discourse.llvm.org/t/gsoc-2026-host-device-cir-combine-pipeline-project-idea-discussion/89623), mentored by Konstantinos Parasyris (Dinos) and Joseph Huber.
 
-I started contributing to ClangIR for the love of the game: I wanted to understand how compilers work underneath. GPU support was close to nonexistent at the time, so I took ownership of it, and with the help of the maintainers I got to really own a portion of the compiler stack.
+I started contributing to ClangIR for the love of the game: I wanted to understand how compilers work underneath. GPU support in ClangIR was limited at the time, so I started working on it, and with the help of the maintainers I became a valuable contributor to the project, especially on the components related to GPU compilation.
 
 This project started as Dinos's idea. He had a [work-in-progress merge pipeline](https://github.com/llvm/clangir/pull/2097) in the ClangIR incubator, and in January I added the driver-side support for CUDA on top of his branch. Before GSoC I also spent months landing CUDA and HIP support upstream ([tracking issue](https://github.com/llvm/llvm-project/issues/179278)), which this project depends on and which is like another mini GSoC project by itself.
 
@@ -16,8 +16,8 @@ GSoC took me from sending patches to coordinating with the community: contributi
 TL;DR:
 
 - We have a prototype that merges the host and device ClangIR modules of a CUDA or HIP translation unit into one module, runs passes that see both sides, and splits them back into the normal pipelines. We've measured real benefits with it.
-- Forwarding alias information from host launch sites gave us the best results: a 1.67× geomean in GPU-region time on PolyBench/GPU on an NVIDIA A10, with caveats I go through below.
-- The prototype isn't merged upstream yet. The foundations have landed, we have a roadmap for the rest, and we'll be working on it in the coming months.
+- We implemented three optimizations on top of it: kernel argument constant propagation, launch bounds propagation, and alias information forwarded from host launch sites. Alias information provides by far the largest gains: a 1.67× geomean in GPU-region time on PolyBench/GPU on an NVIDIA A10, with caveats I go through below.
+- The prototype isn't merged upstream yet. The foundations have landed, including [the container](https://github.com/llvm/llvm-project/pull/206576) and the work that followed [Dinos's RFC](https://discourse.llvm.org/t/rfc-clangir-making-cir-pipeline-boundaries-first-class-driver-artifacts/90998), we have a roadmap for the rest, and we'll be working on it in the coming months.
 
 # Background
 
@@ -107,7 +107,7 @@ void __device_stub__acc(...) {
 }
 ```
 
-The link between the stub and the kernel only exists at runtime, through `__cudaRegisterFunction`. So the first analysis I wrote, `KernelBindingTable`, recovers that mapping statically: each host stub, its device kernel in each architecture's module, and every launch site with its arguments and grid and block geometry. Every pass below is built on it.
+The link between the stub and the kernel only exists at runtime, through `__cudaRegisterFunction`. So the first analysis I wrote, `KernelBindingTable`, recovers that mapping statically: each host stub, its device kernel in each architecture's module, and every launch site with its arguments and grid and block geometry. Every pass below is built on it. Reflecting on the implementation, we believe this mapping should be an operation in the IR rather than an analysis, which I come back to under future work.
 
 ## What made this harder than it looks
 
@@ -124,7 +124,7 @@ We started with a couple of passes that were partly a concept of how cross-bound
 | Kernel argument constant propagation | Folds an argument into the kernel when every launch passes the same constant | Neutral on its own (1.0016× at 1× size, 0.9996× at 2×), but binaries were 11.8% smaller |
 | Launch bounds propagation | Records the largest constant block size as `nvvm.maxntid`, like a user-written `__launch_bounds__` | 0.9998× geomean, and the SASS (NVIDIA's machine code) was byte-identical on all 21 programs |
 
-We expected launch bounds to be the biggest early win, since PolyBench declares its block sizes statically. It did nothing. NVPTX has no register allocator in LLVM, so `ptxas` makes the real decisions, and `maxntid` is only an upper bound, which constrains nothing when kernels sit far below the register ceiling. Forcing it by hand on HeCBench kernels with stock `nvcc` gained nothing either. The pass only runs for NVIDIA today. Experimenting with AMD is something we still have to do, and we're aware we might see different results on AMD or on Intel targets, although Intel isn't something we support here.
+We expected launch bounds to be the biggest early win, since PolyBench declares its block sizes statically. On this suite the hint is invariant, and the reason is useful. NVPTX has no register allocator in LLVM, so `ptxas` makes the real decisions, and `maxntid` only gives it room to use more registers per thread. These kernels don't spill registers to memory, so that room has nothing to relieve. The HeCBench kernels we forced by hand with stock `nvcc` were register-lean as well and showed the same result. We expect kernels with higher register pressure, the ones that actually spill, to benefit from this optimization, and we still need to widen our search for candidates like that. The pass only runs for NVIDIA today. Experimenting with AMD is something we still have to do, and we're aware we might see different results on AMD or on Intel targets, although Intel isn't something we support here.
 
 So by early September the infrastructure worked and nothing was faster.
 
@@ -256,9 +256,9 @@ So the PolyBench numbers don't carry over to real code today. The pattern is les
 
 # Limitations
 
-- **Separate TUs hide definitions.** A launch of a kernel defined in another TU is opaque, and the pipeline is non-RDC only. Fixing this properly is effectively CIR-level LTO.
+- **Separate TUs hide definitions.** We merge one TU at a time, so a launch of a kernel defined in another TU only sees a declaration. The pipeline is also non-RDC only, so a device function calling a device function in another TU isn't covered either. Fixing this properly is effectively CIR-level LTO.
 - **Tracing facts across the boundary is hard.** When the launch sits in a function and the allocation happens in its caller, we can't walk back and see every allocation, so the kernel gets rejected. A proper interprocedural framework would help more than another pass.
-- **Specialization has a cost.** Cloning grows the binary, as `chemv` shows, and it needs a cost model we don't have yet.
+- **Specialization has a cost.** Cloning grows the binary, as `chemv` shows, so a cost model that decides when a clone is worth it would be great, and looking at what LLVM does for specialization is a good starting point.
 
 # Status and future work
 
@@ -268,9 +268,9 @@ So the PolyBench numbers don't carry over to real code today. The pattern is les
 | Emitting and resuming `.cir` through `cc1` | Upstream, stop point before ABI lowering still open |
 | Driver integration, `cir-offload-merge`, binding table, passes | Fork, on [`gsoc/combine-cir`](https://github.com/RiverDave/llvm-project/tree/gsoc/combine-cir) |
 
-I'm staying on this after GSoC. The plan is to upstream aggressively until we reach a point that needs an RFC, which is what we settled on after talking with one of the maintainers. The bigger goal is a much more generic representation of GPU programs in CIR:
+I'm staying on this after GSoC, and I'm planning to upstream all of these findings. The bigger goal is a much more generic representation of GPU programs in CIR, one that works across different GPU targets and runtimes:
 
-- **Launches connected through the call graph.** `KernelBindingTable` is one of the sloppy parts of the current implementation, and we want to get rid of it. MLIR has generic transformations like `symbol-dce` and `sccp` that dialects opt into through interfaces, and we could rely on them if a launch connected the call graph on the host to the kernel on the device. A higher-level launch op would make that edge explicit in the IR. This was also some of the feedback we got at the LLVM Developers' Meeting.
+- **Launches connected through the call graph.** `KernelBindingTable` is one of the sloppy parts of the current implementation, and we want to get rid of it. MLIR has generic transformations like `symbol-dce` and `sccp` that dialects opt into through interfaces, and we could rely on them if a launch connected the call graph on the host to the kernel on the device. A higher-level launch op, similar to what the `gpu` dialect has, would make that edge explicit in the IR. This was also some of the feedback we got at the LLVM Developers' Meeting.
 - **Generic runtime operations.** The noalias pass has to recognize `cudaMalloc`, and with today's shape we'd have to track every runtime's allocation, whether that's CUDA, HIP, liboffload or anything else. Ideally these operations would be generic in the CIR dialect, which is in part what the `gpu` dialect does.
 
 This representation can also introduce new diagnostics, because it sees both sides of the program. A [small prototype](https://github.com/RiverDave/llvm-project/tree/gsoc/diag-1-kernel-arg-layout-check) warns when a kernel argument's layout differs between host and device.
