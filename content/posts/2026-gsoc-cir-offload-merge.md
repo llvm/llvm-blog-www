@@ -256,7 +256,7 @@ So the PolyBench numbers don't carry over to real code today. The pattern is les
 
 # Limitations
 
-- **Separate TUs hide definitions.** We merge one TU at a time, so a launch of a kernel defined in another TU only sees a declaration. The pipeline is also non-RDC only, so a device function calling a device function in another TU isn't covered either. Fixing this properly is effectively CIR-level LTO.
+- **Separate TUs hide definitions.** We merge one TU at a time, so a launch of a kernel defined in another TU only sees a declaration. The pipeline is also non-RDC only, so a device function calling a device function in another TU isn't covered either. Solving this needs visibility across translation units, which is an inherent problem in compilers, not one specific to this pipeline.
 - **Tracing facts across the boundary is hard.** When the launch sits in a function and the allocation happens in its caller, we can't walk back and see every allocation, so the kernel gets rejected. A proper interprocedural framework would help more than another pass.
 - **Specialization has a cost.** Cloning grows the binary, as `chemv` shows, so a cost model that decides when a clone is worth it would be great, and looking at what LLVM does for specialization is a good starting point.
 
