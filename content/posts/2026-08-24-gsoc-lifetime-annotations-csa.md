@@ -1,6 +1,6 @@
 ---
 author: "Benedek Kaibás"
-date: "2026-08-24"
+date: "2026-11-08"
 tags: ["GSoC", "clang", "static analyzer", "lifetime"]
 title: "GSoC 2026 - Teach the Clang Static Analyzer to understand lifetime annotations"
 ---
