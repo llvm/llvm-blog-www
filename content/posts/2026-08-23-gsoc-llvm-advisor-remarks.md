@@ -1,26 +1,38 @@
 ---
 author: "Kamini Banait"
 date: "2026-08-23"
-tags: ["GSoC", "llvm-advisor", "optimization remarks", "visualization", "tooling"]
+tags:
+  ["GSoC", "llvm-advisor", "optimization remarks", "visualization", "tooling"]
 title: "GSoC 2026: llvm-advisor - Optimization Remarks & Visualizations"
 ---
 
 This summer I worked on **llvm-advisor**, LLVM's web-based compiler advisor, as
-part of Google Summer of Code 2026. The goal was to make optimization remarks
-(the diagnostics emitted by `clang -fsave-optimization-record`) searchable,
-comparable, and visual.
+part of Google Summer of Code 2026. llvm-advisor was started during last year's
+GSoC by [Miguel Cárdenas](https://blog.llvm.org/posts/2025-08-31-gsoc-llvm-advisor/),
+and this year I extended it with optimization-remarks storage, search, heatmap,
+Code Explorer, PGO hotness, and snapshot diff. The goal was to make optimization
+remarks (the diagnostics emitted by `clang -fsave-optimization-record`)
+searchable, comparable, and visual.
 
-Let's walk through a real example to see how it works. I took a small C program that was missing a
-vectorization opportunity,
-used llvm-advisor to find the exact remark, changed one function from
-`noinline` to `static inline`, and measured the result.
+Optimization remarks are the compiler's way of explaining its decisions back to
+you. Every time Clang decides to vectorize a loop, inline a call, or give up on
+an optimization, it can emit a structured diagnostic tied to a source location.
+Without these remarks, the only way to reconstruct what happened is to read
+assembly or rely on intuition. With remarks however, you can ask targeted questions: "Why wasn't this loop vectorized?", "Did my change help?", "Which missed remark is
+actually worth fixing?" Real projects can produce millions of these remarks, so
+you need a tool that can filter, aggregate, and visualize them. That's what
+llvm-advisor does.
 
-The source files for the example are in this post's repo under
-`static/demo/baseline.c` and `static/demo/optimized.c`.
+This matters whether you're a compiler developer tuning inlining or vectorization heuristics, a user upgrading your toolchain and watching for regressions, or someone making performance-critical source changes. The example here is small for a walkthrough, but the workflow remains the same and similar bottlenecks show up in production code, and a large build can easily emit more remarks than a person can go through by hand. This is where the viewer helps: instead of drowning in raw remark data, you can narrow things down to the handful of diagnostics that actually point at a problem.
+
+Let's walk through the example to see how it works. I took a small C program
+that was missing a vectorization opportunity, used llvm-advisor to find the exact
+remark, changed one function from `noinline` to `static inline`, and measured
+the result.
 
 The work is submitted as a single pull request against `llvm/llvm-project`:
 
-* [`llvm/llvm-project#218692`](https://github.com/llvm/llvm-project/pull/218692) — the full optimization-remarks feature on top of the `minimal-advisor` foundation.
+- [`llvm/llvm-project#218692`](https://github.com/llvm/llvm-project/pull/218692): the full optimization-remarks feature on top of the `minimal-advisor` foundation.
 
 ---
 
@@ -90,10 +102,10 @@ Open `http://127.0.0.1:8080` and press `g r` for the remarks view. The summary
 card shows 137 remarks, and the top pass/name table immediately surfaces the
 problem:
 
-| Pass | Remark | Total | Missed | Passed | Analysis |
-|------|--------|------:|-------:|-------:|---------:|
-| loop-vectorize | CantVectorizeLibcall | 11 | 11 | 0 | 0 |
-| loop-vectorize | MissedDetails | 11 | 11 | 0 | 0 |
+| Pass           | Remark               | Total | Missed | Passed | Analysis |
+| -------------- | -------------------- | ----: | -----: | -----: | -------: |
+| loop-vectorize | CantVectorizeLibcall |    11 |     11 |      0 |        0 |
+| loop-vectorize | MissedDetails        |    11 |     11 |      0 |        0 |
 
 The heatmap shows the same thing grouped by function and line:
 
@@ -120,14 +132,15 @@ source line that produced it.
 If you open `baseline.opt.yaml`, the relevant entry is:
 
 ```yaml
---- !Missed
-Pass:            loop-vectorize
-Name:            CantVectorizeLibcall
-DebugLoc:        { File: 'baseline.c', Line: 10, Column: 12 }
-Function:        process
+---
+!Missed
+Pass: loop-vectorize
+Name: CantVectorizeLibcall
+DebugLoc: { File: "baseline.c", Line: 10, Column: 12 }
+Function: process
 Args:
-  - String:          'loop not vectorized: '
-  - String:          'call instruction cannot be vectorized'
+  - String: "loop not vectorized: "
+  - String: "call instruction cannot be vectorized"
 ```
 
 Line 10 is the `a[i] = work(a[i])` assignment. The loop cannot be vectorized
@@ -156,32 +169,33 @@ void process(int *a, int n) {
 Recompile, re-import into a new snapshot, and look at the remarks again. The
 top pass/name table now shows:
 
-| Pass | Remark | Total | Missed | Passed | Analysis |
-|------|--------|------:|-------:|-------:|---------:|
-| loop-vectorize | Vectorized | 13 | 0 | 13 | 0 |
+| Pass           | Remark     | Total | Missed | Passed | Analysis |
+| -------------- | ---------- | ----: | -----: | -----: | -------: |
+| loop-vectorize | Vectorized |    13 |      0 |     13 |        0 |
 
 ![llvm-advisor remarks view after the fix, showing loop-vectorize Vectorized for the process loop](/img/2026-08-23-gsoc-llvm-advisor-remarks-demo-optimized-remarks.png)
 
 The raw remark in `optimized.opt.yaml` confirms the loop was vectorized:
 
 ```yaml
---- !Passed
-Pass:            loop-vectorize
-Name:            Vectorized
-DebugLoc:        { File: 'optimized.c', Line: 8, Column: 3 }
-Function:        process
+---
+!Passed
+Pass: loop-vectorize
+Name: Vectorized
+DebugLoc: { File: "optimized.c", Line: 8, Column: 3 }
+Function: process
 Args:
-  - String:          'vectorized '
-  - String:          ''
-  - String:          'loop (vectorization width: '
-  - VectorizationFactor: '4'
-  - String:          ', interleaved count: '
-  - InterleaveCount: '2'
-  - String:          ')'
+  - String: "vectorized "
+  - String: ""
+  - String: "loop (vectorization width: "
+  - VectorizationFactor: "4"
+  - String: ", interleaved count: "
+  - InterleaveCount: "2"
+  - String: ")"
 ```
 
-The change is small, but the performance difference is real. More importantly,
-llvm-advisor told me *which* remark to act on.
+It's a small change, but it makes a real difference, and llvm-advisor helps point out
+the remarks worth fixing.
 
 ### Snapshot diff: before and after
 
@@ -220,15 +234,21 @@ can now be inlined:
 The diff answers the question "What changed in the remarks between the two
 builds?" without re-parsing files or writing a custom script.
 
+This diff workflow pinpoints exactly which remarks shifted. On large projects,
+remarks can be overwhelming, but filtering, aggregation, and PGO hotness help you
+prioritize which ones to investigate.
+
 ---
 
 ## PGO hotness: which remark matters most?
 
-The vectorization example is tiny. In a real program, dozens of files can emit
-missed-remark warnings. PGO hotness tells you which ones are worth fixing first.
+The vectorization example is tiny. In a real program, dozens of files can emit missed-remark warnings. PGO adds a profile-derived `Hotness` value to
+remarks, which gives you workload context and tells you which ones are worth fixing first.
 
-Take `pgo_example.c`. The training run calls `hot_work` one million times and
-`cold_work` one hundred times:
+### Small walkthrough: hot and cold loops
+
+To make the contrast easy to see, this small program calls `hot_work` one
+million times and `cold_work` one hundred times:
 
 ```c
 #include <stdio.h>
@@ -266,8 +286,7 @@ int main(int argc, char **argv) {
 }
 ```
 
-Generate and merge a profile, then compile with `-fprofile-use` while keeping
-remarks enabled:
+Generate a profile, then compile with profile use and remarks enabled:
 
 ```bash
 clang -fprofile-generate -O3 -g -fsave-optimization-record pgo_example.c -o pgo_train
@@ -277,14 +296,15 @@ clang -fprofile-use=pgo_example.profdata -O3 -g -fsave-optimization-record \
   -c pgo_example.c -o pgo_example.o
 ```
 
-Import `pgo_example.opt.yaml` and open the heatmap (`g h`). The two `hot_work`
-lines show as **Critical** at 100% hotness, while the `cold_work` lines are
-**Low**:
+Import `pgo_example.opt.yaml` and open the heatmap (`g h`). Clang inlines both
+helpers into `main`, so the hot loop at lines 6 and 7 appears under `main` and
+reaches 100% of the heatmap's normalized scale. The `cold_work` loop is marked
+Low.
 
-![llvm-advisor heatmap for pgo_example.c showing hot_work at 100% hotness and cold_work at low hotness](/img/2026-08-23-gsoc-llvm-advisor-remarks-pgo-heatmap.png)
+![llvm-advisor heatmap for pgo_example.c showing the hot loop at 100% normalized hotness and the cold loop at low hotness](/img/2026-08-23-gsoc-llvm-advisor-remarks-pgo-heatmap.png)
 
-Switch to Code Explorer and filter by `loop-vectorize`. Both loops have remarks,
-but the heatmap already told you which one to optimize first:
+In Code Explorer, filter by `loop-vectorize` to inspect the remarks on both
+loops:
 
 ![llvm-advisor Code Explorer for pgo_example.c with the loop-vectorize pass filter active](/img/2026-08-23-gsoc-llvm-advisor-remarks-pgo-explorer.png)
 
@@ -296,11 +316,11 @@ With hotness, you can sort by actual runtime cost instead of by file name.
 
 Three new C++ capability analyzers turn raw remark files into the views above:
 
-| Capability | Output |
-|------------|--------|
+| Capability                | Output                                                                                                |
+| ------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `llvm.remarks.relational` | A columnar table of every remark, with deduplicated string tables for function, file, pass, and name. |
-| `llvm.remarks.hotspot` | Per-function, per-file, per-line aggregations used by the heatmap. |
-| `llvm.remarks.diff` | A delta of added, removed, and changed remarks between two snapshots. |
+| `llvm.remarks.hotspot`    | Per-function, per-file, per-line aggregations used by the heatmap.                                    |
+| `llvm.remarks.diff`       | A delta of added, removed, and changed remarks between two snapshots.                                 |
 
 The relational endpoint uses integer-indexed columns instead of an array of
 objects. That keeps JSON payloads small and makes browser-side filtering fast
@@ -320,18 +340,25 @@ repeated queries are essentially free.
 On real compiler output the analyzer sustains tens of thousands of remarks per
 second:
 
-| Source | Remarks | Parse time | Throughput |
-|--------|--------:|-----------:|-----------:|
-| `zstd_lazy.c` | 41,537 | 3.7 s | 11,265 r/s |
-| `sqlite3` amalgam | 429,075 | 27 s | 15,655 r/s |
+| Source            | Remarks | Parse time | Throughput |
+| ----------------- | ------: | ---------: | ---------: |
+| `zstd_lazy.c`     |  41,537 |      3.7 s | 11,265 r/s |
+| `sqlite3` amalgam | 429,075 |       27 s | 15,655 r/s |
 
-A scale test on 572 translation units produced 10.7 million remarks. The first
-successful relational query used to OOM the server. Three fixes reduced peak
-RSS from 10.7 GB to 5.3 GB:
+Scale test: 572 translation units produced 10.7 million remarks in a single snapshot;
+the first relational query OOM-killed the server. Three fixes (splitting HTTP sends,
+per-unit fetching, streaming merger) reduced peak RSS from 10.7 GB to 5.3 GB.
 
-![Server peak RSS reduction across three optimization stages](/img/2026-08-23-gsoc-llvm-advisor-remarks-peak-rss.svg)
+![Peak RSS across the three memory fixes](/img/2026-08-23-gsoc-llvm-advisor-remarks-peak-rss.svg)
 
----
+Those numbers are for YAML remark files. For large projects, Clang's bitstream remark format (`-pass-remarks-format=bitstream`) is worth using instead:
+
+| Format    | Source                         | Remarks | Size   | Parse time |
+| --------- | ------------------------------ | ------- | ------ | ---------- |
+| YAML      | `llvm/lib/Support/APFloat.cpp` | 18,003  | ~20 MB | ~22 s      |
+| Bitstream | `llvm/lib/Support/APFloat.cpp` | 18,003  | ~2 MB  | <1 s       |
+
+Bitstream avoids text parsing entirely, it's already in a binary form the advisor can read directly. The gap compounds across a whole build. Building llvm-project with `-fsave-optimization-record=bitstream` across its ~800 translation units produces tens of millions of remarks. As YAML that would be hundreds of gigabytes of text to re-parse on every import; as bitstream it stays in the low single-digit gigabytes and can be memory-mapped, so the advisor can query it without a multi-minute parse step.
 
 ## Testing
 
@@ -348,9 +375,14 @@ All 9 pass on the `minimal-advisor-remarks` branch.
 
 ## Acknowledgements and links
 
-Thank you to my mentors and to the LLVM community for the opportunity to
-contribute. Incredibly grateful to previous year's GSoC team for the initial llvm-advisor
-foundation this work builds on.
+Thank you to my mentors [Tobias Stadler](https://github.com/tobias-stadler)
+and [Henrik Olsson](https://github.com/hnrklssn) for guiding me
+through the summer, and to the LLVM community for the opportunity
+to contribute.
 
-* Pull Request: [`llvm/llvm-project#218692`](https://github.com/llvm/llvm-project/pull/218692)
-* GSoC 2026 final report: [gist](https://gist.github.com/kamini08/8ab23822d525856c44ad8315f9f39c01)
+Special thanks to last year's GSoC team: [Miguel Cárdenas](https://github.com/miguelcsx), with mentors [Johannes Doerfert](https://github.com/jdoerfert) and [Kevin Sala](https://github.com/kevinsala),
+for starting llvm-advisor ([his post](https://blog.llvm.org/posts/2025-08-31-gsoc-llvm-advisor/))
+and for the initial foundation this work builds on.
+
+- Pull Request: [`llvm/llvm-project#218692`](https://github.com/llvm/llvm-project/pull/218692)
+- GSoC 2026 final report: [gist](https://gist.github.com/kamini08/8ab23822d525856c44ad8315f9f39c01)
