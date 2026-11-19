@@ -25,14 +25,10 @@ llvm-advisor does.
 
 This matters whether you're a compiler developer tuning inlining or vectorization heuristics, a user upgrading your toolchain and watching for regressions, or someone making performance-critical source changes. The example here is small for a walkthrough, but the workflow remains the same and similar bottlenecks show up in production code, and a large build can easily emit more remarks than a person can go through by hand. This is where the viewer helps: instead of drowning in raw remark data, you can narrow things down to the handful of diagnostics that actually point at a problem.
 
-Let's walk through the example to see how it works. I took a small C program
+Let's walk through an example to see how it works. I took a small C program
 that was missing a vectorization opportunity, used llvm-advisor to find the exact
 remark, changed one function from `noinline` to `static inline`, and measured
 the result.
-
-The work is submitted as a single pull request against `llvm/llvm-project`:
-
-- [`llvm/llvm-project#218692`](https://github.com/llvm/llvm-project/pull/218692): the full optimization-remarks feature on top of the `minimal-advisor` foundation.
 
 ---
 
@@ -85,8 +81,7 @@ This produces `baseline.opt.yaml` next to the object file.
 rm -rf /tmp/adv-baseline
 llvm-advisor import baseline.opt.yaml \
   --source-root . \
-  --store /tmp/adv-baseline \
-  --capability-dir /path/to/llvm-project/llvm/tools/llvm-advisor/config/capabilities
+  --store /tmp/adv-baseline
 ```
 
 Then start the server:
@@ -94,8 +89,7 @@ Then start the server:
 ```bash
 llvm-advisor serve \
   --store /tmp/adv-baseline \
-  --port 8080 \
-  --capability-dir /path/to/llvm-project/llvm/tools/llvm-advisor/config/capabilities
+  --port 8080
 ```
 
 Open `http://127.0.0.1:8080` and press `g r` for the remarks view. The summary
@@ -194,9 +188,6 @@ Args:
   - String: ")"
 ```
 
-It's a small change, but it makes a real difference, and llvm-advisor helps point out
-the remarks worth fixing.
-
 ### Snapshot diff: before and after
 
 Import both remark files into the same store and use the Compare view (`g c`):
@@ -209,18 +200,15 @@ cp optimized.opt.yaml optimized/vectorize.opt.yaml
 
 llvm-advisor import baseline/vectorize.opt.yaml \
   --source-root baseline \
-  --store /tmp/adv-compare \
-  --capability-dir /path/to/llvm-project/llvm/tools/llvm-advisor/config/capabilities
+  --store /tmp/adv-compare
 
 llvm-advisor import optimized/vectorize.opt.yaml \
   --source-root optimized \
-  --store /tmp/adv-compare \
-  --capability-dir /path/to/llvm-project/llvm/tools/llvm-advisor/config/capabilities
+  --store /tmp/adv-compare
 
 llvm-advisor serve \
   --store /tmp/adv-compare \
-  --port 8080 \
-  --capability-dir /path/to/llvm-project/llvm/tools/llvm-advisor/config/capabilities
+  --port 8080
 ```
 
 Select the baseline snapshot as **BASE** and the optimized snapshot as
@@ -234,7 +222,7 @@ can now be inlined:
 The diff answers the question "What changed in the remarks between the two
 builds?" without re-parsing files or writing a custom script.
 
-This diff workflow pinpoints exactly which remarks shifted. On large projects,
+This diff workflow pinpoints exactly which remarks changed. On large projects,
 remarks can be overwhelming, but filtering, aggregation, and PGO hotness help you
 prioritize which ones to investigate.
 
@@ -314,7 +302,7 @@ With hotness, you can sort by actual runtime cost instead of by file name.
 
 ## How the tool makes this possible
 
-Three new C++ capability analyzers turn raw remark files into the views above:
+Capabilities are analyzer endpoints that each expose a different view of the compiled program - relational tables, heatmap aggregations, snapshot diffs, IR views, debug info, and more. Three new C++ capability analyzers turn raw remark data into the views above:
 
 | Capability                | Output                                                                                                |
 | ------------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -327,11 +315,6 @@ objects. That keeps JSON payloads small and makes browser-side filtering fast
 for millions of rows.
 
 ![High-level data flow from remark files through analyzers to the web UI](/img/2026-08-23-gsoc-llvm-advisor-remarks-architecture.svg)
-
-The backend is C++ because it is much faster than the initially planned Python ctypes prototype. The
-C++ path is in-process,
-has no new runtime dependencies, and reuses llvm-advisor's CAS cache so
-repeated queries are essentially free.
 
 ---
 
@@ -359,17 +342,6 @@ Those numbers are for YAML remark files. For large projects, Clang's bitstream r
 | Bitstream | `llvm/lib/Support/APFloat.cpp` | 18,003  | ~2 MB  | <1 s       |
 
 Bitstream avoids text parsing entirely, it's already in a binary form the advisor can read directly. The gap compounds across a whole build. Building llvm-project with `-fsave-optimization-record=bitstream` across its ~800 translation units produces tens of millions of remarks. As YAML that would be hundreds of gigabytes of text to re-parse on every import; as bitstream it stays in the low single-digit gigabytes and can be memory-mapped, so the advisor can query it without a multi-minute parse step.
-
-## Testing
-
-I added 9 LLVM lit tests under `llvm/test/tools/llvm-advisor/`:
-
-```bash
-ninja -C llvm-build-dev llvm-advisor
-../llvm-build-dev/bin/llvm-lit -v llvm/test/tools/llvm-advisor
-```
-
-All 9 pass on the `minimal-advisor-remarks` branch.
 
 ---
 
