@@ -1,6 +1,6 @@
 ---
 author: "Kamini Banait"
-date: "2026-08-23"
+date: "2026-11-23"
 tags:
   ["GSoC", "llvm-advisor", "optimization remarks", "visualization", "tooling"]
 title: "GSoC 2026: llvm-advisor - Optimization Remarks & Visualizations"
